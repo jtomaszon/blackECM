@@ -5,10 +5,11 @@ blackECM
 ###Escopo macro
 
 * Documentos
-	* Criar novo documento
+	* Criar novo documento / pasta
 	* Copiar
 	* Colar
-	* Recortar
+	* Recortar / mover
+	* Criar link
 	* Remover
 	* Versionamento
 		* checkin
@@ -18,3 +19,8 @@ blackECM
 	* ???
 * Segurança
 	* Roles
+	* Grupos
+	* Permissoes
+	* User
+	* Tenant??
+* Multi-tenancy?
