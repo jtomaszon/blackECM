@@ -2,4 +2,4 @@ blackECM
 ========
 
 
-##Por favor, leiam a [wiki](/jtomaszon/blackECM/wiki)
+##Por favor, leiam a [wiki](https://github.com/jtomaszon/blackECM/wiki)
