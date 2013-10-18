@@ -5,3 +5,8 @@
 .round7 {
 	border-radius: 7px;
 }
+
+.login-form-box {
+	padding-top: 0px;
+	padding-bottom: 30px;
+}
