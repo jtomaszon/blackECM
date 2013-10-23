@@ -2,7 +2,9 @@ require(['jquery', 'nav'], function($, nav) {
 	
 
 	function logoff() {
-		location.href = '/prototipo';
+		nav.toPage({
+			url: 'loginform.html'
+		});
 	}
 
 	$('body').on('click', '.system-logoff', logoff);
