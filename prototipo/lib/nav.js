@@ -19,10 +19,9 @@ define(['jquery'], function($) {
 			}
 		})
 		.done(function(data) {
-
-			mainContext.fadeTo('fast', 0, function() {
+			mainContext.fadeOut(80, function() {
 				$(this).empty();
-				mainContext.html(data).fadeTo('fast', 1);
+				$(this).html(data).fadeIn(80);
 			});
 			
 		})
