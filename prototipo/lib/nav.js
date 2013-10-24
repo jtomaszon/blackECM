@@ -11,7 +11,15 @@ define(['jquery'], function($) {
 	//e tenta redirecionar para aquela pagina
 	function refreshSafe() {
 		if(initialHash.trim()) {
-			toPage({url: initialHash});
+
+			if(initialHash === 'loginform.html' || initialHash === 'welcome.html') {
+				toPage({url: initialHash});
+			} else {
+				//se for uma section, vai para welcome, DEPOIS vai para a section
+				toPage({url: 'welcome.html', cb: function() {
+					toSection({url: initialHash});
+				}});
+			}
 			return true;
 		}
 
@@ -42,11 +50,7 @@ define(['jquery'], function($) {
 					if(options.cb) options.cb(null, data);
 				});
 
-				if(isSection) {
-					location.hash = location.hash + '|' + (options.hash || options.url);
-				} else {
-					location.hash = options.hash || options.url;
-				}
+				location.hash = options.hash || options.url;
 			});
 		})
 		.fail(function(a, b, c) {

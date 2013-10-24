@@ -7,11 +7,7 @@ require(['jquery','nav'], function($, nav) {
 	}
 
 	function logoff() {
-		nav.toPage({url: 'loginform.html', cb: function(err, data) {
-			if(!err) {
-				alert('ake');
-			}
-		}});
+		nav.toPage({url: 'loginform.html'});
 	}
 
 	function documents() {
@@ -35,9 +31,9 @@ require(['jquery','nav'], function($, nav) {
 
 	$('body').on('click', '.system-logoff', logoff);
 
-	$('body').on('click', '.db-card.documents', documents);
-	$('body').on('click', '.db-card.workflow', workflow);
-	$('body').on('click', '.db-card.social', social);
-	$('body').on('click', '.db-card.security', security);
+	$('body').on('click', '.db-card.documents, .mnu-documents', documents);
+	$('body').on('click', '.db-card.workflow, .mnu-workflow', workflow);
+	$('body').on('click', '.db-card.social, .mnu-social', social);
+	$('body').on('click', '.db-card.security, .mnu-security', security);
 
 });
