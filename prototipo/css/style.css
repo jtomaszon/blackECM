@@ -37,3 +37,6 @@ body {
 	cursor: pointer;
 }
 
+li.active {
+	font-size: 20px;
+}

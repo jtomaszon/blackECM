@@ -21,27 +21,49 @@ define(['jquery'], function($) {
 	/*
 	Este metodo substitui o div principal main-context
 	*/
-	function toPage(options) {
+	function toPage(options, isSection) {
+
+		var navDiv = mainContext;
+
+		if(isSection) {
+			navDiv = $('#module-section');
+		}
 
 		if(!options) options = {};
 
 		$.ajax({
-			url: options.url
+			url: options.url,
+			cache: false
 		})
 		.done(function(data) {
-			mainContext.fadeOut(80, function() {
+			navDiv.fadeOut(80, function() {
 				$(this).empty();
-				$(this).html(data).fadeIn(80);
-				location.hash = options.hash || options.url
+				$(this).html(data).fadeIn(80, function() {
+					if(options.cb) options.cb(null, data);
+				});
+
+				if(isSection) {
+					location.hash = location.hash + '|' + (options.hash || options.url);
+				} else {
+					location.hash = options.hash || options.url;
+				}
 			});
 		})
 		.fail(function(a, b, c) {
-			options.cb(a);
+			if(options.cb) options.cb(a);
 		});
+	}
+
+	/*
+	Este modulo substitui o div module-section 
+	*/
+	function toSection(options) {
+		toPage(options, true);
 	}
 
 	return {
 		toPage: toPage,
+		toSection: toSection,
 		refreshSafe: refreshSafe
 	};
 });
