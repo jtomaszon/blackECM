@@ -4,27 +4,7 @@ este é um Single Page App.
 */
 define(['jquery'], function($) {
 
-	var mainContext = $('#main-context'),
-		initialHash = location.hash.substr(1);
-
-	//se o usuario deu refresh na pagina, verifica se ha uma url no location.hash
-	//e tenta redirecionar para aquela pagina
-	function refreshSafe() {
-		if(initialHash.trim()) {
-
-			if(initialHash === 'loginform.html' || initialHash === 'welcome.html') {
-				toPage({url: initialHash});
-			} else {
-				//se for uma section, vai para welcome, DEPOIS vai para a section
-				toPage({url: 'welcome.html', cb: function() {
-					toSection({url: initialHash});
-				}});
-			}
-			return true;
-		}
-
-		return false;
-	}
+	var mainContext = $('#main-context');
 
 	/*
 	Este metodo substitui o div principal main-context
@@ -49,8 +29,6 @@ define(['jquery'], function($) {
 				$(this).html(data).fadeIn(80, function() {
 					if(options.cb) options.cb(null, data);
 				});
-
-				location.hash = options.hash || options.url;
 			});
 		})
 		.fail(function(a, b, c) {
@@ -62,12 +40,25 @@ define(['jquery'], function($) {
 	Este modulo substitui o div module-section 
 	*/
 	function toSection(options) {
-		toPage(options, true);
+
+		/*
+		Se o usuario der refresh na pagina, eh preciso carregar
+		a pagina welcome antes de chamar a section, senão a tela fica em branco
+		*/
+		if(!$('#module-section').length) {
+			toPage({
+				url: 'welcome.html',
+				cb: function() {
+					toPage(options, true);
+				}
+			});
+		} else {
+			toPage(options, true);
+		}
 	}
 
 	return {
 		toPage: toPage,
-		toSection: toSection,
-		refreshSafe: refreshSafe
+		toSection: toSection
 	};
 });

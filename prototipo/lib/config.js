@@ -4,7 +4,9 @@ requirejs.config({
 
 	paths: {
 		jquery: 'jquery.min',
-		bootstrap: 'bootstrap.min'
+		bootstrap: 'bootstrap.min',
+		backbone: 'backbone-min',
+		underscore: 'underscore-min'
 	},
 
 	shim: {
@@ -14,6 +16,11 @@ requirejs.config({
 
 		bootstrap: {
 			deps: ['jquery']
+		},
+
+		backbone: {
+			deps: ['underscore'],
+			exports: 'Backbone'
 		}
 	}
 });

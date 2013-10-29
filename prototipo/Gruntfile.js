@@ -12,6 +12,10 @@ module.exports = function(grunt) {
 		      {expand: true, src: ['bower_components/bootstrap/dist/fonts/*'], dest: 'fonts/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/requirejs/require.js'], dest: 'lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/jquery/*'], dest: 'lib/', filter: 'isFile', flatten:true},
+		      {expand: true, src: ['bower_components/backbone/backbone-min.js'], dest: 'lib/', filter: 'isFile', flatten:true},
+		      {expand: true, src: ['bower_components/underscore/underscore-min.js'], dest: 'lib/', filter: 'isFile', flatten:true},
+
+
 
 		    ]
 		  }
