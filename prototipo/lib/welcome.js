@@ -1,3 +1,3 @@
-require(['jquery', 'nav'], function($, nav) {
+require(['dropdown'], function(dd) {
 
 });

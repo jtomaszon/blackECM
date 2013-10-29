@@ -46,7 +46,7 @@ require(['backbone', 'nav'], function(backbone, nav) {
 		},
 
 		security: function() {
-			setActive('security');
+			setActive('security-fake');
 			nav.toSection({url: 'security.html'});
 		}
 
