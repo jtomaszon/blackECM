@@ -38,8 +38,8 @@ body {
 	text-decoration: none;
 }
 
-li.active {
-	
+.breadcrumb .active {
+	font-size: 20px;
 }
 
 .dropdown {
