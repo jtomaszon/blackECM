@@ -11,6 +11,7 @@ module.exports = function(grunt) {
 		      {expand: true, src: ['bower_components/bootstrap/dist/js/*'], dest: 'lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/bootstrap/dist/fonts/*'], dest: 'fonts/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/bootstrap/js/dropdown.js'], dest: 'lib/', filter: 'isFile', flatten:true},
+		      {expand: true, src: ['bower_components/bootstrap/js/collapse.js'], dest: 'lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/requirejs/require.js'], dest: 'lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/jquery/*'], dest: 'lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/backbone/backbone-min.js'], dest: 'lib/', filter: 'isFile', flatten:true},

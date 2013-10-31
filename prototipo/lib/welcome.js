@@ -1,3 +1,3 @@
-require(['dropdown'], function(dd) {
+require(['dropdown', 'collapse'], function(dd, coll) {
 
 });
