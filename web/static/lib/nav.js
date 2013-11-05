@@ -47,7 +47,7 @@ define(['jquery'], function($) {
 		*/
 		if(!$('#module-section').length) {
 			toPage({
-				url: 'welcome.html',
+				url: '/welcome',
 				cb: function() {
 					toPage(options, true);
 				}

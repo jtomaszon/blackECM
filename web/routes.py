@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, Response
 
 app = Flask('__main__')
 
@@ -30,3 +30,10 @@ def social():
 def workflow():
 	return render_template('workflow.html')
 
+
+@app.route('/dologin/<email>/<password>', methods=['POST'])
+def dologin(email, password):
+
+	if email == 'adm@foo.com' and password == 'adm':
+		return Response('{"success": true}', content_type='application/json')
+	return Response('{"success": false}', content_type='application/json')

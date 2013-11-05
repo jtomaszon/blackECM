@@ -45,3 +45,7 @@ body {
 .dropdown {
 	cursor: pointer;
 }
+
+.navbar-brand {
+	border-right: 1px solid #444;
+}
