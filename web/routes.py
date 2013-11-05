@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, Response
+import util
 
 app = Flask('__main__')
 
@@ -31,9 +32,17 @@ def workflow():
 	return render_template('workflow.html')
 
 
-@app.route('/dologin/<email>/<password>', methods=['POST'])
-def dologin(email, password):
+@app.route('/dologin', methods=['POST'])
+def dologin():
+
+	email = request.form['email']
+	password = request.form['password']
 
 	if email == 'adm@foo.com' and password == 'adm':
-		return Response('{"success": true}', content_type='application/json')
-	return Response('{"success": false}', content_type='application/json')
+		return util.toJSON('{"success": true}')
+	return util.toJSON('{"success": false}')
+
+
+
+
+

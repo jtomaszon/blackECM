@@ -54,13 +54,13 @@ require(['backbone', 'nav'], function(backbone, nav) {
 		dologin: function() {
 			var email = $('#email').val(),
 				password = $('#password').val(),
-				url = '/dologin/' + email + '/' + password,
+				//url = '/dologin/' + email + '/' + password,
 				that = this;
 
 			$.ajax({
-				url: url,
+				url: '/dologin',
 				type: 'POST',
-				data: {lero: email, laro: password}
+				data: {email: email, password: password}
 			})
 			.done(function(data) {
 				if(data.success) {
