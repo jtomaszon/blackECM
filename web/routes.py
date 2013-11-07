@@ -43,6 +43,7 @@ def dologin():
 	return util.toJSON('{"success": false}')
 
 
-
-
-
+@app.route('/collab/post/<post_id>')
+def post(post_id):
+	res = util.get_service('/collab/post/', post_id)
+	return Response(res, content_type = 'application/json')

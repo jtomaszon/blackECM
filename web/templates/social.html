@@ -3,3 +3,49 @@
   <li class="active">Colaboração</li>
 </ol>
 
+
+<ul class="posts"></ul>
+
+
+
+<script type="text/javascript" src="/static/lib/social.js"></script>
+
+
+<!-- TEMPLATES -->
+<script type="text/template" class="tpl_post">
+	{% raw %}
+	<li>
+		<div data-post-id="{{id}}">
+			<div>Post Message</div>
+			<div class="post_message">{{text}}</div>
+			<div class="stats">
+				<span>Likes</span>
+				<span class="likes">{{numberLikes}}</span>
+				<span>Comments</span>
+				<span class="comments">{{numberComments}}</span>
+				<span>Sharings</span>
+				<span class="sharings">{{numberShares}}</span>
+			</div>
+			<div>Comments</div>
+			<ul>
+				{{#comments}}
+					<li>
+						<div>Comment</div>
+						<div class="post_message">{{text}}</div>
+						<div class="stats">
+							<span>Likes</span>
+							<span class="likes">{{numberLikes}}</span>
+							<span>Comments</span>
+							<span class="comments">{{numberComments}}</span>
+							<span>Sharings</span>
+							<span class="sharings">{{numberShares}}</span>
+						</div>
+
+					</li>
+				{{/comments}}
+
+			</ul>
+		</div>
+	</li>
+	{% endraw %}
+</script>

@@ -16,6 +16,7 @@ module.exports = function(grunt) {
 		      {expand: true, src: ['bower_components/jquery/*'], dest: 'web/static/lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/backbone/backbone-min.js'], dest: 'web/static/lib/', filter: 'isFile', flatten:true},
 		      {expand: true, src: ['bower_components/underscore/underscore-min.js'], dest: 'web/static/lib/', filter: 'isFile', flatten:true},
+		      {expand: true, src: ['bower_components/mustache/mustache.js'], dest: 'web/static/lib/', filter: 'isFile', flatten:true},
 
 		    ]
 		  }

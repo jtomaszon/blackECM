@@ -54,7 +54,6 @@ require(['backbone', 'nav'], function(backbone, nav) {
 		dologin: function() {
 			var email = $('#email').val(),
 				password = $('#password').val(),
-				//url = '/dologin/' + email + '/' + password,
 				that = this;
 
 			$.ajax({

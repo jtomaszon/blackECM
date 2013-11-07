@@ -6,7 +6,8 @@ requirejs.config({
 		jquery: 'jquery.min',
 		bootstrap: 'bootstrap.min',
 		backbone: 'backbone-min',
-		underscore: 'underscore-min'
+		underscore: 'underscore-min',
+		mustache: 'mustache'
 	},
 
 	shim: {
@@ -21,6 +22,10 @@ requirejs.config({
 		backbone: {
 			deps: ['underscore'],
 			exports: 'Backbone'
+		},
+
+		mustache: {
+			exports: 'Mustache'
 		}
 	}
 });
