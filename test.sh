@@ -24,6 +24,7 @@ delete() {
 }
 
 get "${workflows}"
-post -d "id=1&name=aee" "${workflows}"
+post -d "name=aee" "${workflows}"
 
+get "${workflows}"
 
