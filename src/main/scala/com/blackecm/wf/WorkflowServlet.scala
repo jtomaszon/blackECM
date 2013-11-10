@@ -1,11 +1,14 @@
 package com.blackecm.wf
 
 import org.scalatra._
+import org.json4s.{DefaultFormats, Formats}
+import org.scalatra.json._
 
-class WorkflowServlet extends BlackecmWfStack {
+class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
 
+  // get the list of workflows
   get("/"){
-    "Listagem de Workflows"
+     Ok( List( "Xoxotiha", "Maooe", "Babaca", "Peteca", "Batatinha" ) )
   }
 
   post("/"){
@@ -13,7 +16,7 @@ class WorkflowServlet extends BlackecmWfStack {
   }
 
   get("/:id"){
-    "Buscar Workflow"
+    NotFound("Buscar Workflow")
   }
 
   put("/:id"){
