@@ -24,4 +24,9 @@ class AbstractRepository[T <: HasId] {
     val index = repository.indexOf(find(t.id))
     repository = repository.patch(index, Seq(t), 1)
   }
+
+  def removeById(id: Long) = {
+    val w = find(id)
+    repository = repository diff List(w)
+  }
 }
