@@ -3,6 +3,7 @@ package com.blackecm.wf
 import org.scalatra._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
+import com.blackecm.wf.model.Workflow
 
 //fake repository
 import com.blackecm.wf.repository._
