@@ -4,7 +4,7 @@ package com.blackecm.wf.repository
 object WorkflowRepository {
   var repository: List[Workflow] = List()
 
-  def nextId = repository match {
+  private def nextId = repository match {
     case List() => 1L
     case _ => repository.maxBy(_.id).id + 1
   }
