@@ -1,7 +1,6 @@
 package com.blackecm.wf
 
 import org.scalatra._
-import scalate.ScalateSupport
 
 class WorkflowServlet extends BlackecmWfStack {
 
