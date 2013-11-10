@@ -4,11 +4,14 @@ import org.scalatra._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
 
+//fake repository
+import com.blackecm.wf.repository._
+
 class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
 
   // get the list of workflows
   get("/"){
-     Ok( List( "Xoxotiha", "Maooe", "Babaca", "Peteca", "Batatinha" ) )
+     Ok( WorkflowRepository.all )
   }
 
   post("/"){
@@ -20,7 +23,8 @@ class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
   }
 
   put("/:id"){
-    "Alteração de Workflow"
+    val id = params("id")
+    Ok ( WorkflowRepository.byId(id) )
   }
 
   delete(":id"){
