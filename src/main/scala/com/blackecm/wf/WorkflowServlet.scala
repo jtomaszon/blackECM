@@ -1,6 +1,7 @@
 package com.blackecm.wf
 
 import org.scalatra._
+<<<<<<< HEAD
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
 
@@ -11,7 +12,7 @@ class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
 
   // get the list of workflows
   get("/"){
-     Ok( WorkflowRepository.all )
+     Ok(WorkflowRepository.findAll)
   }
 
   post("/"){
@@ -23,8 +24,8 @@ class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
   }
 
   put("/:id"){
-    val id = params("id")
-    Ok ( WorkflowRepository.byId(id) )
+    val id = params("id").toLong
+    Ok(WorkflowRepository.find(id))
   }
 
   delete(":id"){

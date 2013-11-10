@@ -4,14 +4,19 @@ package com.blackecm.wf.repository
 object WorkflowRepository {
   var repository: List[Workflow] = List()
 
-  def all = repository
-  def byId(id: Long) = {
-    val index = repository find { w => w.id == id }
-//    repository(index)
+  def findAll = repository
+
+  def find(id: Long) = {
+    repository find (_.id == id) match {
+      case Some(wf) => wf
+      case None => NilWorkflow
+    }
   }
+
   def create(w: Workflow) = repository = repository :+ w
+
   def update(w: Workflow) = {
-    val index = repository find { wf => w.id == wf.id }
-//    repository = repository.patch(index, w, index)
+    val index = repository.indexOf(find(w.id))
+    repository = repository.patch(index, Seq(w), index)
   }
 }
