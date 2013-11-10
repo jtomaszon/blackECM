@@ -4,6 +4,11 @@ package com.blackecm.wf.repository
 object WorkflowRepository {
   var repository: List[Workflow] = List()
 
+  private def nextId = repository match {
+    case List() => 1L
+    case _ => repository.maxBy(_.id).id + 1
+  }
+
   def findAll = repository
 
   def find(id: Long) = {
@@ -13,15 +18,19 @@ object WorkflowRepository {
     }
   }
 
-  def create(w: Workflow) = repository = repository :+ w
+  def create(w: Workflow) = {
+    val wf = Workflow(nextId, w.name)
+    repository = repository :+ wf
+  }
 
   def update(w: Workflow) = {
     val index = repository.indexOf(find(w.id))
-    repository = repository.patch(index, Seq(w), index)
+    repository = repository.patch(index, Seq(w), 1)
   }
 
   def removeById(id: Long) = {
-    val wf = find(id)
-    repository diff List(wf)
+    val w = find(id)
+    System.out.println(repository)
+    repository = repository diff List(w)
   }
 }

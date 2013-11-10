@@ -23,7 +23,17 @@ delete() {
   curl_ -X DELETE $@
 }
 
+echo "Create"
+post -d "name=aee" "${workflows}"
 get "${workflows}"
-post -d "id=1&name=aee" "${workflows}"
+echo "========================"
 
+echo "Update"
+put -d "name=mavai" "${workflows}/1"
+get "${workflows}"
+echo "========================"
 
+echo "Delete"
+delete "${workflows}/1"
+get "${workflows}"
+echo "========================"
