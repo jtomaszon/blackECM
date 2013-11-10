@@ -15,7 +15,8 @@ class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
   }
 
   post("/"){
-    "Criacao de workflows"
+    val w = Workflow(params("name"))
+    Ok(WorkflowRepository.create(w))
   }
 
   get("/:id"){
