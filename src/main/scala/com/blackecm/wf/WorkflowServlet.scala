@@ -11,23 +11,26 @@ class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
 
   // get the list of workflows
   get("/"){
-     Ok(WorkflowRepository.findAll)
+    Ok(WorkflowRepository.findAll)
   }
 
   post("/"){
-    "Criacao de workflows"
+    val w = parsedBody.extract[Workflow]
+    WorkflowRepository.create(w)
+    Ok("created")
   }
 
   get("/:id"){
-    NotFound("Buscar Workflow")
-  }
-
-  put("/:id"){
     val id = params("id").toLong
     Ok(WorkflowRepository.find(id))
   }
 
+  put("/:id"){
+    "Alterando Workflow"
+  }
+
   delete(":id"){
-    "Exclusão de Workflow"
+    val id = params("id").toLong
+    WorkflowRepository.removeById(id)
   }
 }

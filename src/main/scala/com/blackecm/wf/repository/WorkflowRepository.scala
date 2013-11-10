@@ -19,4 +19,9 @@ object WorkflowRepository {
     val index = repository.indexOf(find(w.id))
     repository = repository.patch(index, Seq(w), index)
   }
+
+  def removeById(id: Long) = {
+    val wf = find(id)
+    repository diff List(wf)
+  }
 }
