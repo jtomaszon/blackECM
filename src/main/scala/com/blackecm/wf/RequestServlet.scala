@@ -18,9 +18,8 @@ class RequestServlet extends BlackecmWfStack with JacksonJsonSupport {
     val wf_id = params("workflow_id").toLong
     WorkflowRepository.find(wf_id) match {
       case Some(wf) => {
-        val req = Request(wf.id, params("user_id").toLong,
-          Map())
-        Ok(RequestRepository.create(req))
+        val user_id = params("user_id").toLong
+        Ok(RequestRepository.create(Request(wf.id, user_id)))
       }
       case None => halt(404, "Workflow not found.")
     }
@@ -39,6 +38,7 @@ class RequestServlet extends BlackecmWfStack with JacksonJsonSupport {
   }
 
   delete(":id"){
-    "adioes"
+    val id = params("id").toLong
+    Ok(RequestRepository removeById(id))
   }
 }
