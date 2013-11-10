@@ -1,7 +1,6 @@
 package com.blackecm.wf
 
 import org.scalatra._
-<<<<<<< HEAD
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
 
