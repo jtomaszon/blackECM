@@ -5,10 +5,11 @@ workflows="${server}/workflows"
 requests="${server}/requests"
 
 rdm_name() {
-  mktemp "${@}XXXXXXXXXXXXXXX"
+  cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-f0-9' | head -c 32
 }
 
 curl_() {
+  echo -e "\n\nCURL $@..."
   curl -i -H "Accept: application/json" $@
 }
 
@@ -30,7 +31,6 @@ delete() {
 
 
 for i in $(seq 20); do
-  echo "Creating Workflow"
   post -d "name=$(rdm_name)" $workflows
   post -d "user_id=2&workflow_id=${i}" $requests
   j=$(( $i % 3 ))
@@ -41,11 +41,12 @@ for i in $(seq 20); do
   k=$(( $i % 2 ))
   if [ $k -eq 0 ]; then
     put -d "name=$(rdm_name)" "${workflows}/${i}"
-    put -d "workflow_id=$(( $1 - 1 ))" "${requests}/${i}"
+    put -d "workflow_id=${i}" "${requests}/${i}"
   fi
-  get $workflows
-  get $requests
 done
+
+get $workflows
+get $requests
 
 # echo "Create"
 # post -d "name=aee" "${workflows}"

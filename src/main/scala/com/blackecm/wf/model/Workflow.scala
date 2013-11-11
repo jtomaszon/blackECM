@@ -1,6 +1,6 @@
 package com.blackecm.wf.model
 
-class Workflow(id: Long, var name: String) extends HasId(id) {
+class Workflow(var id: Long, var name: String) extends HasId {
   override def toString = s"Workflow: id: $id; name: $name"
 }
 

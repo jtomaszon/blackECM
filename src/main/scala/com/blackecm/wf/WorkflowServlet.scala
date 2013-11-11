@@ -29,11 +29,11 @@ class WorkflowServlet extends BlackecmWfStack with JacksonJsonSupport {
   put("/:id"){
     val id = params("id").toLong
     val w = Workflow(id, params("name"))
-    WorkflowRepository.update(w)
+    Ok(WorkflowRepository.update(w))
   }
 
   delete("/:id"){
     val id = params("id").toLong
-    WorkflowRepository.removeById(id)
+    Ok(WorkflowRepository.removeById(id))
   }
 }
