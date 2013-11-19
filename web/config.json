@@ -1,0 +1,9 @@
+{
+	"url_maps": {
+		"/collab/post/": "http://foolabs.us/collab/post/",
+
+
+		"/security/session/": "http://eossecurity.apiary.io/session"
+	}
+	
+}
