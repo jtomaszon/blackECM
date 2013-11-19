@@ -1,17 +1,22 @@
 from flask import Response
 import requests
+from json import loads
 
-url_map = {
-	'/collab/post/': 'http://foolabs.us/collab/post/'
-}
+config_file = open('config.json', 'r')
+config = loads(config_file.read())
+
+url_map = config['url_maps'];
 
 def toJSON(str):
-	return Response(str, content_type='application/json')
+	res = Response(str, content_type='application/json')
+	return res
 
 
 def get_service(url_key, params=''):
 	if url_key not in url_map:
 		return None
 
-	r = requests.get(url_map[url_key] + params)
+	cookies = dict(ppk='id')
+
+	r = requests.get(url_map[url_key] + params, cookies=cookies)
 	return r.text

@@ -47,3 +47,11 @@ def dologin():
 def post(post_id):
 	res = util.get_service('/collab/post/', post_id)
 	return util.toJSON(res)
+
+@app.route('/security/session/')
+def security_session():
+	res = util.get_service('/security/session/')
+	return util.toJSON(res)
+
+
+
