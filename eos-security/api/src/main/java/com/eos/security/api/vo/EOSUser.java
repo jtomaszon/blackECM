@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.eos.common.EOSState;
+import com.eos.common.EOSUserType;
 
 /**
  * Object representing a User.
@@ -25,6 +26,7 @@ public class EOSUser implements Serializable {
 	private String personalMail;
 	private String email;
 	private EOSState state;
+	private EOSUserType type;
 	private Long tenantId;
 	private EOSImagePaths photos;
 	private Map<String, String> userData;
@@ -165,6 +167,22 @@ public class EOSUser implements Serializable {
 	}
 
 	/**
+	 * @return the type
+	 */
+	public EOSUserType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public EOSUser setType(EOSUserType type) {
+		this.type = type;
+		return this;
+	}
+
+	/**
 	 * @return the tenantId
 	 */
 	public Long getTenantId() {
@@ -264,7 +282,8 @@ public class EOSUser implements Serializable {
 		return "EOSUser [login=" + login + ", url=" + url + ", nickName="
 				+ nickName + ", firstName=" + firstName + ", lastName="
 				+ lastName + ", personalMail=" + personalMail + ", email="
-				+ email + ", state=" + state + ", tenantId=" + tenantId + "]";
+				+ email + ", state=" + state + ", type=" + type + ", tenantId="
+				+ tenantId + "]";
 	}
 
 }

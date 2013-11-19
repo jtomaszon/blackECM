@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSState;
+import com.eos.common.EOSUserType;
 import com.eos.security.impl.dao.EOSPermissionDAO;
 import com.eos.security.impl.dao.EOSRoleDAO;
 import com.eos.security.impl.dao.EOSRoleUserDAO;
@@ -87,24 +88,33 @@ public class EOSSecurityStartup implements
 	private void createUsers() {
 		// Create Administrator User
 		EOSUserTenantEntity adminUser = createUser(
-				EOSSystemConstants.LOGIN_SUPER_ADMIN, "Administrator");
+				EOSSystemConstants.LOGIN_SUPER_ADMIN, "Administrator",
+				EOSUserType.USER);
 		// Create Anonymous User
-		createUser(EOSSystemConstants.LOGIN_ANONYMOUS, "Anonymous");
+		createUser(EOSSystemConstants.LOGIN_ANONYMOUS, "Anonymous",
+				EOSUserType.USER);
 
 		// Super Administrator role
 		EOSRoleEntity adminRole = createAdminRole();
 		// Roles to users
 		createRoleUser(adminUser.getId(), adminRole.getId());
-
+		// Create system user
+		EOSUserTenantEntity systemUser = createUser(
+				EOSSystemConstants.LOGIN_SYSTEM_USER, "System User",
+				EOSUserType.SYSTEM);
+		// system task user has the same permissions as super administrator
+		createRoleUser(systemUser.getId(), adminRole.getId());
 	}
 
-	private EOSUserTenantEntity createUser(String login, String name) {
+	private EOSUserTenantEntity createUser(String login, String name,
+			EOSUserType type) {
 		EOSUserEntity user = userDAO.checkedFind(login);
 
 		if (user == null) {
 			log.debug("Creating EOS default user " + login);
 			user = new EOSUserEntity().setFirstName("EOS").setLastName(name)
-					.setLogin(login).setEmail(login + "@eossecurity.com");
+					.setLogin(login).setEmail(login + "@eossecurity.com")
+					.setType(type);
 
 			userDAO.persist(user);
 		}

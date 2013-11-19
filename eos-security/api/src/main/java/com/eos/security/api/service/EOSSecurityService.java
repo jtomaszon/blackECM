@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.session.SessionContext;
 
@@ -43,6 +44,16 @@ public interface EOSSecurityService {
 			throws EOSNotFoundException;
 
 	/**
+	 * Setup current session information for the given session ID.
+	 * 
+	 * @param sessionId
+	 *            The session ID.
+	 * @throws EOSNotFoundException
+	 *             If no session with the given id was found.
+	 */
+	public void setupSession(String sessionId) throws EOSNotFoundException;
+
+	/**
 	 * Perform the user login. This service also loads the
 	 * {@link SessionContext}.
 	 * 
@@ -69,6 +80,22 @@ public interface EOSSecurityService {
 	 * @return True if an user is logged, false otherwise.
 	 */
 	public boolean isLogged();
+
+	/**
+	 * Executes a job with the given user into the given tenant. Only system
+	 * users can execute jobs.
+	 * 
+	 * @param login
+	 *            Login of a system user.
+	 * @param tenantId
+	 *            Id of the tenant for the job.
+	 * @param job
+	 *            Task job.
+	 * @throws EOSException
+	 * @throws EOSForbiddenException
+	 */
+	public void runAs(String login, Long tenantId, Runnable job)
+			throws EOSForbiddenException, EOSException;
 
 	/**
 	 * Validates the given user has a permission. Validates access through role

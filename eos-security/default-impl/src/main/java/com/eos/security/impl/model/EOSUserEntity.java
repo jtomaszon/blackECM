@@ -5,10 +5,13 @@ package com.eos.security.impl.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
+import com.eos.common.EOSUserType;
 import com.eos.commons.jpa.AbstractEntity;
 import com.eos.commons.jpa.EntityFieldSizes;
 
@@ -41,11 +44,16 @@ public class EOSUserEntity extends AbstractEntity {
 	@Column(name = "lastname", nullable = false)
 	private String lastName;
 
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "usertype", nullable = false)
+	private EOSUserType type;
+
 	/**
 	 * Default constructor.
 	 */
 	public EOSUserEntity() {
 		super();
+		type = EOSUserType.USER;
 	}
 
 	/**
@@ -123,6 +131,22 @@ public class EOSUserEntity extends AbstractEntity {
 	}
 
 	/**
+	 * @return the type
+	 */
+	public EOSUserType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public EOSUserEntity setType(EOSUserType type) {
+		this.type = type;
+		return this;
+	}
+
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -165,7 +189,8 @@ public class EOSUserEntity extends AbstractEntity {
 	@Override
 	public String toString() {
 		return "EOSUserEntity [login=" + login + ", email=" + email
-				+ ", firstName=" + firstName + ", lastName=" + lastName + "]";
+				+ ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", type=" + type + "]";
 	}
 
 }

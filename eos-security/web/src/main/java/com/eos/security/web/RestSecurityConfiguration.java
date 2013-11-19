@@ -31,9 +31,13 @@ import com.eos.security.web.util.ClassComparator;
  * @author santos.fabiano
  * 
  */
-@ApplicationPath("/api")
+@ApplicationPath(RestSecurityConfiguration.REST_PATH)
 @Component
 public class RestSecurityConfiguration extends Application {
+
+	public static final String REST_PATH = "/api";
+	public static final String SESSION_COOKIE_NAME = "ppk";
+	public static final String TENANT_HEADER = "X-Tenant";
 
 	private static final Logger log = LoggerFactory
 			.getLogger(RestSecurityConfiguration.class);

@@ -55,17 +55,15 @@ public class EOSUserServiceImpl implements EOSUserService {
 		// TODO Validations and security
 		EOSUserEntity entity = userDAO.checkedFind(user.getLogin());
 
-		if (entity != null) {
-			throw new EOSDuplicatedEntryException("User with login "
-					+ user.getLogin() + " already exists");
+		if (entity == null) {
+			entity = new EOSUserEntity();
+			entity.setLogin(user.getLogin()).setEmail(user.getPersonalMail())
+					.setFirstName(user.getFirstName())
+					.setLastName(user.getLastName());
+			// Create user
+			userDAO.persist(entity);
 		}
 
-		entity = new EOSUserEntity();
-		entity.setLogin(user.getLogin()).setEmail(user.getPersonalMail())
-				.setFirstName(user.getFirstName())
-				.setLastName(user.getLastName());
-		// Create user
-		userDAO.persist(entity);
 		EOSUserTenantEntity userTenant = addUserToTenant(user.getLogin(),
 				user.getNickName(), user.getEmail(), user.getState());
 
@@ -173,6 +171,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 				.setPersonalMail(entity.getUser().getEmail())
 				.setNickName(entity.getNickName())
 				.setEmail(entity.getTenantMail()).setState(entity.getState())
+				.setType(entity.getUser().getType())
 				.setTenantId(entity.getTenantId());
 
 	}

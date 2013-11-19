@@ -8,9 +8,11 @@ import java.util.Map;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSTenant;
+import com.eos.security.api.vo.EOSUser;
 
 /**
  * Tenant service utility.
@@ -27,6 +29,7 @@ public interface EOSTenantService {
 	 * 
 	 * @param tenant
 	 * @param data
+	 * @param adminUser
 	 * @return The tenant created.
 	 * @throws EOSDuplicatedEntryException
 	 *             If an tenant already exists.
@@ -35,10 +38,12 @@ public interface EOSTenantService {
 	 *             Usually only a super user can create a tenant.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other tenant.
+	 * @throws EOSException
+	 *             If any other error occurs.
 	 */
-	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException;
+	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data,
+			EOSUser adminUser) throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException, EOSException;
 
 	/**
 	 * Finds a tenant by its id.

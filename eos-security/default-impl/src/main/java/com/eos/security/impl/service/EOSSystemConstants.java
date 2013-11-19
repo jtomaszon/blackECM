@@ -24,6 +24,10 @@ public interface EOSSystemConstants {
 	 */
 	String LOGIN_ANONYMOUS = "anonymous";
 	/**
+	 * Security task user login.
+	 */
+	String LOGIN_SYSTEM_USER = "security.user";
+	/**
 	 * Super Administrator role code.
 	 */
 	String ROLE_SUPER_ADMIN = "EOSAdmin";

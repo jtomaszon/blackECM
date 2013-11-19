@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.eos.common.EOSState;
-import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
@@ -57,11 +57,11 @@ public class TenantServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public EOSTenant createTenant(EOSTenantCreateData data)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
+			throws EOSException {
 
+		// Create tenant
 		EOSTenant tenant = svcTenant.createTenant(data.getTenant(),
-				data.getData());
+				data.getData(), data.getAdminUser());
 		response.setStatus(Response.Status.CREATED.getStatusCode());
 		return tenant;
 	}

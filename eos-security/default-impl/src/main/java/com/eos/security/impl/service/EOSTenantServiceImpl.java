@@ -18,11 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSException;
 import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSTenantService;
+import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSTenant;
+import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSTenantDAO;
 import com.eos.security.impl.dao.EOSTenantDataDAO;
 import com.eos.security.impl.model.EOSTenantDataEntity;
@@ -39,19 +43,30 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	private EOSTenantDAO tenantDAO;
 	@Autowired
 	private EOSTenantDataDAO tenantDataDAO;
+	private EOSUserService svcUser;
+	private EOSSecurityService svcSecurity;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(EOSTenantServiceImpl.class);
 
+	@Autowired
+	public void setUserService(EOSUserService svcUser) {
+		this.svcUser = svcUser;
+	}
+
+	@Autowired
+	public void setSecurityService(EOSSecurityService svcSecurity) {
+		this.svcSecurity = svcSecurity;
+	}
+
 	/**
 	 * @see com.eos.security.api.service.EOSTenantService#createTenant(EOSTenant,
-	 *      Map)
+	 *      Map, EOSUser)
 	 */
 	@Override
 	@Transactional
-	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
+	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data,
+			final EOSUser adminUser) throws EOSException {
 		EOSTenantEntity entity = new EOSTenantEntity();
 
 		entity.setName(tenant.getName());
@@ -66,6 +81,21 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 		addTenantData(entity.getId(), data);
 		tenantDAO.getEntityManager().flush();
 		tenant.setId(entity.getId());
+		// TODO create admin user
+		svcSecurity.runAs(EOSSystemConstants.LOGIN_SYSTEM_USER, entity.getId(),
+				new Runnable() {
+					@Override
+					public void run() {
+						try {
+							svcUser.createUser(adminUser);
+						} catch (EOSDuplicatedEntryException
+								| EOSForbiddenException
+								| EOSUnauthorizedException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
+
 		// TODO messaging and validations, security check
 		log.debug("Tenant created: " + tenant.toString());
 		return tenant;

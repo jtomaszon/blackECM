@@ -38,7 +38,7 @@ public class EOSRestFilter implements ContainerResponseFilter {
 	@Override
 	public void filter(ContainerRequestContext requestContext,
 			ContainerResponseContext responseContext) throws IOException {
-		log.info("Response filtering###############");
+		log.debug("Response filtering");
 		// POST method should return Response.Status.CREATED
 		if (requestContext.getMethod().equals(HttpMethod.POST)
 				&& responseContext.getStatus() == Response.Status.OK

@@ -5,17 +5,21 @@ package com.eos.security.impl.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSTenantService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.session.SessionContext;
+import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.session.EOSSession;
 import com.eos.security.impl.session.SessionContextManager;
 
@@ -48,9 +52,15 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	@Override
 	public final SessionContext createSessionContext(String sessionId,
 			Long tenantId) {
+		return createSessionContext(sessionId, tenantId,
+				svcUser.findTenantUser(EOSSystemConstants.LOGIN_ANONYMOUS,
+						tenantId));
+	}
+
+	private final SessionContext createSessionContext(final String sessionId,
+			final Long tenantId, final EOSUser user) {
 		final SessionContext context = new SessionContext(
-				svcTenant.findTenant(tenantId), svcUser.findTenantUser(
-						EOSSystemConstants.LOGIN_ANONYMOUS, tenantId));
+				svcTenant.findTenant(tenantId), user);
 		final EOSSession session = EOSSession.getContext();
 		// Set current session
 		session.setSessionId(sessionId).setSession(context);
@@ -69,12 +79,22 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 
 		// If session do not exist, create default session and return
 		if (session == null) {
-			return createSessionContext(sessionId,
-					EOSSystemConstants.ADMIN_TENANT);
+			throw new EOSNotFoundException("Session not found: " + sessionId);
 		} else {
 			// return current session
 			return session;
 		}
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSSecurityService#setupSession(java.lang.String)
+	 */
+	@Override
+	public void setupSession(String sessionId) throws EOSNotFoundException {
+		SessionContext context = getSessionContext(sessionId);
+		final EOSSession session = EOSSession.getContext();
+		// Set current session
+		session.setSessionId(sessionId).setSession(context);
 	}
 
 	/**
@@ -103,6 +123,40 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	public boolean isLogged() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSSecurityService#runAs(java.lang.String,
+	 *      java.lang.Long, java.lang.Runnable)
+	 */
+	@Override
+	public void runAs(String login, Long tenantId, Runnable job)
+			throws EOSForbiddenException, EOSException {
+		// TODO Auto-generated method stub
+		final EOSSession session = EOSSession.getContext();
+		final String currentSessionId = session.getSessionId();
+		final SessionContext currentContext = session.getSession();
+		final UUID uuid = UUID.randomUUID();
+		final EOSUser user = svcUser.findTenantUser(
+				EOSSystemConstants.LOGIN_SYSTEM_USER,
+				EOSSystemConstants.ADMIN_TENANT);
+
+		if (user.getType() != EOSUserType.SYSTEM) {
+			throw new EOSForbiddenException("User not a system user");
+		}
+		// Setup session
+		SessionContext context = createSessionContext(uuid.toString(),
+				tenantId, user);
+
+		try {
+			session.setSessionId(uuid.toString()).setSession(context);
+			job.run();
+		} catch (Throwable e) {
+			throw new EOSException("Failed to execute task", e);
+		} finally {
+			// Restore session
+			session.setSessionId(currentSessionId).setSession(currentContext);
+		}
 	}
 
 	/**
