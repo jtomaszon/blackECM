@@ -26,6 +26,7 @@ public interface EOSTenantService {
 	 * Creates a new tenant.
 	 * 
 	 * @param tenant
+	 * @param data
 	 * @return The tenant created.
 	 * @throws EOSDuplicatedEntryException
 	 *             If an tenant already exists.
@@ -35,7 +36,7 @@ public interface EOSTenantService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other tenant.
 	 */
-	public EOSTenant createTenant(EOSTenant tenant)
+	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
 			EOSUnauthorizedException;
 

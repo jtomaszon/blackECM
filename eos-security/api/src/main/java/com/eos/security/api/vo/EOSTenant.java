@@ -4,7 +4,6 @@
 package com.eos.security.api.vo;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import com.eos.common.EOSState;
 
@@ -22,7 +21,6 @@ public class EOSTenant implements Serializable {
 	private String description;
 	private EOSState state;
 	private EOSImagePaths logos;
-	private Map<String, String> tenantData;
 
 	/**
 	 * Default constructor.
@@ -108,22 +106,6 @@ public class EOSTenant implements Serializable {
 	 */
 	public EOSTenant setLogos(EOSImagePaths logos) {
 		this.logos = logos;
-		return this;
-	}
-
-	/**
-	 * @return the tenantData
-	 */
-	public Map<String, String> getTenantData() {
-		return tenantData;
-	}
-
-	/**
-	 * @param tenantData
-	 *            the tenantData to set
-	 */
-	public EOSTenant setTenantData(Map<String, String> tenantData) {
-		this.tenantData = tenantData;
 		return this;
 	}
 

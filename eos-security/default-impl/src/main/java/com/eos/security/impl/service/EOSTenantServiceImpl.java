@@ -44,11 +44,12 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 			.getLogger(EOSTenantServiceImpl.class);
 
 	/**
-	 * @see com.eos.security.api.service.EOSTenantService#createTenant(com.eos.security.api.vo.EOSTenant)
+	 * @see com.eos.security.api.service.EOSTenantService#createTenant(EOSTenant,
+	 *      Map)
 	 */
 	@Override
 	@Transactional
-	public EOSTenant createTenant(EOSTenant tenant)
+	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
 			EOSUnauthorizedException {
 		EOSTenantEntity entity = new EOSTenantEntity();
@@ -62,7 +63,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 
 		tenantDAO.persist(entity);
 		// Create meta data
-		addTenantData(entity.getId(), tenant.getTenantData());
+		addTenantData(entity.getId(), data);
 		tenantDAO.getEntityManager().flush();
 		tenant.setId(entity.getId());
 		// TODO messaging and validations, security check

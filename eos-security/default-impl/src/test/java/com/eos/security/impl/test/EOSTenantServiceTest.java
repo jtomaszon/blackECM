@@ -43,7 +43,7 @@ public class EOSTenantServiceTest {
 		EOSTenant tenant = new EOSTenant();
 		tenant.setName("Test create tenant").setDescription(
 				"Create tenant description");
-		tenant = svcTenant.createTenant(tenant);
+		tenant = svcTenant.createTenant(tenant, null);
 		Assert.assertNotNull("Create tenant", tenant.getId());
 	}
 
@@ -52,7 +52,7 @@ public class EOSTenantServiceTest {
 			EOSForbiddenException, EOSUnauthorizedException {
 		Long tenantId = svcTenant.createTenant(
 				new EOSTenant().setName("Test find tenant").setDescription(
-						"Test find description")).getId();
+						"Test find description"), null).getId();
 		EOSTenant tenant = svcTenant.findTenant(tenantId);
 		Assert.assertNotNull("Find tenant: id not null", tenant.getId());
 		Assert.assertEquals("Find tenant id equals", tenant.getId(), tenantId);
@@ -64,10 +64,10 @@ public class EOSTenantServiceTest {
 		List<Long> ids = new ArrayList<>(2);
 		ids.add(svcTenant.createTenant(
 				new EOSTenant().setName("Test find tenants 1").setDescription(
-						"Test find description")).getId());
+						"Test find description"), null).getId());
 		ids.add(svcTenant.createTenant(
 				new EOSTenant().setName("Test find tenants 2").setDescription(
-						"Test find description")).getId());
+						"Test find description"), null).getId());
 		List<EOSTenant> tenants = svcTenant.findTenants(ids);
 		Assert.assertEquals("Find tenants size", 2, tenants.size());
 	}
@@ -77,10 +77,10 @@ public class EOSTenantServiceTest {
 			EOSForbiddenException, EOSUnauthorizedException {
 		svcTenant.createTenant(
 				new EOSTenant().setName("Test list tenant 1").setDescription(
-						"Test list description 1")).getId();
+						"Test list description 1"), null).getId();
 		svcTenant.createTenant(
 				new EOSTenant().setName("Test list tenant 2").setDescription(
-						"Test list description 2")).getId();
+						"Test list description 2"), null).getId();
 		List<EOSTenant> tenants = svcTenant.listTenants(null, 5, 0);
 		Assert.assertTrue("List tenants higher than 1", tenants.size() > 1);
 	}
@@ -90,7 +90,7 @@ public class EOSTenantServiceTest {
 			EOSForbiddenException, EOSUnauthorizedException {
 		Long tenantId = svcTenant.createTenant(
 				new EOSTenant().setName("Test update tenant").setDescription(
-						"Test update tenant description")).getId();
+						"Test update tenant description"), null).getId();
 		// Perform update
 		EOSTenant updated = new EOSTenant().setId(tenantId)
 				.setName("Test update tenant: UPDATED")
@@ -109,8 +109,8 @@ public class EOSTenantServiceTest {
 				.createTenant(
 						new EOSTenant().setName("Test update tenant state")
 								.setDescription(
-										"Test update tenant state description"))
-				.getId();
+										"Test update tenant state description"),
+						null).getId();
 		svcTenant.updateTenantState(tenantId, EOSState.DISABLED);
 		EOSTenant tenant = svcTenant.findTenant(tenantId);
 		Assert.assertEquals(tenant.getState(), EOSState.DISABLED);
@@ -130,11 +130,10 @@ public class EOSTenantServiceTest {
 		Map<String, String> tenantData = new HashMap<>(2);
 		tenantData.put("key1", "value1");
 		tenantData.put("key2", "value2");
-		tenant.setName("Create tenant data")
-				.setDescription("Create tenant data description")
-				.setTenantData(tenantData);
+		tenant.setName("Create tenant data").setDescription(
+				"Create tenant data description");
 
-		tenant = svcTenant.createTenant(tenant);
+		tenant = svcTenant.createTenant(tenant, tenantData);
 		tenantData = svcTenant.listTenantData(tenant.getId(), 5, 0);
 		Assert.assertEquals("tenant data size", 2, tenantData.size());
 	}
@@ -148,10 +147,9 @@ public class EOSTenantServiceTest {
 		tenantData.put("key1", "value1");
 		tenantData.put("key2", "value2");
 
-		tenant.setName("Update tenant data")
-				.setDescription("Update tenant data description")
-				.setTenantData(tenantData);
-		tenant = svcTenant.createTenant(tenant);
+		tenant.setName("Update tenant data").setDescription(
+				"Update tenant data description");
+		tenant = svcTenant.createTenant(tenant, tenantData);
 
 		tenantData = svcTenant.listTenantData(tenant.getId(), 5, 0);
 		Assert.assertEquals("tenant data size", 2, tenantData.size());
@@ -180,10 +178,9 @@ public class EOSTenantServiceTest {
 		tenantData.put("key1", "value1");
 		tenantData.put("key2", "value2");
 
-		tenant.setName("List tenant data keys")
-				.setDescription("List tenant data keys description")
-				.setTenantData(tenantData);
-		tenant = svcTenant.createTenant(tenant);
+		tenant.setName("List tenant data keys").setDescription(
+				"List tenant data keys description");
+		tenant = svcTenant.createTenant(tenant, tenantData);
 		List<String> keys = new ArrayList<>(2);
 		keys.addAll(tenantData.keySet());
 		tenantData = svcTenant.listTenantData(tenant.getId(), keys);
@@ -202,10 +199,9 @@ public class EOSTenantServiceTest {
 		tenantData.put("key3", "value3");
 		tenantData.put("key4", "value4");
 
-		tenant.setName("List tenant data keys")
-				.setDescription("List tenant data keys description")
-				.setTenantData(tenantData);
-		tenant = svcTenant.createTenant(tenant);
+		tenant.setName("List tenant data keys").setDescription(
+				"List tenant data keys description");
+		tenant = svcTenant.createTenant(tenant, tenantData);
 		tenantData = svcTenant.listTenantData(tenant.getId(), 5, 0);
 		Assert.assertEquals("tenant data size", 4, tenantData.size());
 	}

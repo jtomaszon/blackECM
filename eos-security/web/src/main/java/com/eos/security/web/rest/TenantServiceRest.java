@@ -30,6 +30,7 @@ import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSTenantService;
 import com.eos.security.api.vo.EOSTenant;
+import com.eos.security.web.dto.EOSTenantCreateData;
 
 /**
  * Tenant rest services.
@@ -55,11 +56,12 @@ public class TenantServiceRest {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSTenant createTenant(EOSTenant tenant)
+	public EOSTenant createTenant(EOSTenantCreateData data)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
 			EOSUnauthorizedException {
 
-		tenant = svcTenant.createTenant(tenant);
+		EOSTenant tenant = svcTenant.createTenant(data.getTenant(),
+				data.getData());
 		response.setStatus(Response.Status.CREATED.getStatusCode());
 		return tenant;
 	}
