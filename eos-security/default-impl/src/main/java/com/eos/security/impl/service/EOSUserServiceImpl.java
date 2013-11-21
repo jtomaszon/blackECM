@@ -4,15 +4,20 @@
 package com.eos.security.impl.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSUserService;
@@ -31,6 +36,9 @@ import com.eos.security.impl.session.SessionContextManager;
  */
 @Service
 public class EOSUserServiceImpl implements EOSUserService {
+
+	private static final Logger log = LoggerFactory
+			.getLogger(EOSUserServiceImpl.class);
 
 	private EOSUserDAO userDAO;
 	private EOSUserTenantDAO userTenantDAO;
@@ -56,6 +64,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 		EOSUserEntity entity = userDAO.checkedFind(user.getLogin());
 
 		if (entity == null) {
+			log.debug("User entity not found, creating it");
 			entity = new EOSUserEntity();
 			entity.setLogin(user.getLogin()).setEmail(user.getPersonalMail())
 					.setFirstName(user.getFirstName())
@@ -84,6 +93,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	private EOSUserTenantEntity addUserToTenant(String login, String nickName,
 			String email, EOSState state) {
+		log.debug("Adding user " + login + " to current tenant");
 		EOSUserTenantEntity entity = new EOSUserTenantEntity();
 		entity.setLogin(login).setNickName(nickName).setTenantMail(email);
 
@@ -99,7 +109,8 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 * @see com.eos.security.api.service.EOSUserService#findUser(java.lang.String)
 	 */
 	@Override
-	public EOSUser findUser(String login) {
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public EOSUser findUser(String login) throws EOSNotFoundException {
 		return findTenantUser(login, SessionContextManager.getCurrentTenantId());
 	}
 
@@ -108,7 +119,9 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.lang.Long)
 	 */
 	@Override
-	public EOSUser findTenantUser(String login, Long tenantId) {
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public EOSUser findTenantUser(String login, Long tenantId)
+			throws EOSNotFoundException {
 		// TODO Validations and security
 		return entityToVo(userTenantDAO.findByLogin(login, tenantId));
 	}
@@ -117,6 +130,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 * @see com.eos.security.api.service.EOSUserService#findUsers(java.util.List)
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public List<EOSUser> findUsers(List<String> logins) {
 		// TODO Validations and security
 		List<EOSUserTenantEntity> entities = userTenantDAO.findByLogins(logins,
@@ -135,25 +149,55 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      int, int)
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public List<EOSUser> listUsers(List<EOSState> states, int limit, int offset) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Validations and security
+		if (states == null || states.isEmpty()) {
+			states = Arrays.asList(EOSState.values());
+		}
+
+		List<EOSUserTenantEntity> entities = userTenantDAO.list(states,
+				SessionContextManager.getCurrentTenantId(), limit, offset);
+		List<EOSUser> users = new ArrayList<>(entities.size());
+
+		for (EOSUserTenantEntity entity : entities) {
+			users.add(entityToVo(entity));
+		}
+
+		return users;
 	}
 
 	/**
 	 * @see com.eos.security.api.service.EOSUserService#updateUser(com.eos.security.api.vo.EOSUser)
 	 */
 	@Override
+	@Transactional
 	public void updateUser(EOSUser user) throws EOSForbiddenException,
-			EOSUnauthorizedException {
-		// TODO Auto-generated method stub
+			EOSUnauthorizedException, EOSNotFoundException {
+		// TODO Validations and security
+		EOSUserTenantEntity entity = userTenantDAO.findByLogin(user.getLogin(),
+				SessionContextManager.getCurrentTenantId());
+		EOSUserEntity userEntity = userDAO.checkedFind(user.getLogin());
 
+		if (entity == null || userEntity == null) {
+			throw new EOSNotFoundException("User not found with login: "
+					+ user.getLogin());
+		}
+
+		entity.setNickName(user.getNickName()).setTenantMail(user.getEmail());
+		userEntity.setEmail(user.getPersonalMail())
+				.setFirstName(user.getFirstName())
+				.setLastName(user.getLastName());
+
+		userDAO.merge(userEntity);
+		userTenantDAO.merge(entity);
 	}
 
 	/**
 	 * @see com.eos.security.api.service.EOSUserService#deleteUser(java.lang.String)
 	 */
 	@Override
+	@Transactional
 	public void deleteUser(String login) throws EOSForbiddenException,
 			EOSUnauthorizedException {
 		// TODO Auto-generated method stub
@@ -183,6 +227,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.util.Map)
 	 */
 	@Override
+	@Transactional
 	public void updateUserData(String login, Map<String, String> userData)
 			throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO Auto-generated method stub
@@ -194,6 +239,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.util.List)
 	 */
 	@Override
+	@Transactional
 	public void removeUserData(String login, List<String> keys)
 			throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO Auto-generated method stub
@@ -205,6 +251,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.lang.String)
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public String findUserData(String login, String key) {
 		// TODO Auto-generated method stub
 		return null;
@@ -215,6 +262,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.util.List)
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public Map<String, String> listUserData(String login, List<String> keys) {
 		// TODO Auto-generated method stub
 		return null;
@@ -225,6 +273,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      int, int)
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public Map<String, String> listUserData(String login, int limit, int offset) {
 		// TODO Auto-generated method stub
 		return null;

@@ -4,6 +4,7 @@
 package com.eos.security.web.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -56,8 +57,7 @@ public class TenantServiceRest {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSTenant createTenant(EOSTenantCreateData data)
-			throws EOSException {
+	public EOSTenant createTenant(EOSTenantCreateData data) throws EOSException {
 
 		// Create tenant
 		EOSTenant tenant = svcTenant.createTenant(data.getTenant(),
@@ -106,5 +106,35 @@ public class TenantServiceRest {
 	public void deleteTenant(@PathParam("tenant") Long tenantId)
 			throws EOSForbiddenException, EOSUnauthorizedException {
 		svcTenant.updateTenantState(tenantId, EOSState.REMOVED);
+	}
+
+	@Path("/{tenantId}/data")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void updateTenantData(@PathParam("tenantId") Long tenantId,
+			Map<String, String> data) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcTenant.updateTenantData(tenantId, data);
+	}
+
+	@Path("/{tenantId}/data")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Map<String, String> listTenantData(
+			@PathParam("tenantId") Long tenantId,
+			@QueryParam("limit") @DefaultValue("20") int limit,
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		return svcTenant.listTenantData(tenantId, limit, offset);
+	}
+
+	@Path("/{tenantId}/data/find")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Map<String, String> listTenantData(
+			@PathParam("tenantId") Long tenantId,
+			@QueryParam("key") List<String> keys) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		return svcTenant.listTenantData(tenantId, keys);
 	}
 }

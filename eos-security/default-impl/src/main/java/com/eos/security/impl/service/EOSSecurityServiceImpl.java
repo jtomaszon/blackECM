@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,9 @@ import com.eos.security.impl.session.SessionContextManager;
 @Service
 public class EOSSecurityServiceImpl implements EOSSecurityService {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(EOSSecurityServiceImpl.class);
+
 	private EOSTenantService svcTenant;
 	private EOSUserService svcUser;
 
@@ -51,10 +56,16 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	 */
 	@Override
 	public final SessionContext createSessionContext(String sessionId,
-			Long tenantId) {
-		return createSessionContext(sessionId, tenantId,
-				svcUser.findTenantUser(EOSSystemConstants.LOGIN_ANONYMOUS,
-						tenantId));
+			Long tenantId) throws EOSException {
+		try {
+			return createSessionContext(sessionId, tenantId,
+					svcUser.findTenantUser(EOSSystemConstants.LOGIN_ANONYMOUS,
+							EOSSystemConstants.ADMIN_TENANT));
+		} catch (EOSNotFoundException e) {
+			// Should never happens
+			log.debug("Anonymous user not found");
+			throw e;
+		}
 	}
 
 	private final SessionContext createSessionContext(final String sessionId,

@@ -17,11 +17,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSUser;
+import com.eos.security.impl.dao.EOSUserTenantDAO;
 import com.eos.security.impl.service.EOSSystemConstants;
 import com.eos.security.impl.session.SessionContextManager;
 
@@ -39,9 +42,11 @@ public class EOSUserServiceTest {
 	private EOSUserService svcUser;
 	@Autowired
 	private EOSSecurityService svcSecurity;
+	@Autowired
+	private EOSUserTenantDAO userTenantDAO;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws EOSException {
 		if (SessionContextManager.getCurrentSession() == null
 				|| SessionContextManager.getCurrentSession().getTenant() == null) {
 			svcSecurity.createSessionContext(UUID.randomUUID().toString(),
@@ -64,7 +69,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void testFindUser() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		EOSUser user = createUser("find");
 		EOSUser find = svcUser.findUser(user.getLogin());
 		Assert.assertNotNull("Find User", find);
@@ -72,8 +78,9 @@ public class EOSUserServiceTest {
 	}
 
 	@Test
-	public void testFindtenantUser() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+	public void testFindTenantUser() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		EOSUser user = createUser("findtenant");
 		EOSUser find = svcUser.findTenantUser(user.getLogin(), 99L);
 		Assert.assertNull("Find Tenant User other tenant", find);
@@ -99,13 +106,37 @@ public class EOSUserServiceTest {
 				user2.getLogin());
 	}
 
+	@Test
 	public void testUpdateUser() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		EOSUser user = createUser("update");
-		// Change names
-		user.setFirstName("Updated F. Name").setLastName("Update L. Name");
+		// Change names and emails
+		user.setFirstName("Updated F. Name").setLastName("Update L. Name")
+				.setEmail("updated@tenant.mail")
+				.setPersonalMail("updated@personal.mail");
 
 		svcUser.updateUser(user);
+		// force cache clearing
+		//clearCache();
+		EOSUser saved = svcUser.findUser(user.getLogin());
+		Assert.assertEquals("Update user: first name", user.getFirstName(),
+				saved.getFirstName());
+		Assert.assertEquals("Update user: last name", user.getLastName(),
+				saved.getLastName());
+		Assert.assertEquals("Update user: tenant mail", user.getEmail(),
+				saved.getEmail());
+		Assert.assertEquals("Update user: personal mail",
+				user.getPersonalMail(), saved.getPersonalMail());
+	}
+
+	@Test
+	public void testListUser() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
+		createUser("list-1");
+		createUser("list-2");
+		List<EOSUser> users = svcUser.listUsers(null, 5, 0);
+		Assert.assertTrue("List users size", users.size() >= 2);
 	}
 
 	private EOSUser createUser(String prefix)
@@ -115,7 +146,8 @@ public class EOSUserServiceTest {
 		user.setLogin(prefix + "_create").setEmail(prefix + "@create.com")
 				.setFirstName(prefix + " First").setLastName(prefix + " Last")
 				.setNickName(prefix + " Nick")
-				.setPersonalMail(prefix + "@personal.com");
+				.setPersonalMail(prefix + "@personal.com")
+				.setState(EOSState.ACTIVE);
 
 		user = svcUser.createUser(user);
 		return user;

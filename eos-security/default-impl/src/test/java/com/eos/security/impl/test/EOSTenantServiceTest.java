@@ -130,6 +130,7 @@ public class EOSTenantServiceTest {
 	@Test
 	public void testTenantPurge() {
 		// TODO
+		Assert.assertTrue("TODO pruge tests", true);
 	}
 
 	// Tenant Data

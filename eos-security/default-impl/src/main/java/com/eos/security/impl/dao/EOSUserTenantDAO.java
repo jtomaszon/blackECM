@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 
+import com.eos.common.EOSState;
 import com.eos.commons.jpa.AbstractDAO;
 import com.eos.security.impl.model.EOSUserTenantEntity;
 
@@ -64,4 +65,13 @@ public class EOSUserTenantDAO extends AbstractDAO<EOSUserTenantEntity> {
 				.getResultList();
 	}
 
+	public List<EOSUserTenantEntity> list(List<EOSState> states, Long tenantId,
+			int limit, int offset) {
+		return em
+				.createNamedQuery(EOSUserTenantEntity.QUERY_LIST,
+						EOSUserTenantEntity.class)
+				.setParameter(EOSUserTenantEntity.PARAM_TENANT, tenantId)
+				.setParameter(EOSUserTenantEntity.PARAM_STATE, states)
+				.setFirstResult(offset).setMaxResults(limit).getResultList();
+	}
 }

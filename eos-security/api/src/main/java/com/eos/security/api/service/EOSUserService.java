@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSUser;
@@ -45,8 +46,11 @@ public interface EOSUserService {
 	 * @param login
 	 *            User login.
 	 * @return The user or null if not found.
+	 * @throws EOSNotFoundException
+	 *             If not entity is found in the current tenant with the given
+	 *             login.
 	 */
-	public EOSUser findUser(String login);
+	public EOSUser findUser(String login) throws EOSNotFoundException;
 
 	/**
 	 * Finds the user with the given login on the given tenant. Internal use
@@ -57,8 +61,12 @@ public interface EOSUserService {
 	 * @param tenantId
 	 *            The tenant id which the user belongs.
 	 * @return The user or null if not found.
+	 * @throws EOSNotFoundException
+	 *             If not entity is found in the given tenant with the given
+	 *             login.
 	 */
-	public EOSUser findTenantUser(String login, Long tenantId);
+	public EOSUser findTenantUser(String login, Long tenantId)
+			throws EOSNotFoundException;
 
 	/**
 	 * Find users by their login.
@@ -92,9 +100,12 @@ public interface EOSUserService {
 	 *             If the creator do not have permission for user update.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other users.
+	 * @throws EOSNotFoundException
+	 *             If not entity is found in the current tenant with the given
+	 *             login.
 	 */
 	public void updateUser(EOSUser user) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSNotFoundException;
 
 	/**
 	 * Delete a user, the user is marked as deleted.

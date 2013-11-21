@@ -31,15 +31,19 @@ import com.eos.commons.jpa.EntityFieldSizes;
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_FIND, query = "SELECT t FROM EOSUserTenant t "
 				+ "WHERE t.login = :login AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_FIND_MULTIPLE, query = "SELECT t FROM EOSUserTenant t "
-				+ "WHERE t.login IN (:login) AND t.tenantId = :tenantId") })
+				+ "WHERE t.login IN (:login) AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSUserTenantEntity.QUERY_LIST, query = "SELECT t FROM EOSUserTenant t "
+				+ "WHERE t.state IN (:state) AND t.tenantId = :tenantId") })
 public class EOSUserTenantEntity extends AbstractTenantEntity {
 
 	private static final long serialVersionUID = 3877045991804448137L;
 
 	public static final String QUERY_FIND = "EOSUserTenant.FindByLogin";
 	public static final String QUERY_FIND_MULTIPLE = "EOSUserTenant.FindUsersByLogin";
+	public static final String QUERY_LIST = "EOSUserTenant.ListAll";
 
 	public static final String PARAM_LOGIN = "login";
+	public static final String PARAM_STATE = "state";
 
 	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_TINY)
 	@Column(name = "login", nullable = false, updatable = false)
