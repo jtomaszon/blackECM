@@ -29,6 +29,9 @@ public interface EOSUserService {
 	 * 
 	 * @param user
 	 *            User to be created.
+	 * @param userData
+	 *            Additional user data. This data belongs only for the user in
+	 *            the current tenant.
 	 * @return The user created.
 	 * @throws EOSDuplicatedEntryException
 	 *             If an user already exists in the current tenant.
@@ -37,7 +40,7 @@ public interface EOSUserService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other users.
 	 */
-	public EOSUser createUser(EOSUser user) throws EOSDuplicatedEntryException,
+	public EOSUser createUser(EOSUser user, Map<String, String> userData) throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
@@ -124,8 +127,8 @@ public interface EOSUserService {
 
 	/**
 	 * Add user data to the given user. If the data value exists, then an update
-	 * will be performed. If value is null, then the key, value pair will be
-	 * removed.
+	 * will be performed. If value is null or empty, then the key, value pair
+	 * will be removed.
 	 * 
 	 * @param login
 	 *            User login.
@@ -137,20 +140,6 @@ public interface EOSUserService {
 	 *             Only authenticated users can update user data.
 	 */
 	public void updateUserData(String login, Map<String, String> userData)
-			throws EOSForbiddenException, EOSUnauthorizedException;
-
-	/**
-	 * Remove the user data with the given keys.
-	 * 
-	 * @param login
-	 *            User login.
-	 * @param keys
-	 * @throws EOSForbiddenException
-	 *             If the creator do not have permission for user data removal.
-	 * @throws EOSUnauthorizedException
-	 *             Only authenticated users can remove user data.
-	 */
-	public void removeUserData(String login, List<String> keys)
 			throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**

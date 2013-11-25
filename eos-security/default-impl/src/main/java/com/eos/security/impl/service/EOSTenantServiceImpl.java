@@ -87,7 +87,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 					@Override
 					public void run() {
 						try {
-							svcUser.createUser(adminUser);
+							svcUser.createUser(adminUser, null);
 						} catch (EOSDuplicatedEntryException
 								| EOSForbiddenException
 								| EOSUnauthorizedException e) {

@@ -5,8 +5,10 @@ package com.eos.security.impl.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSUserDAO;
 import com.eos.security.impl.dao.EOSUserTenantDAO;
+import com.eos.security.impl.dao.EOSUserTenantDataDAO;
 import com.eos.security.impl.model.EOSUserEntity;
+import com.eos.security.impl.model.EOSUserTenantDataEntity;
 import com.eos.security.impl.model.EOSUserTenantEntity;
 import com.eos.security.impl.session.SessionContextManager;
 
@@ -42,6 +47,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 
 	private EOSUserDAO userDAO;
 	private EOSUserTenantDAO userTenantDAO;
+	private EOSUserTenantDataDAO userTenantDataDAO;
 
 	@Autowired
 	public void setUserDAO(EOSUserDAO userDAO) {
@@ -53,13 +59,20 @@ public class EOSUserServiceImpl implements EOSUserService {
 		this.userTenantDAO = userTenantDAO;
 	}
 
+	@Autowired
+	public void setUserTenantDataDAO(EOSUserTenantDataDAO userTenantDataDAO) {
+		this.userTenantDataDAO = userTenantDataDAO;
+	}
+
 	/**
-	 * @see com.eos.security.api.service.EOSUserService#createUser(com.eos.security.api.vo.EOSUser)
+	 * @see com.eos.security.api.service.EOSUserService#createUser(com.eos.security.api.vo.EOSUser,
+	 *      Map)
 	 */
 	@Override
 	@Transactional
-	public EOSUser createUser(EOSUser user) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+	public EOSUser createUser(EOSUser user, Map<String, String> userData)
+			throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO Validations and security
 		EOSUserEntity entity = userDAO.checkedFind(user.getLogin());
 
@@ -79,6 +92,12 @@ public class EOSUserServiceImpl implements EOSUserService {
 		// Override state and tenant
 		user.setState(userTenant.getState()).setTenantId(
 				userTenant.getTenantId());
+
+		// User data
+		if (userData != null && !userData.isEmpty()) {
+			addUserTenantData(user.getLogin(), userData);
+		}
+
 		return user;
 	}
 
@@ -177,6 +196,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 		// TODO Validations and security
 		EOSUserTenantEntity entity = userTenantDAO.findByLogin(user.getLogin(),
 				SessionContextManager.getCurrentTenantId());
+		// Find UserEntity, because the attached one in UserTenant isn't managed
 		EOSUserEntity userEntity = userDAO.checkedFind(user.getLogin());
 
 		if (entity == null || userEntity == null) {
@@ -184,7 +204,9 @@ public class EOSUserServiceImpl implements EOSUserService {
 					+ user.getLogin());
 		}
 
+		// UserTenantEntity
 		entity.setNickName(user.getNickName()).setTenantMail(user.getEmail());
+		// UserEntity
 		userEntity.setEmail(user.getPersonalMail())
 				.setFirstName(user.getFirstName())
 				.setLastName(user.getLastName());
@@ -230,20 +252,51 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Transactional
 	public void updateUserData(String login, Map<String, String> userData)
 			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
+		// TODO security check
+		final Long tenantId = SessionContextManager.getCurrentTenantId();
+		List<String> keys = new ArrayList<>(userData.size());
+		keys.addAll(userData.keySet());
+		// Look for data that already exists
+		Map<String, String> dataFound = listUserData(login, keys);
+		List<String> remove = new ArrayList<>();
 
+		// Updates
+		log.debug("Starting User Tenant data update ");
+		for (Entry<String, String> entry : dataFound.entrySet()) {
+			// Add removes to removal list
+			if (StringUtil.isEmpty(userData.get(entry.getKey()))) {
+				remove.add(entry.getKey());
+				log.debug("User Tenant data set for removal: " + entry.getKey());
+			} else {
+				// Update
+				userTenantDataDAO.updateUserData(login, entry.getKey(),
+						entry.getValue(), tenantId);
+				log.debug("User Tenant data [" + entry.getKey() + "] updated");
+			}
+			// Remove key pair value from tenantData map
+			userData.remove(entry.getKey());
+		}
+
+		// Add new data
+		addUserTenantData(login, userData);
+		// Remove removal list
+		if (!remove.isEmpty()) {
+			log.debug("Starting Tenant data removal ");
+			userTenantDataDAO.deleteUserData(login, remove, tenantId);
+		}
+
+		// TODO Remove user tenant data cache using keys variable
 	}
 
-	/**
-	 * @see com.eos.security.api.service.EOSUserService#removeUserData(java.lang.String,
-	 *      java.util.List)
-	 */
-	@Override
-	@Transactional
-	public void removeUserData(String login, List<String> keys)
-			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
-
+	private void addUserTenantData(String login, Map<String, String> userData) {
+		log.debug("Adding user data to user " + login);
+		
+		for (Entry<String, String> entry : userData.entrySet()) {
+			EOSUserTenantDataEntity entity = new EOSUserTenantDataEntity()
+					.setLogin(login).setKey(entry.getKey())
+					.setValue(entry.getValue());
+			userTenantDataDAO.persist(entity);
+		}
 	}
 
 	/**
@@ -253,8 +306,9 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public String findUserData(String login, String key) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO security check
+		return userTenantDataDAO.findUserData(login, key,
+				SessionContextManager.getCurrentTenantId());
 	}
 
 	/**
@@ -264,8 +318,9 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public Map<String, String> listUserData(String login, List<String> keys) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO security check
+		return entitiesToMap(userTenantDataDAO.listUserData(login, keys,
+				SessionContextManager.getCurrentTenantId()));
 	}
 
 	/**
@@ -275,8 +330,20 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public Map<String, String> listUserData(String login, int limit, int offset) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO security check
+		return entitiesToMap(userTenantDataDAO.listUserData(login, limit,
+				offset, SessionContextManager.getCurrentTenantId()));
+	}
+
+	private Map<String, String> entitiesToMap(
+			List<EOSUserTenantDataEntity> entities) {
+		Map<String, String> userData = new HashMap<>(entities.size());
+
+		for (EOSUserTenantDataEntity entity : entities) {
+			userData.put(entity.getKey(), entity.getValue());
+		}
+
+		return userData;
 	}
 
 }
