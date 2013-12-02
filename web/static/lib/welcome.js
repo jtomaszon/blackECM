@@ -1,7 +1,7 @@
 require(['dropdown', 'collapse'], function(dd, coll) {
 
 	$.ajax({
-		url: '/security/session/'
+		url: '/security/session'
 	})
 	.done(function(data) {
 		console.log(data);
