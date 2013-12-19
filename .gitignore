@@ -23,6 +23,7 @@ target/
 .project
 reports/
 eos/*/bin/
+eos/*/.metadata/
 
 # Vim ignore files
 *.swp

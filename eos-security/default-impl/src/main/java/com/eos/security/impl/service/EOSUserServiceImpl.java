@@ -141,7 +141,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public EOSUser findTenantUser(String login, Long tenantId)
 			throws EOSNotFoundException {
-		// TODO Validations and security
+		// TODO Validations, cache and security
 		return entityToVo(userTenantDAO.findByLogin(login, tenantId));
 	}
 
@@ -151,7 +151,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public List<EOSUser> findUsers(List<String> logins) {
-		// TODO Validations and security
+		// TODO Validations, cache and security
 		List<EOSUserTenantEntity> entities = userTenantDAO.findByLogins(logins,
 				SessionContextManager.getCurrentTenantId());
 		List<EOSUser> users = new ArrayList<>(entities.size());

@@ -4,7 +4,6 @@
 package com.eos.security.api.vo;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import com.eos.common.EOSState;
 import com.eos.common.EOSUserType;
@@ -29,7 +28,6 @@ public class EOSUser implements Serializable {
 	private EOSUserType type;
 	private Long tenantId;
 	private EOSImagePaths photos;
-	private Map<String, String> userData;
 
 	/**
 	 * Default constructor.
@@ -211,22 +209,6 @@ public class EOSUser implements Serializable {
 	 */
 	public EOSUser setPhotos(EOSImagePaths photos) {
 		this.photos = photos;
-		return this;
-	}
-
-	/**
-	 * @return the userData
-	 */
-	public Map<String, String> getUserData() {
-		return userData;
-	}
-
-	/**
-	 * @param userData
-	 *            the userData to set
-	 */
-	public EOSUser setUserData(Map<String, String> userData) {
-		this.userData = userData;
 		return this;
 	}
 

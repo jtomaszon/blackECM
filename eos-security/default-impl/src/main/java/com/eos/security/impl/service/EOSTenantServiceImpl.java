@@ -81,7 +81,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 		addTenantData(entity.getId(), data);
 		tenantDAO.getEntityManager().flush();
 		tenant.setId(entity.getId());
-		// TODO create admin user
+		// Create administrator user with new tenant
 		svcSecurity.runAs(EOSSystemConstants.LOGIN_SYSTEM_USER, entity.getId(),
 				new Runnable() {
 					@Override
@@ -97,7 +97,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 				});
 
 		// TODO messaging and validations, security check
-		log.debug("Tenant created: " + tenant.toString());
+		log.info("Tenant created: " + tenant.toString());
 		return tenant;
 	}
 
