@@ -7,9 +7,11 @@ import java.util.List;
 
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSGroup;
+import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 
 /**
@@ -87,9 +89,11 @@ public interface EOSGroupService {
 	 *             If the creator do not have permission for group deletion.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can delete groups.
+	 * @throws EOSNotFoundException
+	 *             If the group is not found.
 	 */
 	public void deleteGroup(Long groupId) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSNotFoundException;
 
 	/**
 	 * List groups filtered by level.
@@ -128,7 +132,7 @@ public interface EOSGroupService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate groups.
 	 */
-	public void addUsersToGroup(Long groupId, List<Long> users)
+	public void addUsersToGroup(Long groupId, List<String> users)
 			throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
@@ -144,7 +148,7 @@ public interface EOSGroupService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate groups.
 	 */
-	public void removeUsersFromGroup(Long groupId, List<Long> users)
+	public void removeUsersFromGroup(Long groupId, List<String> users)
 			throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
@@ -159,4 +163,49 @@ public interface EOSGroupService {
 	 * @return List of users.
 	 */
 	public List<EOSUser> listGroupUsers(Long groupId, int limit, int offset);
+
+	/**
+	 * Add roles to the given group.
+	 * 
+	 * @param groupId
+	 *            The group id where the roles will be added.
+	 * @param roles
+	 *            List of roles to be added.
+	 * @throws EOSForbiddenException
+	 *             If the creator do not have permission to add roles to a
+	 *             group.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can manipulate groups.
+	 */
+	public void addRolesToGroup(Long groupId, List<String> roles)
+			throws EOSForbiddenException, EOSUnauthorizedException;
+
+	/**
+	 * Remove roles from the given group.
+	 * 
+	 * @param groupId
+	 *            The group id where the roles will be removed.
+	 * @param roles
+	 *            List of roles to be removed.
+	 * @throws EOSForbiddenException
+	 *             If the creator do not have permission to remove roles from a
+	 *             group.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can manipulate groups.
+	 */
+	public void removeRolesFromGroup(Long groupId, List<String> roles)
+			throws EOSForbiddenException, EOSUnauthorizedException;
+
+	/**
+	 * List all roles from the given group.
+	 * 
+	 * @param groupId
+	 *            The group id to list roles.
+	 * @param limit
+	 *            Maximum number of registers.
+	 * @param offset
+	 *            Initial point.
+	 * @return List of roles.
+	 */
+	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset);
 }

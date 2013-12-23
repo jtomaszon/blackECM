@@ -3,7 +3,6 @@
  */
 package com.eos.security.web.rest;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,8 +21,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
+import com.eos.security.api.exception.EOSForbiddenException;
+import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
@@ -39,113 +43,125 @@ import com.eos.security.api.vo.EOSUser;
 @Component
 public class GroupServiceRest {
 
-	private EOSGroupService svcGroup;
+	private static EOSGroupService svcGroup;
 
-	private static final EOSGroup group;
+	@Context
+	private HttpServletResponse response;
 
-	static {
-		group = new EOSGroup();
-		group.setId(1L);
-		group.setName("Mock Group");
-		group.setDescription("Mock Group");
-		group.setLevel(5000);
-		group.setTenantId(1L);
+	@Autowired
+	private void setGroupService(EOSGroupService eosGroupService) {
+		svcGroup = eosGroupService;
 	}
 
-	@Path("/")
-	@POST
+	// Group
+
+	@Path("/{groupId}")
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public EOSGroup createGroup(EOSGroup group,
-			@Context final HttpServletResponse response) {
-		response.setStatus(Response.Status.CREATED.getStatusCode());
-		return this.group;
+	public void updateGroup(@PathParam("groupId") Long groupId, EOSGroup group)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		group.setId(groupId);
+		svcGroup.updateGroup(group);
 	}
 
-	@Path("/{id}")
+	@Path("/{groupId}")
+	@DELETE
+	public void deleteGroup(@PathParam("groupId") Long groupId)
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
+		svcGroup.deleteGroup(groupId);
+	}
+
+	@Path("/{groupId}")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSGroup findGroup(@PathParam("id") Long groupId) {
-		// TODO
-		return group;
+	public EOSGroup findGroup(@PathParam("groupId") Long groupId)
+			throws EOSForbiddenException {
+		return svcGroup.findGroup(groupId);
 	}
 
-	@Path("/{id}")
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateGroup(@PathParam("id") Long groupId, EOSGroup group) {
-		// TODO
-	}
-
-	@Path("/{id}")
-	@DELETE
-	public void deleteGroup(@PathParam("id") Long groupId) {
-		// TODO
+	@Path("/find")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<EOSGroup> findGroups(@QueryParam("groupId") List<Long> groups)
+			throws EOSForbiddenException {
+		return svcGroup.findGroups(groups);
 	}
 
 	@Path("/list")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EOSGroup> listGroups(
-			@QueryParam("minimumLevel") List<Integer> minimum,
-			@QueryParam("maximumLevel") List<Integer> maximum,
+			@QueryParam("miniLevel") Integer minimumLevel,
+			@QueryParam("maxLevel") Integer maximumLevel,
 			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset) {
-		// TODO
-		return Arrays.asList(group);
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSForbiddenException {
+		return svcGroup.listGroups(minimumLevel, maximumLevel, limit, offset);
+	}
+
+	@Path("")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public EOSGroup createGroup(EOSGroup group)
+			throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException {
+		group = svcGroup.createGroup(group);
+		response.setStatus(Response.Status.CREATED.getStatusCode());
+		return group;
 	}
 
 	// Group User
 
-	@Path("/{id}/user")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<EOSUser> listUsers(@PathParam("id") Long groupId) {
-		// TODO
-		return Collections.emptyList();
-	}
-
-	@Path("/{id}/user")
-	@POST
+	@Path("/{groupId}/user")
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addUsers(@PathParam("id") Long groupId, List<String> users,
-			@Context final HttpServletResponse response) {
-		response.setStatus(Response.Status.CREATED.getStatusCode());
-		// TODO
+	public void addUsers(@PathParam("groupId") Long groupId, List<String> users)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcGroup.addUsersToGroup(groupId, users);
 	}
 
-	@Path("/{id}/user")
+	@Path("/{groupId}/user")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeUsers(@PathParam("id") Long groupId, List<String> users) {
-		// TODO
+	public void removeUsers(@PathParam("id") Long groupId, List<String> users)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcGroup.removeUsersFromGroup(groupId, users);
+	}
+
+	@Path("/{groupId}/user")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<EOSUser> listUsers(@PathParam("groupId") Long groupId,
+			@QueryParam("limit") @DefaultValue("20") int limit,
+			@QueryParam("offset") @DefaultValue("0") int offset) {
+		return svcGroup.listGroupUsers(groupId, limit, offset);
 	}
 
 	// Group Role
 
-	@Path("/{id}/role")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<EOSRole> listRole(@PathParam("id") Long groupId) {
-		// TODO
-		return Collections.emptyList();
-	}
-
-	@Path("/{id}/role")
-	@POST
+	@Path("/{groupId}/role")
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addRoles(@PathParam("id") Long groupId, List<Long> roles,
-			@Context final HttpServletResponse response) {
-		response.setStatus(Response.Status.CREATED.getStatusCode());
+	public void addRoles(@PathParam("groupId") Long groupId, List<Long> roles) {
 		// TODO
 	}
 
-	@Path("/{id}/role")
+	@Path("/{groupId}/role")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeRoles(@PathParam("id") Long groupId, List<Long> roles) {
+	public void removeRoles(@PathParam("groupId") Long groupId, List<Long> roles) {
 		// TODO
+	}
+
+	@Path("/{groupId}/role")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<EOSRole> listRole(@PathParam("groupId") Long groupId) {
+		// TODO
+		return Collections.emptyList();
 	}
 
 }

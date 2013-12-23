@@ -9,6 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Size;
+
+import com.eos.commons.jpa.EntityFieldSizes;
 
 /**
  * Role Permission entity.
@@ -30,6 +33,7 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 	@JoinColumn(name = "roleid", referencedColumnName = "id", insertable = false, nullable = false, updatable = false)
 	private EOSRoleEntity role;
 
+	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_SMALL)
 	@Column(name = "permission", nullable = false, updatable = false)
 	private String permission;
 

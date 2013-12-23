@@ -26,6 +26,7 @@ public class AbstractTenantEntity extends AbstractEntity {
 	private static final long serialVersionUID = -4212558217144636L;
 
 	public static final String PARAM_TENANT = "tenantId";
+	public static final String PARAM_ID = "id";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

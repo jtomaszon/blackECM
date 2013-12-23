@@ -40,8 +40,9 @@ public class EOSGroup implements Serializable {
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(Long id) {
+	public EOSGroup setId(Long id) {
 		this.id = id;
+		return this;
 	}
 
 	/**
@@ -55,8 +56,9 @@ public class EOSGroup implements Serializable {
 	 * @param name
 	 *            the name to set
 	 */
-	public void setName(String name) {
+	public EOSGroup setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	/**
@@ -70,8 +72,9 @@ public class EOSGroup implements Serializable {
 	 * @param description
 	 *            the description to set
 	 */
-	public void setDescription(String description) {
+	public EOSGroup setDescription(String description) {
 		this.description = description;
+		return this;
 	}
 
 	/**
@@ -85,8 +88,9 @@ public class EOSGroup implements Serializable {
 	 * @param level
 	 *            the level to set
 	 */
-	public void setLevel(Integer level) {
+	public EOSGroup setLevel(Integer level) {
 		this.level = level;
+		return this;
 	}
 
 	/**
@@ -100,8 +104,9 @@ public class EOSGroup implements Serializable {
 	 * @param tenantId
 	 *            the tenantId to set
 	 */
-	public void setTenantId(Long tenantId) {
+	public EOSGroup setTenantId(Long tenantId) {
 		this.tenantId = tenantId;
+		return this;
 	}
 
 	/**

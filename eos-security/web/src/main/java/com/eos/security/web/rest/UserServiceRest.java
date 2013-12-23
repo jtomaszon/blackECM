@@ -22,6 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.eos.common.EOSState;
@@ -43,7 +44,15 @@ import com.eos.security.web.dto.EOSUserCreateData;
 @Component
 public class UserServiceRest {
 
-	private EOSUserService svcUser;
+	private static EOSUserService svcUser;
+
+	@Context
+	private HttpServletResponse response;
+
+	@Autowired
+	private void setUserService(EOSUserService eosUserService) {
+		svcUser = eosUserService;
+	}
 
 	// User
 
@@ -75,8 +84,7 @@ public class UserServiceRest {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSUser createUser(EOSUserCreateData user,
-			@Context final HttpServletResponse response)
+	public EOSUser createUser(EOSUserCreateData user)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
 			EOSUnauthorizedException {
 		EOSUser ret = svcUser.createUser(user.getUser(), user.getUserData());

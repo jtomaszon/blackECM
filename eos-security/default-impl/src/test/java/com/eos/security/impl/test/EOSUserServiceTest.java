@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,8 +27,7 @@ import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSUserTenantDAO;
-import com.eos.security.impl.service.EOSSystemConstants;
-import com.eos.security.impl.session.SessionContextManager;
+import com.eos.security.impl.test.util.EOSTestUtil;
 
 /**
  * Test class for user service.
@@ -50,11 +48,7 @@ public class EOSUserServiceTest {
 
 	@Before
 	public void setUp() throws EOSException {
-		if (SessionContextManager.getCurrentSession() == null
-				|| SessionContextManager.getCurrentSession().getTenant() == null) {
-			svcSecurity.createSessionContext(UUID.randomUUID().toString(),
-					EOSSystemConstants.ADMIN_TENANT);
-		}
+		EOSTestUtil.setup(svcSecurity);
 	}
 
 	@Test
