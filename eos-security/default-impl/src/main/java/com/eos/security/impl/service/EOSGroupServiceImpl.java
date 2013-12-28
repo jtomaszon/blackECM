@@ -19,11 +19,14 @@ import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
+import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSGroupDAO;
+import com.eos.security.impl.dao.EOSGroupUserDAO;
 import com.eos.security.impl.model.EOSGroupEntity;
+import com.eos.security.impl.model.EOSGroupUserEntity;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -39,10 +42,22 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 			.getLogger(EOSGroupServiceImpl.class);
 
 	private EOSGroupDAO groupDAO;
+	private EOSGroupUserDAO groupUserDAO;
+	private EOSUserService svcUser;
 
 	@Autowired
 	public void setGroupDAO(EOSGroupDAO groupDAO) {
 		this.groupDAO = groupDAO;
+	}
+
+	@Autowired
+	public void setGroupUserDAO(EOSGroupUserDAO groupUserDAO) {
+		this.groupUserDAO = groupUserDAO;
+	}
+
+	@Autowired
+	public void setUserService(EOSUserService svcUser) {
+		this.svcUser = svcUser;
 	}
 
 	/**
@@ -70,7 +85,8 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public EOSGroup findGroup(Long groupId) throws EOSForbiddenException {
+	public EOSGroup findGroup(Long groupId) throws EOSForbiddenException,
+			EOSNotFoundException {
 		// TODO Security and cache
 		return entityToVo(groupDAO.find(groupId,
 				SessionContextManager.getCurrentTenantId()));
@@ -101,7 +117,7 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	@Override
 	@Transactional
 	public void updateGroup(EOSGroup group) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSNotFoundException {
 		// TODO Security, validations and messaging
 		EOSGroupEntity entity = groupDAO.find(group.getId(),
 				SessionContextManager.getCurrentTenantId());
@@ -122,10 +138,6 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 		// Find required for group level validation
 		EOSGroupEntity entity = groupDAO.find(groupId,
 				SessionContextManager.getCurrentTenantId());
-
-		if (entity == null) {
-			throw new EOSNotFoundException("Group not found for ID: " + groupId);
-		}
 
 		log.debug("Group removed: " + entity.toString());
 		groupDAO.remove(entity);
@@ -170,8 +182,38 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	@Transactional
 	public void addUsersToGroup(Long groupId, List<String> users)
 			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
+		// TODO Security, validations and messaging
 
+		for (String userLogin : users) {
+			addUserToGroup(groupId, userLogin);
+		}
+
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSGroupService#addUsersInGroup(java.util.List,
+	 *      java.lang.String)
+	 */
+	@Override
+	@Transactional
+	public void addUsersInGroup(List<Long> groups, String userLogin)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		// TODO Security, validations and messaging
+
+		for (Long groupId : groups) {
+			addUserToGroup(groupId, userLogin);
+		}
+	}
+
+	private void addUserToGroup(Long groupId, String userLogin) {
+		EOSGroupUserEntity entity = new EOSGroupUserEntity()
+				.setGroupId(groupId).setUserLogin(userLogin);
+		groupUserDAO.persist(entity);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Add new user[" + userLogin + "] to group [" + groupId
+					+ "]");
+		}
 	}
 
 	/**
@@ -182,8 +224,18 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	@Transactional
 	public void removeUsersFromGroup(Long groupId, List<String> users)
 			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
+		// TODO Security and validations
+		groupUserDAO.removeUsersFromGroup(
+				SessionContextManager.getCurrentTenantId(), groupId, users);
+	}
 
+	@Override
+	@Transactional
+	public void removeUserFromGroups(List<Long> groups, String userLogin)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		// TODO Security and validations
+		groupUserDAO.removeUserFromGroups(
+				SessionContextManager.getCurrentTenantId(), groups, userLogin);
 	}
 
 	/**
@@ -193,8 +245,27 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public List<EOSUser> listGroupUsers(Long groupId, int limit, int offset) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Security and validations
+		List<String> logins = groupUserDAO.listUserLogins(
+				SessionContextManager.getCurrentTenantId(), groupId, limit,
+				offset);
+
+		return svcUser.findUsers(logins);
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSGroupService#listUserGroups(java.lang.String,
+	 *      int, int)
+	 */
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public List<EOSGroup> listUserGroups(String userLogin, int limit, int offset)
+			throws EOSForbiddenException {
+		// TODO Security and validations
+		List<Long> groups = groupUserDAO.listGroupIds(
+				SessionContextManager.getCurrentTenantId(), userLogin, limit,
+				offset);
+		return findGroups(groups);
 	}
 
 	/**

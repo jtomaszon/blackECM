@@ -290,7 +290,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 
 	private void addUserTenantData(String login, Map<String, String> userData) {
 		log.debug("Adding user data to user " + login);
-		
+
 		for (Entry<String, String> entry : userData.entrySet()) {
 			EOSUserTenantDataEntity entity = new EOSUserTenantDataEntity()
 					.setLogin(login).setKey(entry.getKey())
@@ -344,6 +344,19 @@ public class EOSUserServiceImpl implements EOSUserService {
 		}
 
 		return userData;
+	}
+
+	// User Permission
+
+	/**
+	 * @see com.eos.security.api.service.EOSUserService#hasPermission(java.lang.String,
+	 *      java.util.List)
+	 */
+	@Override
+	public Map<String, Boolean> hasPermission(String login,
+			List<String> permissions) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

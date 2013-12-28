@@ -68,7 +68,7 @@ public class EOSUserServiceTest {
 	public void testFindUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
 			EOSNotFoundException {
-		EOSUser user = createUser("find", null);
+		EOSUser user = EOSTestUtil.createUser("find", null, svcUser);
 		EOSUser find = svcUser.findUser(user.getLogin());
 		Assert.assertNotNull("Find User", find);
 		Assert.assertEquals("Find User", user.getLogin(), find.getLogin());
@@ -78,7 +78,7 @@ public class EOSUserServiceTest {
 	public void testFindTenantUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
 			EOSNotFoundException {
-		EOSUser user = createUser("findtenant", null);
+		EOSUser user = EOSTestUtil.createUser("findtenant", null, svcUser);
 		EOSUser find = svcUser.findTenantUser(user.getLogin(), 99L);
 		Assert.assertNull("Find Tenant User other tenant", find);
 		// Now find for the current tenant
@@ -91,8 +91,8 @@ public class EOSUserServiceTest {
 	@Test
 	public void testFindUsers() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException {
-		EOSUser user1 = createUser("finds1", null);
-		EOSUser user2 = createUser("finds2", null);
+		EOSUser user1 = EOSTestUtil.createUser("finds1", null, svcUser);
+		EOSUser user2 = EOSTestUtil.createUser("finds2", null, svcUser);
 
 		List<EOSUser> users = svcUser.findUsers(Arrays.asList(user1.getLogin(),
 				user2.getLogin()));
@@ -107,7 +107,7 @@ public class EOSUserServiceTest {
 	public void testUpdateUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
 			EOSNotFoundException {
-		EOSUser user = createUser("update", null);
+		EOSUser user = EOSTestUtil.createUser("update", null, svcUser);
 		// Change names and emails
 		user.setFirstName("Updated F. Name").setLastName("Update L. Name")
 				.setEmail("updated@tenant.mail")
@@ -130,8 +130,8 @@ public class EOSUserServiceTest {
 	@Test
 	public void testListUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException {
-		createUser("list-1", null);
-		createUser("list-2", null);
+		EOSTestUtil.createUser("list-1", null, svcUser);
+		EOSTestUtil.createUser("list-2", null, svcUser);
 		List<EOSUser> users = svcUser.listUsers(null, 5, 0);
 		Assert.assertTrue("List users size", users.size() >= 2);
 	}
@@ -144,7 +144,8 @@ public class EOSUserServiceTest {
 		Map<String, String> userData = new HashMap<>(1);
 		userData.put("key", "value");
 
-		EOSUser user = createUser("create-user-data", userData);
+		EOSUser user = EOSTestUtil.createUser("create-user-data", userData,
+				svcUser);
 		String value = svcUser.findUserData(user.getLogin(), "key");
 		Assert.assertEquals("Create User Data", "value", value);
 	}
@@ -156,7 +157,8 @@ public class EOSUserServiceTest {
 		userData.put("key1", "value1");
 		userData.put("key2", "value2");
 
-		EOSUser user = createUser("update-user-data", userData);
+		EOSUser user = EOSTestUtil.createUser("update-user-data", userData,
+				svcUser);
 		Assert.assertEquals("Update user data: create-size", 2, svcUser
 				.listUserData(user.getLogin(), 5, 0).size());
 
@@ -172,7 +174,7 @@ public class EOSUserServiceTest {
 		userData = svcUser.listUserData(user.getLogin(), 5, 0);
 		Assert.assertEquals("user data update size", 3, userData.size());
 		// user data with key1 check new value
-		// Not working, fetching old value
+		// FIXME Not working, fetching old value
 		// String value = svcUser.findUserData(user.getLogin(), "key1");
 		// Assert.assertEquals("tenant data update key1", "newValue", value);
 
@@ -185,7 +187,8 @@ public class EOSUserServiceTest {
 		userData.put("key1", "value1");
 		userData.put("key2", "value2");
 
-		EOSUser user = createUser("list-user-data", userData);
+		EOSUser user = EOSTestUtil.createUser("list-user-data", userData,
+				svcUser);
 		Assert.assertEquals("Update user data: create-size", 2, svcUser
 				.listUserData(user.getLogin(), 5, 0).size());
 
@@ -202,7 +205,8 @@ public class EOSUserServiceTest {
 		keys.add("key1");
 		keys.add("key2");
 
-		EOSUser user = createUser("list-key-user-data", userData);
+		EOSUser user = EOSTestUtil.createUser("list-key-user-data", userData,
+				svcUser);
 		// Clear user data after creation
 		userData.clear();
 		// reload user data
@@ -213,22 +217,6 @@ public class EOSUserServiceTest {
 				userData.containsKey("key1"));
 		Assert.assertTrue("User data - contains key1",
 				userData.containsKey("key2"));
-	}
-
-	// Utilities
-
-	private EOSUser createUser(String prefix, Map<String, String> userData)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
-		EOSUser user = new EOSUser();
-		user.setLogin(prefix + "_create").setEmail(prefix + "@create.com")
-				.setFirstName(prefix + " First").setLastName(prefix + " Last")
-				.setNickName(prefix + " Nick")
-				.setPersonalMail(prefix + "@personal.com")
-				.setState(EOSState.ACTIVE);
-
-		user = svcUser.createUser(user, userData);
-		return user;
 	}
 
 }

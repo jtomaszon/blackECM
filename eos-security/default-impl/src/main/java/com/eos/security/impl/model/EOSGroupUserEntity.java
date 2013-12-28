@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -17,9 +19,25 @@ import javax.persistence.Table;
  */
 @Entity(name = "EOSGroupUser")
 @Table(name = "tbgroupuser")
+@NamedQueries({
+		@NamedQuery(name = EOSGroupUserEntity.QUERY_GROUP_USERS, query = "SELECT t.userLogin FROM EOSGroupUser t "
+				+ "WHERE t.tenantId = :tenantId AND t.groupId = :groupId "),
+		@NamedQuery(name = EOSGroupUserEntity.QUERY_USER_GROUPS, query = "SELECT t.groupId FROM EOSGroupUser t "
+				+ "WHERE t.tenantId = :tenantId AND t.userLogin = :login "),
+		@NamedQuery(name = EOSGroupUserEntity.QUERY_REMOVE_USERS, query = "DELETE FROM EOSGroupUser t "
+				+ "WHERE t.tenantId = :tenantId AND t.groupId = :groupId AND t.userLogin IN (:login) "),
+		@NamedQuery(name = EOSGroupUserEntity.QUERY_REMOVE_GROUPS, query = "DELETE FROM EOSGroupUser t "
+				+ "WHERE t.tenantId = :tenantId AND t.groupId IN (:groupId) AND t.userLogin = :login ")
+
+})
 public class EOSGroupUserEntity extends AbstractTenantEntity {
 
 	private static final long serialVersionUID = 7626578005288178045L;
+
+	public static final String QUERY_GROUP_USERS = "EOSGroupUser.ListUsersByGroup";
+	public static final String QUERY_USER_GROUPS = "EOSGroupUser.ListGroupsByUser";
+	public static final String QUERY_REMOVE_USERS = "EOSGroupUser.ReomveUsersFromGroup";
+	public static final String QUERY_REMOVE_GROUPS = "EOSGroupUser.ReomveUserFromGroups";
 
 	public static final String PARAM_USER = "login";
 	public static final String PARAM_GROUP = "groupId";
@@ -97,8 +115,9 @@ public class EOSGroupUserEntity extends AbstractTenantEntity {
 	 * @param userLogin
 	 *            the userLogin to set
 	 */
-	public void setUserLogin(String userLogin) {
+	public EOSGroupUserEntity setUserLogin(String userLogin) {
 		this.userLogin = userLogin;
+		return this;
 	}
 
 	/**

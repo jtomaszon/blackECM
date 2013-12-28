@@ -4,6 +4,7 @@
 package com.eos.commons.jpa;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 
 /**
@@ -76,7 +77,7 @@ public abstract class AbstractDAO<T> {
 	public T getCheckedReference(Object id) {
 		try {
 			return getReference(id);
-		} catch (PersistenceException e) {
+		} catch (NoResultException e) {
 			return null;
 		}
 	}

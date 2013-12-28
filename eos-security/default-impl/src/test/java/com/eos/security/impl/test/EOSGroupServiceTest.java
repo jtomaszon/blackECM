@@ -4,6 +4,7 @@
 package com.eos.security.impl.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -22,7 +23,9 @@ import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
 import com.eos.security.api.service.EOSSecurityService;
+import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSGroup;
+import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.test.util.EOSTestUtil;
 
 /**
@@ -39,6 +42,8 @@ public class EOSGroupServiceTest {
 	private EOSGroupService svcGroup;
 	@Autowired
 	private EOSSecurityService svcSecurity;
+	@Autowired
+	private EOSUserService svcUser;
 
 	@Before
 	public void setUp() throws EOSException {
@@ -58,8 +63,9 @@ public class EOSGroupServiceTest {
 
 	@Test
 	public void testFindGroup() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
-		EOSGroup group = createGroup("Find");
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
+		EOSGroup group = EOSTestUtil.createGroup("Find", svcGroup);
 		EOSGroup find = svcGroup.findGroup(group.getId());
 		Assert.assertEquals("Find Group", group.getId(), find.getId());
 	}
@@ -67,8 +73,8 @@ public class EOSGroupServiceTest {
 	@Test
 	public void testFindMultiple() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException {
-		EOSGroup group1 = createGroup("Find Multiple 1");
-		EOSGroup group2 = createGroup("Find Multiple 2");
+		EOSGroup group1 = EOSTestUtil.createGroup("Find Multiple 1", svcGroup);
+		EOSGroup group2 = EOSTestUtil.createGroup("Find Multiple 2", svcGroup);
 		List<Long> ids = new ArrayList<>(2);
 
 		ids.add(group1.getId());
@@ -83,8 +89,8 @@ public class EOSGroupServiceTest {
 	@Test
 	public void testListGroups() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException {
-		createGroup("List 1");
-		createGroup("List 2");
+		EOSTestUtil.createGroup("List 1", svcGroup);
+		EOSTestUtil.createGroup("List 2", svcGroup);
 		List<EOSGroup> groups = svcGroup.listGroups(null, null, 50, 0);
 		Assert.assertTrue("Size higher or equals than 2", groups.size() >= 2);
 	}
@@ -93,21 +99,110 @@ public class EOSGroupServiceTest {
 	public void testDeleteGroup() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
 			EOSNotFoundException {
-		EOSGroup group = createGroup("Delete");
+		EOSGroup group = EOSTestUtil.createGroup("Delete", svcGroup);
 		svcGroup.deleteGroup(group.getId());
-		EOSGroup deleted = svcGroup.findGroup(group.getId());
-		Assert.assertNull(deleted);
+		EOSGroup deleted = null;
 
+		try {
+			deleted = svcGroup.findGroup(group.getId());
+		} catch (EOSNotFoundException e) {
+			// exception expected
+		}
+
+		Assert.assertNull(deleted);
 	}
 
-	private EOSGroup createGroup(String identifier)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
-		EOSGroup group = new EOSGroup().setName("Test " + identifier)
-				.setDescription("Test description " + identifier)
-				.setLevel(EOSLevel.PUBLIC.getLevel());
+	@Test
+	public void testAddFindUsersGroup() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
+		EOSGroup group = EOSTestUtil.createGroup("Add Users", svcGroup);
+		EOSUser user1 = EOSTestUtil.createUser("groupaddUsers1", null, svcUser);
+		EOSUser user2 = EOSTestUtil.createUser("groupaddUsers2", null, svcUser);
+		List<String> userLogins = Arrays.asList(user1.getLogin(),
+				user2.getLogin());
 
-		return svcGroup.createGroup(group);
+		svcGroup.addUsersToGroup(group.getId(), userLogins);
+		List<EOSUser> users = svcGroup.listGroupUsers(group.getId(), 5, 0);
+		Assert.assertEquals("Group Users Add size", 2, users.size());
+		// Validate users
+		Assert.assertTrue("Group Users Add contains",
+				userLogins.contains(users.get(0).getLogin()));
+		Assert.assertTrue("Group Users Add contains",
+				userLogins.contains(users.get(1).getLogin()));
+	}
+
+	@Test
+	public void addFindGroupsUser() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
+		EOSUser user = EOSTestUtil.createUser("addgroupsUser", null, svcUser);
+		EOSGroup group1 = EOSTestUtil.createGroup("Add Find Groups User 1",
+				svcGroup);
+		EOSGroup group2 = EOSTestUtil.createGroup("Add Find Groups User 2",
+				svcGroup);
+		List<Long> groupIds = Arrays.asList(group1.getId(), group2.getId());
+		// Test it
+		svcGroup.addUsersInGroup(groupIds, user.getLogin());
+		// Validate
+		List<EOSGroup> groups = svcGroup.listUserGroups(user.getLogin(), 5, 0);
+		Assert.assertEquals("User Groups Add size", 2, groups.size());
+		Assert.assertTrue("User Groups contains",
+				groupIds.contains(groups.get(0).getId()));
+		Assert.assertTrue("User Groups contains",
+				groupIds.contains(groups.get(1).getId()));
+	}
+
+	@Test
+	public void testRemoveUsersFromGroup() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
+		EOSGroup group = EOSTestUtil.createGroup("Remove Users", svcGroup);
+		EOSUser user1 = EOSTestUtil.createUser("groupremoveUsers1", null,
+				svcUser);
+		EOSUser user2 = EOSTestUtil.createUser("groupremoveUsers2", null,
+				svcUser);
+		EOSUser user3 = EOSTestUtil.createUser("groupremoveUsers3", null,
+				svcUser);
+		List<String> userLogins = Arrays.asList(user1.getLogin(),
+				user2.getLogin(), user3.getLogin());
+
+		svcGroup.addUsersToGroup(group.getId(), userLogins);
+		List<EOSUser> users = svcGroup.listGroupUsers(group.getId(), 5, 0);
+		Assert.assertEquals("Group Users Remove size", 3, users.size());
+		// Remove users
+		userLogins = Arrays.asList(user2.getLogin(), user3.getLogin());
+		svcGroup.removeUsersFromGroup(group.getId(), userLogins);
+		// Validate users, only user1 must be on list
+		users = svcGroup.listGroupUsers(group.getId(), 5, 0);
+		Assert.assertEquals("Group Users Remove size", 1, users.size());
+		Assert.assertEquals("Group Users Remove validate", users.get(0)
+				.getLogin(), user1.getLogin());
+	}
+
+	@Test
+	public void testRemoveUserFromGroups() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
+		EOSUser user = EOSTestUtil
+				.createUser("removegroupsUser", null, svcUser);
+		EOSGroup group1 = EOSTestUtil.createGroup("Remove Groups User 1",
+				svcGroup);
+		EOSGroup group2 = EOSTestUtil.createGroup("Remove Groups User 2",
+				svcGroup);
+		EOSGroup group3 = EOSTestUtil.createGroup("Remove Groups User 3",
+				svcGroup);
+		List<Long> groupIds = Arrays.asList(group1.getId(), group2.getId(),
+				group3.getId());
+		// Test it
+		svcGroup.addUsersInGroup(groupIds, user.getLogin());
+		// Validate
+		List<EOSGroup> groups = svcGroup.listUserGroups(user.getLogin(), 5, 0);
+		Assert.assertEquals("User Groups Remove size", 3, groups.size());
+		// Remove groups
+		groupIds = Arrays.asList(group2.getId(), group3.getId());
+		svcGroup.removeUserFromGroups(groupIds, user.getLogin());
+		// Validate groups, only group 1 must be on list
+		groups = svcGroup.listUserGroups(user.getLogin(), 5, 0);
+		Assert.assertEquals("User Groups Remove size", 1, groups.size());
+		Assert.assertEquals("User Groups  Remove validate", groups.get(0)
+				.getId(), group1.getId());
 	}
 
 }

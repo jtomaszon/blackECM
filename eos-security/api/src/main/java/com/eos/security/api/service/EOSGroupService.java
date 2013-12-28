@@ -50,8 +50,12 @@ public interface EOSGroupService {
 	 * @throws EOSForbiddenException
 	 *             For {@link EOSLevel#INTERNAL} special permissions are
 	 *             required.
+	 * @throws EOSNotFoundException
+	 *             If a group is not found with the given ID in the current
+	 *             tenant.
 	 */
-	public EOSGroup findGroup(Long groupId) throws EOSForbiddenException;
+	public EOSGroup findGroup(Long groupId) throws EOSForbiddenException,
+			EOSNotFoundException;
 
 	/**
 	 * Find groups by its Ids.
@@ -75,9 +79,12 @@ public interface EOSGroupService {
 	 *             If the creator do not have permission for group update.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can update groups.
+	 * @throws EOSNotFoundException
+	 *             If a group is not found with the given ID in the current
+	 *             tenant.
 	 */
 	public void updateGroup(EOSGroup group) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSNotFoundException;
 
 	/**
 	 * Deletes a group. All group user relation and role group relations are
@@ -120,7 +127,8 @@ public interface EOSGroupService {
 	// Group User
 
 	/**
-	 * Add users to the given group.
+	 * Add users to the given group. If the user already belong to a group, this
+	 * user is ignored.
 	 * 
 	 * @param groupId
 	 *            The group id to add users.
@@ -133,6 +141,23 @@ public interface EOSGroupService {
 	 *             Only authenticated users can manipulate groups.
 	 */
 	public void addUsersToGroup(Long groupId, List<String> users)
+			throws EOSForbiddenException, EOSUnauthorizedException;
+
+	/**
+	 * Add the given user in all given groups. If the user already belong to a
+	 * group, this group is ignored.
+	 * 
+	 * @param groups
+	 *            List of groups to add the user.
+	 * @param userLogin
+	 *            User login to be added.
+	 * @throws EOSForbiddenException
+	 *             If the creator do not have permission to add users to a
+	 *             group.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can manipulate groups.
+	 */
+	public void addUsersInGroup(List<Long> groups, String userLogin)
 			throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
@@ -152,6 +177,22 @@ public interface EOSGroupService {
 			throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
+	 * Remove the given user from all given groups.
+	 * 
+	 * @param groups
+	 *            List of groups th remove user from.
+	 * @param userLogin
+	 *            User to be removed.
+	 * @throws EOSForbiddenException
+	 *             If the creator do not have permission to remove users from
+	 *             group.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can manipulate groups.
+	 */
+	public void removeUserFromGroups(List<Long> groups, String userLogin)
+			throws EOSForbiddenException, EOSUnauthorizedException;
+
+	/**
 	 * List group members.
 	 * 
 	 * @param groupId
@@ -163,6 +204,23 @@ public interface EOSGroupService {
 	 * @return List of users.
 	 */
 	public List<EOSUser> listGroupUsers(Long groupId, int limit, int offset);
+
+	/**
+	 * List groups that the given user belongs.
+	 * 
+	 * @param userLogin
+	 *            The user login.
+	 * @param limit
+	 *            Maximum number of registers.
+	 * @param offset
+	 *            Initial point.
+	 * @return List of groups.
+	 * @throws EOSForbiddenException
+	 *             For {@link EOSLevel#INTERNAL} special permissions are
+	 *             required.
+	 */
+	public List<EOSGroup> listUserGroups(String userLogin, int limit, int offset)
+			throws EOSForbiddenException;
 
 	/**
 	 * Add roles to the given group.

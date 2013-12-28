@@ -59,7 +59,8 @@ public class GroupServiceRest {
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateGroup(@PathParam("groupId") Long groupId, EOSGroup group)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		group.setId(groupId);
 		svcGroup.updateGroup(group);
 	}
@@ -77,7 +78,7 @@ public class GroupServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public EOSGroup findGroup(@PathParam("groupId") Long groupId)
-			throws EOSForbiddenException {
+			throws EOSForbiddenException, EOSNotFoundException {
 		return svcGroup.findGroup(groupId);
 	}
 

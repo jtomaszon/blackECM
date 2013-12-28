@@ -30,6 +30,7 @@ import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSGroupService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
@@ -45,6 +46,7 @@ import com.eos.security.web.dto.EOSUserCreateData;
 public class UserServiceRest {
 
 	private static EOSUserService svcUser;
+	private static EOSGroupService svcGroup;
 
 	@Context
 	private HttpServletResponse response;
@@ -52,6 +54,11 @@ public class UserServiceRest {
 	@Autowired
 	private void setUserService(EOSUserService eosUserService) {
 		svcUser = eosUserService;
+	}
+
+	@Autowired
+	private void setGroupService(EOSGroupService eosGroupService) {
+		svcGroup = eosGroupService;
 	}
 
 	// User
@@ -116,8 +123,7 @@ public class UserServiceRest {
 	public Map<String, Boolean> hasPermissions(
 			@PathParam("login") String login,
 			@QueryParam("permission") List<String> permissions) {
-		// TODO
-		return Collections.emptyMap();
+		return svcUser.hasPermission(login, permissions);
 	}
 
 	// User Groups
@@ -127,9 +133,27 @@ public class UserServiceRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EOSGroup> listUserGroups(@PathParam("login") String login,
 			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset) {
-		// TODO
-		return Collections.emptyList();
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSForbiddenException {
+		return svcGroup.listUserGroups(login, limit, offset);
+	}
+
+	@Path("/{login}/groups")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void addUserToGroups(@PathParam("login") String login,
+			List<Long> groups) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcGroup.addUsersInGroup(groups, login);
+	}
+
+	@Path("/{login}/groups")
+	@DELETE
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeUserFromGroups(@PathParam("login") String login,
+			List<Long> groups) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcGroup.removeUserFromGroups(groups, login);
 	}
 
 	// User Roles
@@ -140,7 +164,6 @@ public class UserServiceRest {
 	public List<EOSRole> listUserRoles(@PathParam("login") String login,
 			@QueryParam("limit") @DefaultValue("20") int limit,
 			@QueryParam("offset") @DefaultValue("0") int offset) {
-		// TODO
 		return Collections.emptyList();
 	}
 

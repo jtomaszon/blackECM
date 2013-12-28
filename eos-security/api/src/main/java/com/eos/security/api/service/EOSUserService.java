@@ -40,8 +40,9 @@ public interface EOSUserService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other users.
 	 */
-	public EOSUser createUser(EOSUser user, Map<String, String> userData) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException;
+	public EOSUser createUser(EOSUser user, Map<String, String> userData)
+			throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException;
 
 	/**
 	 * Finds the user with the given login.
@@ -176,4 +177,18 @@ public interface EOSUserService {
 	 * @return A map with user data.
 	 */
 	public Map<String, String> listUserData(String login, int limit, int offset);
+
+	// User Permissions
+
+	/**
+	 * Verify if the given user has any of the given permissions.
+	 * 
+	 * @param login
+	 *            User login.
+	 * @param permissions
+	 *            Permissions list to be verified.
+	 * @return Map indicating which permissions the user has.
+	 */
+	public Map<String, Boolean> hasPermission(String login,
+			List<String> permissions);
 }

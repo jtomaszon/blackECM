@@ -6,11 +6,12 @@ package com.eos.security.impl.dao;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 
 import org.springframework.stereotype.Repository;
 
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.commons.jpa.AbstractDAO;
 import com.eos.security.impl.model.EOSGroupEntity;
 
@@ -38,7 +39,8 @@ public class EOSGroupDAO extends AbstractDAO<EOSGroupEntity> {
 		return em;
 	}
 
-	public EOSGroupEntity find(Long groupId, Long tenantId) {
+	public EOSGroupEntity find(Long groupId, Long tenantId)
+			throws EOSNotFoundException {
 		try {
 			return em
 					.createNamedQuery(EOSGroupEntity.QUERY_FIND,
@@ -46,7 +48,21 @@ public class EOSGroupDAO extends AbstractDAO<EOSGroupEntity> {
 					.setParameter(EOSGroupEntity.PARAM_ID, groupId)
 					.setParameter(EOSGroupEntity.PARAM_TENANT, tenantId)
 					.getSingleResult();
-		} catch (PersistenceException e) {
+		} catch (NoResultException e) {
+			throw new EOSNotFoundException("Group not found for id:" + groupId
+					+ ", tenantId: " + tenantId, e);
+		}
+	}
+
+	public EOSGroupEntity checkedFind(Long groupId, Long tenantId) {
+		try {
+			return em
+					.createNamedQuery(EOSGroupEntity.QUERY_FIND,
+							EOSGroupEntity.class)
+					.setParameter(EOSGroupEntity.PARAM_ID, groupId)
+					.setParameter(EOSGroupEntity.PARAM_TENANT, tenantId)
+					.getSingleResult();
+		} catch (NoResultException e) {
 			return null;
 		}
 	}
