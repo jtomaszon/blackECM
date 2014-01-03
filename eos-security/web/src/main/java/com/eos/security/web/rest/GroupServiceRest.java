@@ -3,7 +3,6 @@
  */
 package com.eos.security.web.rest;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +28,7 @@ import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
+import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
@@ -44,6 +44,7 @@ import com.eos.security.api.vo.EOSUser;
 public class GroupServiceRest {
 
 	private static EOSGroupService svcGroup;
+	private static EOSRoleService svcRole;
 
 	@Context
 	private HttpServletResponse response;
@@ -51,6 +52,11 @@ public class GroupServiceRest {
 	@Autowired
 	private void setGroupService(EOSGroupService eosGroupService) {
 		svcGroup = eosGroupService;
+	}
+
+	@Autowired
+	private void setRoleService(EOSRoleService eosRoleService) {
+		svcRole = eosRoleService;
 	}
 
 	// Group
@@ -146,23 +152,28 @@ public class GroupServiceRest {
 	@Path("/{groupId}/role")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addRoles(@PathParam("groupId") Long groupId, List<Long> roles) {
-		// TODO
+	public void addRoles(@PathParam("groupId") Long groupId, List<String> codes)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.addRolesToGroup(groupId, codes);
 	}
 
 	@Path("/{groupId}/role")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeRoles(@PathParam("groupId") Long groupId, List<Long> roles) {
-		// TODO
+	public void removeRoles(@PathParam("groupId") Long groupId,
+			List<String> codes) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcRole.removeRolesFromGroup(groupId, codes);
 	}
 
 	@Path("/{groupId}/role")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<EOSRole> listRole(@PathParam("groupId") Long groupId) {
-		// TODO
-		return Collections.emptyList();
+	public List<EOSRole> listRole(@PathParam("groupId") Long groupId,
+			@QueryParam("limit") @DefaultValue("20") int limit,
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSForbiddenException {
+		return svcRole.listGroupRoles(groupId, limit, offset);
 	}
 
 }

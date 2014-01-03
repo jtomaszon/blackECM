@@ -97,13 +97,13 @@ public class EOSSecurityStartup implements
 		// Super Administrator role
 		EOSRoleEntity adminRole = createAdminRole();
 		// Roles to users
-		createRoleUser(adminUser.getId(), adminRole.getId());
+		createRoleUser(adminUser.getLogin(), adminRole.getCode());
 		// Create system user
 		EOSUserTenantEntity systemUser = createUser(
 				EOSSystemConstants.LOGIN_SYSTEM_USER, "System User",
 				EOSUserType.SYSTEM);
 		// system task user has the same permissions as super administrator
-		createRoleUser(systemUser.getId(), adminRole.getId());
+		createRoleUser(systemUser.getLogin(), adminRole.getCode());
 	}
 
 	private EOSUserTenantEntity createUser(String login, String name,
@@ -160,15 +160,14 @@ public class EOSSecurityStartup implements
 		return role;
 	}
 
-	private void createRoleUser(Long userId, Long roleId) {
-		EOSRoleUserEntity roleUser = roleUserDAO.findByUserAndRole(userId,
-				roleId, EOSSystemConstants.ADMIN_TENANT);
+	private void createRoleUser(String login, String code) {
+		EOSRoleUserEntity roleUser = roleUserDAO.findByUserAndRole(login, code,
+				EOSSystemConstants.ADMIN_TENANT);
 
 		if (roleUser == null) {
-			log.debug("Adding user " + userId + "to role " + roleId);
-			roleUser = new EOSRoleUserEntity().setRoleId(roleId).setUserId(
-					userId);
-
+			log.debug("Adding user " + login + "to role " + code);
+			roleUser = new EOSRoleUserEntity().setRoleCode(code).setUserLogin(
+					login);
 			roleUser.setTenantId(EOSSystemConstants.ADMIN_TENANT);
 			roleUserDAO.persist(roleUser);
 		}

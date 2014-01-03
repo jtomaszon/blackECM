@@ -37,8 +37,9 @@ public class EOSRole implements Serializable {
 	 * @param code
 	 *            the code to set
 	 */
-	public void setCode(String code) {
+	public EOSRole setCode(String code) {
 		this.code = code;
+		return this;
 	}
 
 	/**
@@ -52,8 +53,9 @@ public class EOSRole implements Serializable {
 	 * @param description
 	 *            the description to set
 	 */
-	public void setDescription(String description) {
+	public EOSRole setDescription(String description) {
 		this.description = description;
+		return this;
 	}
 
 	/**
@@ -67,8 +69,9 @@ public class EOSRole implements Serializable {
 	 * @param level
 	 *            the level to set
 	 */
-	public void setLevel(Integer level) {
+	public EOSRole setLevel(Integer level) {
 		this.level = level;
+		return this;
 	}
 
 	/**
@@ -82,8 +85,9 @@ public class EOSRole implements Serializable {
 	 * @param tenantId
 	 *            the tenantId to set
 	 */
-	public void setTenantId(Long tenantId) {
+	public EOSRole setTenantId(Long tenantId) {
 		this.tenantId = tenantId;
+		return this;
 	}
 
 	/**

@@ -3,7 +3,6 @@
  */
 package com.eos.security.web.rest;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,7 @@ import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
+import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
@@ -47,6 +47,7 @@ public class UserServiceRest {
 
 	private static EOSUserService svcUser;
 	private static EOSGroupService svcGroup;
+	private static EOSRoleService svcRole;
 
 	@Context
 	private HttpServletResponse response;
@@ -59,6 +60,11 @@ public class UserServiceRest {
 	@Autowired
 	private void setGroupService(EOSGroupService eosGroupService) {
 		svcGroup = eosGroupService;
+	}
+
+	@Autowired
+	private void setRoleService(EOSRoleService eosRoleService) {
+		svcRole = eosRoleService;
 	}
 
 	// User
@@ -163,8 +169,27 @@ public class UserServiceRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EOSRole> listUserRoles(@PathParam("login") String login,
 			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset) {
-		return Collections.emptyList();
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSForbiddenException {
+		return svcRole.listUserRoles(login, limit, offset);
+	}
+
+	@Path("/{login}/roles")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void addUserToRoles(@PathParam("login") String login,
+			List<String> roles) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcRole.addRolesToUser(login, roles);
+	}
+
+	@Path("/{login}/roles")
+	@DELETE
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeUserFromRoles(@PathParam("login") String login,
+			List<String> roles) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcRole.removeRolesFromUser(login, roles);
 	}
 
 	// User Data

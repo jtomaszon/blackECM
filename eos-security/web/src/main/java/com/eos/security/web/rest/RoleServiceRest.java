@@ -21,9 +21,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.security.api.exception.EOSForbiddenException;
+import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSRoleService;
+import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 
@@ -35,60 +40,68 @@ import com.eos.security.api.vo.EOSUser;
 @Component
 public class RoleServiceRest {
 
-	private EOSRoleService svcRole;
+	private static EOSRoleService svcRole;
 
-	private static final EOSRole role;
+	@Context
+	private HttpServletResponse response;
 
-	static {
-		role = new EOSRole();
-		role.setCode("Mock_Role");
-		role.setDescription("Mock Role");
-		role.setLevel(5000);
-		role.setTenantId(1L);
+	@Autowired
+	private void setRoleService(EOSRoleService eosRoleService) {
+		svcRole = eosRoleService;
 	}
 
-	@Path("/")
+	@Path("")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSRole createRole(EOSRole role,
-			@Context final HttpServletResponse response) {
-		// TODO
+	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
 		response.setStatus(Response.Status.CREATED.getStatusCode());
-		return this.role;
+		return svcRole.createRole(role);
 	}
 
 	@Path("/{code}")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateRole(@PathParam("code") String code, EOSRole role) {
-
+	public void updateRole(@PathParam("code") String code, EOSRole role)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.updateRole(role);
 	}
 
 	@Path("/{code}")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeRole(@PathParam("code") String code) {
-
+	public void removeRole(@PathParam("code") String code)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.deleteRole(code);
 	}
 
 	@Path("/{code}")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void findRole(@PathParam("code") String code) {
+	public EOSRole findRole(@PathParam("code") String code)
+			throws EOSForbiddenException {
+		return svcRole.findRole(code);
+	}
 
+	@Path("/find")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<EOSRole> findRoles(@QueryParam("code") List<String> codes)
+			throws EOSForbiddenException {
+		return svcRole.findRoles(codes);
 	}
 
 	@Path("/list")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<EOSRole> listRoles(
-			@QueryParam("minimumLevel") List<Integer> minimum,
-			@QueryParam("maximumLevel") List<Integer> maximum,
+			@QueryParam("minimumLevel") Integer minimumLevel,
+			@QueryParam("maximumLevel") Integer maximumLevel,
 			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset) {
-		// TODO
-		return Collections.emptyList();
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSUnauthorizedException {
+		return svcRole.listRoles(minimumLevel, maximumLevel, limit, offset);
 	}
 
 	// Role user
@@ -96,53 +109,54 @@ public class RoleServiceRest {
 	@Path("{code}/user")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<EOSUser> listUsers(@PathParam("code") String code,
-			List<String> users) {
-		// TODO
-		return Collections.emptyList();
+	public List<EOSUser> listRoleUsers(@PathParam("code") String code,
+			@QueryParam("limit") @DefaultValue("20") int limit,
+			@QueryParam("offset") @DefaultValue("0") int offset) {
+		return svcRole.listRoleUsers(code, limit, offset);
 	}
 
 	@Path("{code}/user")
-	@POST
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addUsers(@PathParam("code") String code, List<String> users,
-			@Context final HttpServletResponse response) {
-		// TODO
-		response.setStatus(Response.Status.CREATED.getStatusCode());
+	public void addUsers(@PathParam("code") String code, List<String> users)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.addUsersToRole(code, users);
 	}
 
 	@Path("{code}/user")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeUsers(@PathParam("code") String code, List<String> users) {
-		// TODO
+	public void removeUsers(@PathParam("code") String code, List<String> users)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.removeUsersFromRole(code, users);
 	}
 
-	// Group
+	// Role Group
 
 	@Path("{code}/group")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<EOSUser> listGroups(@PathParam("code") String code,
-			List<Long> groups) {
-		// TODO
-		return Collections.emptyList();
+	public List<EOSGroup> listGroups(@PathParam("code") String code,
+			@QueryParam("limit") @DefaultValue("20") int limit,
+			@QueryParam("offset") @DefaultValue("0") int offset)
+			throws EOSForbiddenException {
+		return svcRole.listRoleGroups(code, limit, offset);
 	}
 
 	@Path("{code}/group")
-	@POST
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addGroups(@PathParam("code") String code, List<Long> groups,
-			@Context final HttpServletResponse response) {
-		// TODO
-		response.setStatus(Response.Status.CREATED.getStatusCode());
+	public void addGroups(@PathParam("code") String code, List<Long> groups)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.addGroupsToRole(code, groups);
 	}
 
 	@Path("{code}/group")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeGroups(@PathParam("code") String code, List<Long> groups) {
-		// TODO
+	public void removeGroups(@PathParam("code") String code, List<Long> groups)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		svcRole.removeGroupsFromRole(code, groups);
 	}
 
 	// Permissions
@@ -150,20 +164,18 @@ public class RoleServiceRest {
 	@Path("{code}/permission")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<EOSUser> listPermissions(@PathParam("code") String code,
-			List<String> permissions) {
+	public List<String> listPermissions(@PathParam("code") String code,
+			@QueryParam("limit") @DefaultValue("20") int limit,
+			@QueryParam("offset") @DefaultValue("0") int offset) {
 		// TODO
 		return Collections.emptyList();
 	}
 
 	@Path("{code}/permission")
-	@POST
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addPermissions(@PathParam("code") String code,
-			List<String> permissions,
-			@Context final HttpServletResponse response) {
+	public void addPermissions(@PathParam("code") String code) {
 		// TODO
-		response.setStatus(Response.Status.CREATED.getStatusCode());
 	}
 
 	@Path("{code}/permission")

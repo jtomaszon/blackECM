@@ -3,8 +3,6 @@
  */
 package com.eos.security.impl.service;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -168,27 +166,6 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 			// Restore session
 			session.setSessionId(currentSessionId).setSession(currentContext);
 		}
-	}
-
-	/**
-	 * @see com.eos.security.api.service.EOSSecurityService#hasPermission(java.lang.String,
-	 *      java.lang.String)
-	 */
-	@Override
-	public boolean hasPermission(String login, String permission) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/**
-	 * @see com.eos.security.api.service.EOSSecurityService#hasPermissions(java.lang.String,
-	 *      java.util.List)
-	 */
-	@Override
-	public Map<String, Boolean> hasPermissions(String login,
-			List<String> permissions) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

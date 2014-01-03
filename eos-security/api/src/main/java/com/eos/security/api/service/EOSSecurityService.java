@@ -3,9 +3,6 @@
  */
 package com.eos.security.api.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
@@ -99,31 +96,5 @@ public interface EOSSecurityService {
 	 */
 	public void runAs(String login, Long tenantId, Runnable job)
 			throws EOSForbiddenException, EOSException;
-
-	/**
-	 * Validates the given user has a permission. Validates access through role
-	 * group and user group relations.
-	 * 
-	 * @param login
-	 *            User login.
-	 * @param permission
-	 *            Permission to be verified.
-	 * @return True if the user has the permission, false otherwise.
-	 */
-	public boolean hasPermission(String login, String permission);
-
-	/**
-	 * Validates the given user has the permissions. Validates access through
-	 * role group and user group relations.
-	 * 
-	 * @param login
-	 *            User login.
-	 * @param permissions
-	 *            Permission list to be verified.
-	 * @return Map with the permission string as key and the value indicates if
-	 *         the user has or not.
-	 */
-	public Map<String, Boolean> hasPermissions(String login,
-			List<String> permissions);
 
 }

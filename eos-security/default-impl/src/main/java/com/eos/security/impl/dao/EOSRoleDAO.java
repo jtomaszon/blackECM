@@ -56,10 +56,28 @@ public class EOSRoleDAO extends AbstractDAO<EOSRoleEntity> {
 
 	public List<EOSRoleEntity> findByCodes(List<String> codes, Long tenantId) {
 		return em
-				.createNamedQuery(EOSRoleEntity.QUERY_FIND, EOSRoleEntity.class)
+				.createNamedQuery(EOSRoleEntity.QUERY_FIND_MULTIPLE,
+						EOSRoleEntity.class)
 				.setParameter(EOSRoleEntity.PARAM_CODE, codes)
 				.setParameter(EOSRoleEntity.PARAM_TENANT, tenantId)
 				.getResultList();
+	}
+
+	public void deleteByCode(String code, Long tenantId) {
+		em.createNamedQuery(EOSRoleEntity.QUERY_DELETE)
+				.setParameter(EOSRoleEntity.PARAM_CODE, code)
+				.setParameter(EOSRoleEntity.PARAM_TENANT, tenantId)
+				.executeUpdate();
+	}
+
+	public List<EOSRoleEntity> listRoles(Long tenantId, Integer minimumLevel,
+			Integer maximumLevel, int limit, int offset) {
+		return em
+				.createNamedQuery(EOSRoleEntity.QUERY_LIST, EOSRoleEntity.class)
+				.setParameter(EOSRoleEntity.PARAM_TENANT, tenantId)
+				.setParameter(EOSRoleEntity.PARAM_MIN_LEVEL, minimumLevel)
+				.setParameter(EOSRoleEntity.PARAM_MAX_LEVEL, maximumLevel)
+				.setFirstResult(offset).setMaxResults(limit).getResultList();
 	}
 
 }

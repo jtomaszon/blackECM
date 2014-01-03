@@ -5,8 +5,6 @@ package com.eos.security.impl.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -20,31 +18,40 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity(name = "EOSRoleUser")
 @Table(name = "tbroleuser", uniqueConstraints = { @UniqueConstraint(columnNames = {
-		"roleid", "userid" }) })
-@NamedQueries({ @NamedQuery(name = EOSRoleUserEntity.QUERY_FIND, query = "SELECT t FROM EOSRoleUser t "
-		+ "WHERE t.userId = :userId AND t.roleId = :roleId AND t.tenantId = :tenantId") })
+		"rolecode", "userlogin", "tenantid" }) })
+@NamedQueries({
+		@NamedQuery(name = EOSRoleUserEntity.QUERY_FIND, query = "SELECT t FROM EOSRoleUser t "
+				+ "WHERE t.userLogin = :login AND t.roleCode = :code AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSRoleUserEntity.QUERY_LIST_USERS, query = "SELECT t.userLogin FROM EOSRoleUser t "
+				+ "WHERE t.roleCode = :code AND t.tenantId = :tenantId "
+				+ "ORDER BY t.userLogin ASC"),
+		@NamedQuery(name = EOSRoleUserEntity.QUERY_LIST_ROLES, query = "SELECT t.roleCode FROM EOSRoleUser t "
+				+ "WHERE t.userLogin = :login AND t.tenantId = :tenantId "
+				+ "ORDER BY t,roleCode ASC"),
+		@NamedQuery(name = EOSRoleUserEntity.QUERY_DELETE_USERS, query = "DELETE FROM EOSRoleUser t "
+				+ "WHERE t.roleCode = :code AND t.userLogin IN (:login) AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSRoleUserEntity.QUERY_DELETE_ROLES, query = "DELETE FROM EOSRoleUser t "
+				+ "WHERE t.roleCode IN (:code) AND t.userLogin = :login AND t.tenantId = :tenantId")
+
+})
 public class EOSRoleUserEntity extends AbstractTenantEntity {
 
 	private static final long serialVersionUID = 6787741943234171944L;
 
 	public static final String QUERY_FIND = "EOSRoleUser.FindByUserAndRole";
+	public static final String QUERY_LIST_USERS = "EOSRoleUser.ListUsersByURole";
+	public static final String QUERY_LIST_ROLES = "EOSRoleUser.ListRolesByUUser";
+	public static final String QUERY_DELETE_USERS = "EOSRoleUser.RemoveUsersFromRole";
+	public static final String QUERY_DELETE_ROLES = "EOSRoleUser.RemoveRolesFromUser";
 
-	public static final String PARAM_USER = "userId";
-	public static final String PARAM_ROLE = "roleId";
+	public static final String PARAM_USER = "login";
+	public static final String PARAM_ROLE = "code";
 
-	@Column(name = "userid", insertable = true, nullable = false, updatable = false)
-	private Long userId;
+	@Column(name = "userlogin", nullable = false, updatable = false)
+	private String userLogin;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "userid", referencedColumnName = "id", insertable = false, nullable = false, updatable = false)
-	private EOSUserTenantEntity user;
-
-	@Column(name = "roleid", insertable = true, nullable = false, updatable = false)
-	private Long roleId;
-
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "roleid", referencedColumnName = "id", insertable = false, nullable = false, updatable = false)
-	private EOSRoleEntity role;
+	@Column(name = "rolecode", nullable = false, updatable = false)
+	private String roleCode;
 
 	/**
 	 * Default constructor.
@@ -54,94 +61,34 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 	}
 
 	/**
-	 * @return the userId
+	 * @return the userLogin
 	 */
-	public Long getUserId() {
-		return userId;
+	public String getUserLogin() {
+		return userLogin;
 	}
 
 	/**
-	 * @param userId
-	 *            the userId to set
+	 * @param userLogin
+	 *            the userLogin to set
 	 */
-	public EOSRoleUserEntity setUserId(Long userId) {
-		this.userId = userId;
-
-		if (userId == null) {
-			user = null;
-		} else {
-			user = new EOSUserTenantEntity(userId);
-		}
-
+	public EOSRoleUserEntity setUserLogin(String userLogin) {
+		this.userLogin = userLogin;
 		return this;
 	}
 
 	/**
-	 * @return the user
+	 * @return the roleCode
 	 */
-	public EOSUserTenantEntity getUser() {
-		return user;
+	public String getRoleCode() {
+		return roleCode;
 	}
 
 	/**
-	 * @param user
-	 *            the user to set
+	 * @param roleCode
+	 *            the roleCode to set
 	 */
-	public EOSRoleUserEntity setUser(EOSUserTenantEntity user) {
-		this.user = user;
-
-		if (user == null) {
-			userId = null;
-		} else {
-			userId = user.getId();
-		}
-
-		return this;
-	}
-
-	/**
-	 * @return the roleId
-	 */
-	public Long getRoleId() {
-		return roleId;
-	}
-
-	/**
-	 * @param roleId
-	 *            the roleId to set
-	 */
-	public EOSRoleUserEntity setRoleId(Long roleId) {
-		this.roleId = roleId;
-
-		if (roleId == null) {
-			role = null;
-		} else {
-			role = new EOSRoleEntity(roleId);
-		}
-
-		return this;
-	}
-
-	/**
-	 * @return the role
-	 */
-	public EOSRoleEntity getRole() {
-		return role;
-	}
-
-	/**
-	 * @param role
-	 *            the role to set
-	 */
-	public EOSRoleUserEntity setRole(EOSRoleEntity role) {
-		this.role = role;
-
-		if (role == null) {
-			roleId = null;
-		} else {
-			roleId = role.getId();
-		}
-
+	public EOSRoleUserEntity setRoleCode(String roleCode) {
+		this.roleCode = roleCode;
 		return this;
 	}
 
@@ -152,10 +99,10 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((role == null) ? 0 : role.hashCode());
-		result = prime * result + ((roleId == null) ? 0 : roleId.hashCode());
-		result = prime * result + ((user == null) ? 0 : user.hashCode());
-		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		result = prime * result
+				+ ((roleCode == null) ? 0 : roleCode.hashCode());
+		result = prime * result
+				+ ((userLogin == null) ? 0 : userLogin.hashCode());
 		return result;
 	}
 
@@ -171,25 +118,15 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 		if (getClass() != obj.getClass())
 			return false;
 		EOSRoleUserEntity other = (EOSRoleUserEntity) obj;
-		if (role == null) {
-			if (other.role != null)
+		if (roleCode == null) {
+			if (other.roleCode != null)
 				return false;
-		} else if (!role.equals(other.role))
+		} else if (!roleCode.equals(other.roleCode))
 			return false;
-		if (roleId == null) {
-			if (other.roleId != null)
+		if (userLogin == null) {
+			if (other.userLogin != null)
 				return false;
-		} else if (!roleId.equals(other.roleId))
-			return false;
-		if (user == null) {
-			if (other.user != null)
-				return false;
-		} else if (!user.equals(other.user))
-			return false;
-		if (userId == null) {
-			if (other.userId != null)
-				return false;
-		} else if (!userId.equals(other.userId))
+		} else if (!userLogin.equals(other.userLogin))
 			return false;
 		return true;
 	}
@@ -199,9 +136,8 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 	 */
 	@Override
 	public String toString() {
-		return "EOSRoleUserEntity [userId=" + userId + ", roleId=" + roleId
-				+ ", getId()=" + getId() + ", getTenantId()=" + getTenantId()
-				+ "]";
+		return "EOSRoleUserEntity [userLogin=" + userLogin + ", roleCode="
+				+ roleCode + ", getTenantId()=" + getTenantId() + "]";
 	}
 
 }

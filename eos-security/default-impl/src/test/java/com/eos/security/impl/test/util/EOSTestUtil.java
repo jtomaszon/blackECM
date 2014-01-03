@@ -13,9 +13,11 @@ import com.eos.common.exception.EOSException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
+import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSGroup;
+import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.service.EOSSystemConstants;
 import com.eos.security.impl.session.SessionContextManager;
@@ -66,5 +68,14 @@ public class EOSTestUtil {
 				.setLevel(EOSLevel.PUBLIC.getLevel());
 
 		return svcGroup.createGroup(group);
+	}
+
+	public static EOSRole createRole(String identifier, EOSRoleService svcRole)
+			throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException {
+		EOSRole role = new EOSRole().setCode(identifier + "_code")
+				.setDescription(identifier + " Description")
+				.setLevel(EOSLevel.MAXIMUM.getLevel());
+		return svcRole.createRole(role);
 	}
 }
