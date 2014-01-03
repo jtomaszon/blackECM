@@ -3,6 +3,8 @@
  */
 package com.eos.security.impl.dao;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -36,6 +38,23 @@ public class EOSPermissionDAO extends AbstractDAO<EOSPermissionEntity> {
 	@Override
 	public EntityManager getEntityManager() {
 		return em;
+	}
+
+	public void deleteRolePermissions(Long tenantId, String code,
+			List<String> permissions) {
+		em.createNamedQuery(EOSPermissionEntity.QUERY_REMOVE)
+				.setParameter(EOSPermissionEntity.PARAM_ROLE, code)
+				.setParameter(EOSPermissionEntity.PARAM_PERMISSION, permissions)
+				.setParameter(EOSPermissionEntity.PARAM_TENANT, tenantId)
+				.executeUpdate();
+	}
+
+	public List<String> listRolePermissions(Long tenantId, String code) {
+		return em
+				.createNamedQuery(EOSPermissionEntity.QUERY_LIST, String.class)
+				.setParameter(EOSPermissionEntity.PARAM_ROLE, code)
+				.setParameter(EOSPermissionEntity.PARAM_TENANT, tenantId)
+				.getResultList();
 	}
 
 }

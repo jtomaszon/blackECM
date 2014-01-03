@@ -5,8 +5,8 @@ package com.eos.security.impl.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
@@ -14,24 +14,33 @@ import javax.validation.constraints.Size;
 import com.eos.commons.jpa.EntityFieldSizes;
 
 /**
- * Role Permission entity.
+ * Role Permission entity model.
  * 
  * @author santos.fabiano
  * 
  */
 @Entity(name = "EOSPermission")
 @Table(name = "tbpermission", uniqueConstraints = { @UniqueConstraint(columnNames = {
-		"roleid", "permission", "tenantid" }) })
+		"rolecode", "permission", "tenantid" }) })
+@NamedQueries({
+		@NamedQuery(name = EOSPermissionEntity.QUERY_LIST, query = "SELECT t.permission FROM EOSPermission t "
+				+ "WHERE t.roleCode = :code AND t.tenantId = :tenantId ORDER BY t.permission ASC"),
+		@NamedQuery(name = EOSPermissionEntity.QUERY_REMOVE, query = "DELETE FROM EOSPermission t "
+				+ "WHERE t.roleCode = :code AND t.permission IN (:permission) AND t.tenantId = :tenantId")
+
+})
 public class EOSPermissionEntity extends AbstractTenantEntity {
 
 	private static final long serialVersionUID = -4228463366776986941L;
 
-	@Column(name = "roleid", insertable = true, nullable = false, updatable = false)
-	private Long roleId;
+	public static final String QUERY_LIST = "EOSPermission.ListByRole";
+	public static final String QUERY_REMOVE = "EOSPermission.DeleteByRole";
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "roleid", referencedColumnName = "id", insertable = false, nullable = false, updatable = false)
-	private EOSRoleEntity role;
+	public static final String PARAM_ROLE = "code";
+	public static final String PARAM_PERMISSION = "permission";
+
+	@Column(name = "rolecode", nullable = false, updatable = false)
+	private String roleCode;
 
 	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_SMALL)
 	@Column(name = "permission", nullable = false, updatable = false)
@@ -45,48 +54,18 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 	}
 
 	/**
-	 * @return the roleId
+	 * @return the roleCode
 	 */
-	public Long getRoleId() {
-		return roleId;
+	public String getRoleCode() {
+		return roleCode;
 	}
 
 	/**
-	 * @param roleId
-	 *            the roleId to set
+	 * @param roleCode
+	 *            the roleCode to set
 	 */
-	public EOSPermissionEntity setRoleId(Long roleId) {
-		this.roleId = roleId;
-
-		if (roleId == null) {
-			role = null;
-		} else {
-			role = new EOSRoleEntity(roleId);
-		}
-
-		return this;
-	}
-
-	/**
-	 * @return the role
-	 */
-	public EOSRoleEntity getRole() {
-		return role;
-	}
-
-	/**
-	 * @param role
-	 *            the role to set
-	 */
-	public EOSPermissionEntity setRole(EOSRoleEntity role) {
-		this.role = role;
-
-		if (role == null) {
-			roleId = null;
-		} else {
-			roleId = role.getId();
-		}
-
+	public EOSPermissionEntity setRoleCode(String roleCode) {
+		this.roleCode = roleCode;
 		return this;
 	}
 
@@ -115,7 +94,8 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 		int result = super.hashCode();
 		result = prime * result
 				+ ((permission == null) ? 0 : permission.hashCode());
-		result = prime * result + ((roleId == null) ? 0 : roleId.hashCode());
+		result = prime * result
+				+ ((roleCode == null) ? 0 : roleCode.hashCode());
 		return result;
 	}
 
@@ -136,10 +116,10 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 				return false;
 		} else if (!permission.equals(other.permission))
 			return false;
-		if (roleId == null) {
-			if (other.roleId != null)
+		if (roleCode == null) {
+			if (other.roleCode != null)
 				return false;
-		} else if (!roleId.equals(other.roleId))
+		} else if (!roleCode.equals(other.roleCode))
 			return false;
 		return true;
 	}
@@ -149,9 +129,8 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 	 */
 	@Override
 	public String toString() {
-		return "EOSPermissionEntity [roleId=" + roleId + ", permission="
-				+ permission + ", getId()=" + getId() + ", getTenantId()="
-				+ getTenantId() + "]";
+		return "EOSPermissionEntity [roleCode=" + roleCode + ", permission="
+				+ permission + ", getTenantId()=" + getTenantId() + "]";
 	}
 
 }

@@ -151,7 +151,7 @@ public class EOSSecurityStartup implements
 
 			// Create Admin permission
 			EOSPermissionEntity permissionAll = new EOSPermissionEntity()
-					.setRoleId(role.getId()).setPermission(
+					.setRoleCode(role.getCode()).setPermission(
 							EOSSystemConstants.PERMISSION_ALL);
 			permissionAll.setTenantId(EOSSystemConstants.ADMIN_TENANT);
 			permissionDAO.persist(permissionAll);

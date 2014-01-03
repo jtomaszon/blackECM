@@ -97,4 +97,42 @@ public interface EOSSecurityService {
 	public void runAs(String login, Long tenantId, Runnable job)
 			throws EOSForbiddenException, EOSException;
 
+	/**
+	 * Performs the following validations:
+	 * <ul>
+	 * <li>Check if the user has any of the given permissions, if not throws
+	 * EOSForbiddenException.</li>
+	 * <li>If the parameter verifyLoggedUser is true, checks if the user is
+	 * logged, if not throws EOSUnauthorizedException.</li>
+	 * <li>If the parameter verifyHierarchical, before validate permissions,
+	 * verify if the user has tenant administration permission or super
+	 * administrator permission.</li>
+	 * <ul>
+	 * 
+	 * <p>
+	 * The validation or is:
+	 * </p>
+	 * <ul>
+	 * <li>Verify user logged.</li>
+	 * <li>Verify hierarchical permissions.</li>
+	 * <li>Verify permissions.</li>
+	 * <ul>
+	 * 
+	 * @param verifyLoggedUser
+	 *            Verify if the user is logged.
+	 * @param verifyHierarchical
+	 *            Verify hierarchical permissions, as tenant administrator and
+	 *            super administrator.
+	 * @param permissions
+	 *            List of permissions to be checked.
+	 * @throws EOSForbiddenException
+	 *             If the user do not have any of the given permissions or any
+	 *             of the hierarchical permissions.
+	 * @throws EOSUnauthorizedException
+	 *             If the user is not logged.
+	 */
+	public void checkPermissions(boolean verifyLoggedUser,
+			boolean verifyHierarchical, String... permissions)
+			throws EOSForbiddenException, EOSUnauthorizedException;
+
 }

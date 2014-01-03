@@ -167,5 +167,16 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 			session.setSessionId(currentSessionId).setSession(currentContext);
 		}
 	}
+	
+	/**
+	 * @see com.eos.security.api.service.EOSSecurityService#checkPermissions(boolean, boolean, java.lang.String[])
+	 */
+	@Override
+	public void checkPermissions(boolean verifyLoggedUser,
+			boolean verifyHierarchical, String... permissions)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
