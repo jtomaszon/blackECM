@@ -14,18 +14,15 @@ EOS-Security
 
 
 *** TODO
-  Document Rest
   Use enunciate to generate documentation
   Cache required services
-  Finish rest implementation of TenantServices
-  Implement UserServices
-  Implement RoleServices
-  Implement GroupServices
+  Implement PermissionService
   Implement SecurityServices
   Implement SessionServices
   Implement validation on all services
   Implement security on all services
-  Finish startup service with default entities creation
   Use flyway to generate ddls and sqls
-  Finish auto-start without any configuration needed
+  Finish auto-start without any configuration needed (add derby or hsqldb)
+  Try to replace all List to Set interfaces where it make sense
+  Validate documentation VS Rests services
 
