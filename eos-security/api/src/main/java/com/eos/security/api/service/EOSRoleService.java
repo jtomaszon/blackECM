@@ -206,6 +206,15 @@ public interface EOSRoleService {
 	public List<EOSRole> listUserRoles(String login, int limit, int offset)
 			throws EOSForbiddenException;
 
+	/**
+	 * Retrieve all codes from all roles that a user has.
+	 * 
+	 * @param login
+	 *            User login.
+	 * @return List of role codes from a user.
+	 */
+	public List<String> listUserRoleCodes(String login);
+
 	// Role Group
 
 	/**

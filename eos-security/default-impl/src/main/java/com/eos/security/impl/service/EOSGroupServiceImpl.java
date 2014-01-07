@@ -21,7 +21,6 @@ import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSGroup;
-import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSGroupDAO;
 import com.eos.security.impl.dao.EOSGroupUserDAO;
@@ -247,9 +246,8 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	public List<EOSUser> listGroupUsers(Long groupId, int limit, int offset) {
 		// TODO Security and validations
 		List<String> logins = groupUserDAO.listUserLogins(
-				SessionContextManager.getCurrentTenantId(), groupId, limit,
-				offset);
-
+				SessionContextManager.getCurrentTenantId(), groupId);
+		// TODO logins as sublist
 		return svcUser.findUsers(logins);
 	}
 
@@ -263,44 +261,19 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 			throws EOSForbiddenException {
 		// TODO Security and validations
 		List<Long> groups = groupUserDAO.listGroupIds(
-				SessionContextManager.getCurrentTenantId(), userLogin, limit,
-				offset);
+				SessionContextManager.getCurrentTenantId(), userLogin);
+		// TODO groups as sublist
 		return findGroups(groups);
 	}
 
 	/**
-	 * @see com.eos.security.api.service.EOSGroupService#addRolesToGroup(java.lang.Long,
-	 *      java.util.List)
+	 * @see com.eos.security.api.service.EOSGroupService#listUserGroupIds(java.lang.String)
 	 */
 	@Override
-	@Transactional
-	public void addRolesToGroup(Long groupId, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @see com.eos.security.api.service.EOSGroupService#removeRolesFromGroup(java.lang.Long,
-	 *      java.util.List)
-	 */
-	@Override
-	@Transactional
-	public void removeRolesFromGroup(Long groupId, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @see com.eos.security.api.service.EOSGroupService#listGroupRoles(java.lang.Long,
-	 *      int, int)
-	 */
-	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Long> listUserGroupIds(String userLogin) {
+		// TODO Security and validations
+		return groupUserDAO.listGroupIds(
+				SessionContextManager.getCurrentTenantId(), userLogin);
 	}
 
 	private EOSGroup entityToVo(EOSGroupEntity entity) {

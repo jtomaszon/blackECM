@@ -21,9 +21,9 @@ import javax.persistence.Table;
 @Table(name = "tbgroupuser")
 @NamedQueries({
 		@NamedQuery(name = EOSGroupUserEntity.QUERY_GROUP_USERS, query = "SELECT t.userLogin FROM EOSGroupUser t "
-				+ "WHERE t.tenantId = :tenantId AND t.groupId = :groupId "),
+				+ "WHERE t.tenantId = :tenantId AND t.groupId = :groupId ORDER BY t.userLogin "),
 		@NamedQuery(name = EOSGroupUserEntity.QUERY_USER_GROUPS, query = "SELECT t.groupId FROM EOSGroupUser t "
-				+ "WHERE t.tenantId = :tenantId AND t.userLogin = :login "),
+				+ "WHERE t.tenantId = :tenantId AND t.userLogin = :login ORDER BY t.groupId "),
 		@NamedQuery(name = EOSGroupUserEntity.QUERY_REMOVE_USERS, query = "DELETE FROM EOSGroupUser t "
 				+ "WHERE t.tenantId = :tenantId AND t.groupId = :groupId AND t.userLogin IN (:login) "),
 		@NamedQuery(name = EOSGroupUserEntity.QUERY_REMOVE_GROUPS, query = "DELETE FROM EOSGroupUser t "

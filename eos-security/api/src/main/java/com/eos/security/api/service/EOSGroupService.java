@@ -11,7 +11,6 @@ import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSGroup;
-import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 
 /**
@@ -223,47 +222,11 @@ public interface EOSGroupService {
 			throws EOSForbiddenException;
 
 	/**
-	 * Add roles to the given group.
+	 * Retrieve all group IDs that a user has.
 	 * 
-	 * @param groupId
-	 *            The group id where the roles will be added.
-	 * @param roles
-	 *            List of roles to be added.
-	 * @throws EOSForbiddenException
-	 *             If the creator do not have permission to add roles to a
-	 *             group.
-	 * @throws EOSUnauthorizedException
-	 *             Only authenticated users can manipulate groups.
+	 * @param userLogin
+	 *            The user login.
+	 * @return List of group IDs of a user.
 	 */
-	public void addRolesToGroup(Long groupId, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException;
-
-	/**
-	 * Remove roles from the given group.
-	 * 
-	 * @param groupId
-	 *            The group id where the roles will be removed.
-	 * @param roles
-	 *            List of roles to be removed.
-	 * @throws EOSForbiddenException
-	 *             If the creator do not have permission to remove roles from a
-	 *             group.
-	 * @throws EOSUnauthorizedException
-	 *             Only authenticated users can manipulate groups.
-	 */
-	public void removeRolesFromGroup(Long groupId, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException;
-
-	/**
-	 * List all roles from the given group.
-	 * 
-	 * @param groupId
-	 *            The group id to list roles.
-	 * @param limit
-	 *            Maximum number of registers.
-	 * @param offset
-	 *            Initial point.
-	 * @return List of roles.
-	 */
-	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset);
+	public List<Long> listUserGroupIds(String userLogin);
 }

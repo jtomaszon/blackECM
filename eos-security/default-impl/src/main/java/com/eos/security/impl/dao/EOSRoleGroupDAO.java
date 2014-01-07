@@ -72,4 +72,15 @@ public class EOSRoleGroupDAO extends AbstractDAO<EOSRoleGroupEntity> {
 				.setParameter(EOSRoleGroupEntity.PARAM_TENANT, tenantId)
 				.getResultList();
 	}
+
+	public List<EOSRoleGroupEntity> listByRoleAndGroup(Long tenantId,
+			List<String> codes, List<Long> groups) {
+		return em
+				.createNamedQuery(EOSRoleGroupEntity.QUERY_LIST_ROLE_GROUP,
+						EOSRoleGroupEntity.class)
+				.setParameter(EOSRoleGroupEntity.PARAM_GROUP, groups)
+				.setParameter(EOSRoleGroupEntity.PARAM_ROLE, codes)
+				.setParameter(EOSRoleGroupEntity.PARAM_TENANT, tenantId)
+				.getResultList();
+	}
 }

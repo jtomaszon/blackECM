@@ -40,24 +40,22 @@ public class EOSGroupUserDAO extends AbstractDAO<EOSGroupUserEntity> {
 		return em;
 	}
 
-	public List<String> listUserLogins(Long tenantId, Long groupId, int limit,
-			int offset) {
+	public List<String> listUserLogins(Long tenantId, Long groupId) {
 		return em
 				.createNamedQuery(EOSGroupUserEntity.QUERY_GROUP_USERS,
 						String.class)
 				.setParameter(EOSGroupUserEntity.PARAM_TENANT, tenantId)
 				.setParameter(EOSGroupUserEntity.PARAM_GROUP, groupId)
-				.setFirstResult(offset).setMaxResults(limit).getResultList();
+				.getResultList();
 	}
 
-	public List<Long> listGroupIds(Long tenantId, String userLogin, int limit,
-			int offset) {
+	public List<Long> listGroupIds(Long tenantId, String userLogin) {
 		return em
 				.createNamedQuery(EOSGroupUserEntity.QUERY_USER_GROUPS,
 						Long.class)
 				.setParameter(EOSGroupUserEntity.PARAM_TENANT, tenantId)
 				.setParameter(EOSGroupUserEntity.PARAM_USER, userLogin)
-				.setFirstResult(offset).setMaxResults(limit).getResultList();
+				.getResultList();
 	}
 
 	public void removeUsersFromGroup(Long tenantId, Long groupId,

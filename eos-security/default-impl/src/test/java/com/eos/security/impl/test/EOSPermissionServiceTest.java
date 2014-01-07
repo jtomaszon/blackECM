@@ -18,10 +18,14 @@ import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSGroupService;
 import com.eos.security.api.service.EOSPermissionService;
 import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.service.EOSSecurityService;
+import com.eos.security.api.service.EOSUserService;
+import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
+import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.test.util.EOSTestUtil;
 
 /**
@@ -38,6 +42,10 @@ public class EOSPermissionServiceTest {
 	private EOSSecurityService svcSecurity;
 	@Autowired
 	private EOSRoleService svcRole;
+	@Autowired
+	private EOSUserService svcUser;
+	@Autowired
+	private EOSGroupService svcGroup;
 	@Autowired
 	private EOSPermissionService svcPermission;
 
@@ -79,5 +87,42 @@ public class EOSPermissionServiceTest {
 		Assert.assertEquals("Remove Permissions: size", 1, permList.size());
 		Assert.assertEquals("Remove Permissions: contains",
 				"removePermissions1", permList.get(0));
+	}
+
+	@Test
+	public void testHasRolePermission() throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
+		EOSUser user = EOSTestUtil.createUser("hasRolePermission", null,
+				svcUser);
+		EOSRole role = EOSTestUtil.createRole("hasRolePermission", svcRole);
+		svcRole.addUsersToRole(role.getCode(), Arrays.asList(user.getLogin()));
+		List<String> permissions = Arrays.asList("hasRolePermission1",
+				"hasRolePermission2");
+		svcPermission.addRolePermissions(role.getCode(), permissions);
+		Assert.assertTrue("Has role permission", svcPermission.hasPermission(
+				user.getLogin(), "hasRolePermission1"));
+		Assert.assertFalse("Hasn't role permission", svcPermission
+				.hasPermission(user.getLogin(), "hasRolePermission3"));
+	}
+
+	@Test
+	public void testHasGroupRolePermission()
+			throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException {
+		EOSUser user = EOSTestUtil.createUser("hasGroupRolePermission", null,
+				svcUser);
+		EOSRole role = EOSTestUtil
+				.createRole("hasGroupRolePermission", svcRole);
+		EOSGroup group = EOSTestUtil.createGroup("hasGroupRolePermission",
+				svcGroup);
+		svcGroup.addUsersToGroup(group.getId(), Arrays.asList(user.getLogin()));
+		svcRole.addRolesToGroup(group.getId(), Arrays.asList(role.getCode()));
+		List<String> permissions = Arrays.asList("hasGroupRolePermission1",
+				"hasGroupRolePermission2");
+		svcPermission.addRolePermissions(role.getCode(), permissions);
+		Assert.assertTrue("Has group permission", svcPermission.hasPermission(
+				user.getLogin(), "hasGroupRolePermission1"));
+		Assert.assertFalse("Hasn't group permission", svcPermission
+				.hasPermission(user.getLogin(), "hasGroupRolePermission3"));
 	}
 }

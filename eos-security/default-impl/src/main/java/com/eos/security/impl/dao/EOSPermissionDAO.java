@@ -57,4 +57,14 @@ public class EOSPermissionDAO extends AbstractDAO<EOSPermissionEntity> {
 				.getResultList();
 	}
 
+	public List<EOSPermissionEntity> listEntities(Long tenantId,
+			List<String> permissions) {
+		return em
+				.createNamedQuery(EOSPermissionEntity.QUERY_LIST_PERM,
+						EOSPermissionEntity.class)
+				.setParameter(EOSPermissionEntity.PARAM_PERMISSION, permissions)
+				.setParameter(EOSPermissionEntity.PARAM_TENANT, tenantId)
+				.getResultList();
+	}
+
 }

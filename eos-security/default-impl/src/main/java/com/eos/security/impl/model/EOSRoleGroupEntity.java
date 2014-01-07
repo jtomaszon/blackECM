@@ -29,7 +29,9 @@ import javax.persistence.UniqueConstraint;
 		@NamedQuery(name = EOSRoleGroupEntity.QUERY_LIST_GROUPS, query = "SELECT t.groupId From EOSRoleGroup t "
 				+ "WHERE t.roleCode = :code AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSRoleGroupEntity.QUERY_LIST_ROLES, query = "SELECT t.roleCode FROM EOSRoleGroup t "
-				+ "WHERE t.groupId = :groupId AND t.tenantId = :tenantId ORDER BY t.roleCode")
+				+ "WHERE t.groupId = :groupId AND t.tenantId = :tenantId ORDER BY t.roleCode"),
+		@NamedQuery(name = EOSRoleGroupEntity.QUERY_LIST_ROLE_GROUP, query = "SELECT t FROM EOSRoleGroup t "
+				+ "WHERE t.groupId IN (:groupId) AND t.roleCode IN (:code) AND t.tenantId = :tenantId ")
 
 })
 public class EOSRoleGroupEntity extends AbstractTenantEntity {
@@ -40,6 +42,7 @@ public class EOSRoleGroupEntity extends AbstractTenantEntity {
 	public static final String QUERY_REMOVE_ROLES = "EOSRoleGroup.RemoveRoleFromGroups";
 	public static final String QUERY_LIST_GROUPS = "EOSRoleGroup.ListGroupsFromRole";
 	public static final String QUERY_LIST_ROLES = "EOSRoleGroup.ListRoleFromGroups";
+	public static final String QUERY_LIST_ROLE_GROUP = "EOSRoleGroup.ListByRoleAndGroup";
 
 	public static final String PARAM_ROLE = "code";
 	public static final String PARAM_GROUP = "groupId";

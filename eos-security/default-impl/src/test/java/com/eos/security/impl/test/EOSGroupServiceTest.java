@@ -148,7 +148,7 @@ public class EOSGroupServiceTest {
 	 * @throws EOSUnauthorizedException
 	 */
 	@Test
-	public void addFindGroupsUser() throws EOSDuplicatedEntryException,
+	public void testAddFindGroupsUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException {
 		EOSUser user = EOSTestUtil.createUser("addgroupsUser", null, svcUser);
 		EOSGroup group1 = EOSTestUtil.createGroup("Add Find Groups User 1",

@@ -273,6 +273,16 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 		return findRoles(roles);
 	}
 
+	/**
+	 * @see com.eos.security.api.service.EOSRoleService#listUserRoleCodes(java.lang.String)
+	 */
+	@Override
+	public List<String> listUserRoleCodes(String login) {
+		// TODO security, validation, cache user roles
+		return roleUserDAO.listRolesByUser(login,
+				SessionContextManager.getCurrentTenantId());
+	}
+
 	// Role Group
 
 	/**

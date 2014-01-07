@@ -25,6 +25,8 @@ import com.eos.commons.jpa.EntityFieldSizes;
 @NamedQueries({
 		@NamedQuery(name = EOSPermissionEntity.QUERY_LIST, query = "SELECT t.permission FROM EOSPermission t "
 				+ "WHERE t.roleCode = :code AND t.tenantId = :tenantId ORDER BY t.permission ASC"),
+		@NamedQuery(name = EOSPermissionEntity.QUERY_LIST_PERM, query = "SELECT t FROM EOSPermission t "
+				+ "WHERE t.permission IN (:permission) AND t.tenantId = :tenantId "),
 		@NamedQuery(name = EOSPermissionEntity.QUERY_REMOVE, query = "DELETE FROM EOSPermission t "
 				+ "WHERE t.roleCode = :code AND t.permission IN (:permission) AND t.tenantId = :tenantId")
 
@@ -34,6 +36,7 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 	private static final long serialVersionUID = -4228463366776986941L;
 
 	public static final String QUERY_LIST = "EOSPermission.ListByRole";
+	public static final String QUERY_LIST_PERM = "EOSPermission.ListByRoleAndPermission";
 	public static final String QUERY_REMOVE = "EOSPermission.DeleteByRole";
 
 	public static final String PARAM_ROLE = "code";
