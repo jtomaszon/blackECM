@@ -48,6 +48,10 @@ public class EOSUserEntity extends AbstractEntity {
 	@Column(name = "usertype", nullable = false)
 	private EOSUserType type;
 
+	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_TINY)
+	@Column(name = "password", nullable = true)
+	private String password;
+
 	/**
 	 * Default constructor.
 	 */
@@ -143,6 +147,22 @@ public class EOSUserEntity extends AbstractEntity {
 	 */
 	public EOSUserEntity setType(EOSUserType type) {
 		this.type = type;
+		return this;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public EOSUserEntity setPassword(String password) {
+		this.password = password;
 		return this;
 	}
 

@@ -6,6 +6,8 @@ package com.eos.security.impl.test.util;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.context.ApplicationContext;
+
 import com.eos.common.EOSLevel;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
@@ -14,12 +16,14 @@ import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
 import com.eos.security.api.service.EOSRoleService;
-import com.eos.security.api.service.EOSSecurityService;
+import com.eos.security.api.service.EOSTenantService;
 import com.eos.security.api.service.EOSUserService;
+import com.eos.security.api.session.SessionContext;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
-import com.eos.security.impl.service.EOSSystemConstants;
+import com.eos.security.impl.service.internal.EOSSystemConstants;
+import com.eos.security.impl.session.EOSSession;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -31,18 +35,51 @@ import com.eos.security.impl.session.SessionContextManager;
 public class EOSTestUtil {
 
 	/**
-	 * Setup session context for testing. Set default tenant.
+	 * Setup session context for testing. Set default tenant and SYSTEM
+	 * administrator user.
 	 * 
-	 * @param svcSecurity
+	 * @param appContext
+	 *            Application Context
 	 * @throws EOSException
+	 *             If any problem occurs.
 	 */
-	public static void setup(EOSSecurityService svcSecurity)
-			throws EOSException {
-		if (SessionContextManager.getCurrentSession() == null
-				|| SessionContextManager.getCurrentSession().getTenant() == null) {
-			svcSecurity.createSessionContext(UUID.randomUUID().toString(),
-					EOSSystemConstants.ADMIN_TENANT);
+	public static void setup(ApplicationContext appContext) throws EOSException {
+		final EOSUserService svcUser = appContext.getBean(EOSUserService.class);
+		EOSUser user = svcUser.findTenantUser(
+				EOSSystemConstants.LOGIN_SUPER_ADMIN,
+				EOSSystemConstants.ADMIN_TENANT);
+		setup(appContext, EOSSystemConstants.ADMIN_TENANT, user);
+	}
+
+	/**
+	 * Setup session for the given user and tenant.
+	 * 
+	 * @param appContext
+	 *            Application Context
+	 * @param tenantId
+	 *            The tenant to be set on context.
+	 * @param user
+	 *            The user to be set on context.
+	 * @throws EOSException
+	 *             If any problem occurs.
+	 */
+	public static void setup(ApplicationContext appContext,
+			final Long tenantId, final EOSUser user) throws EOSException {
+		final EOSTenantService svcTenant = appContext
+				.getBean(EOSTenantService.class);
+		String sessionId = SessionContextManager.getCurrentSessionId();
+		final SessionContext context = new SessionContext(
+				svcTenant.findTenant(tenantId), user);
+		final EOSSession session = EOSSession.getContext();
+
+		if (sessionId == null) {
+			sessionId = UUID.randomUUID().toString();
 		}
+
+		// Set current session
+		session.setSessionId(sessionId).setSession(context);
+		// Add to local session cache
+		SessionContextManager.setSession(sessionId, context);
 	}
 
 	public static EOSUser createUser(String prefix,

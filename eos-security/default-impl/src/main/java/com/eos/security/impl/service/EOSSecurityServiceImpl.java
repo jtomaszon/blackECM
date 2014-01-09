@@ -3,23 +3,33 @@
  */
 package com.eos.security.impl.service;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSInvalidStateException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSPermissionService;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSTenantService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.session.SessionContext;
 import com.eos.security.api.vo.EOSUser;
+import com.eos.security.impl.service.internal.EOSKnownPermissions;
+import com.eos.security.impl.service.internal.EOSSystemConstants;
 import com.eos.security.impl.session.EOSSession;
 import com.eos.security.impl.session.SessionContextManager;
 
@@ -37,6 +47,8 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 
 	private EOSTenantService svcTenant;
 	private EOSUserService svcUser;
+	private EOSPermissionService svcPermission;
+	private Deque<SessionContext> impersonates = new LinkedList<>();
 
 	@Autowired
 	public void setTenantService(EOSTenantService svcTenant) {
@@ -46,6 +58,11 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	@Autowired
 	public void setUserService(EOSUserService svcUser) {
 		this.svcUser = svcUser;
+	}
+
+	@Autowired
+	public void setPermissionService(EOSPermissionService svcPermission) {
+		this.svcPermission = svcPermission;
 	}
 
 	/**
@@ -66,6 +83,17 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 		}
 	}
 
+	/**
+	 * Creates and setup a session context.
+	 * 
+	 * @param sessionId
+	 *            The session ID to be set.
+	 * @param tenantId
+	 *            The tenant ID to be used with the session.
+	 * @param user
+	 *            The user to be used with the session.
+	 * @return The session context created.
+	 */
 	private final SessionContext createSessionContext(final String sessionId,
 			final Long tenantId, final EOSUser user) {
 		final SessionContext context = new SessionContext(
@@ -129,54 +157,129 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	 * @see com.eos.security.api.service.EOSSecurityService#isLogged()
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public boolean isLogged() {
-		// TODO Auto-generated method stub
-		return false;
+		return !SessionContextManager.getCurrentUserLogin().equals(
+				EOSSystemConstants.LOGIN_ANONYMOUS);
 	}
 
 	/**
-	 * @see com.eos.security.api.service.EOSSecurityService#runAs(java.lang.String,
-	 *      java.lang.Long, java.lang.Runnable)
+	 * @see com.eos.security.api.service.EOSSecurityService#checkLogged()
 	 */
 	@Override
-	public void runAs(String login, Long tenantId, Runnable job)
-			throws EOSForbiddenException, EOSException {
-		// TODO Auto-generated method stub
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public void checkLogged() throws EOSUnauthorizedException {
+		if (!isLogged()) {
+			throw new EOSUnauthorizedException("No user logged");
+		}
+
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSSecurityService#impersonate(java.lang.String,
+	 *      java.lang.Long, java.lang.Long)
+	 */
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public void impersonate(String login, Long userTenantId,
+			Long sessionTenantId) throws EOSForbiddenException,
+			EOSNotFoundException {
+
 		final EOSSession session = EOSSession.getContext();
 		final String currentSessionId = session.getSessionId();
 		final SessionContext currentContext = session.getSession();
-		final UUID uuid = UUID.randomUUID();
-		final EOSUser user = svcUser.findTenantUser(
-				EOSSystemConstants.LOGIN_SYSTEM_USER,
-				EOSSystemConstants.ADMIN_TENANT);
+		final EOSUser user = svcUser.findTenantUser(login, userTenantId);
 
 		if (user.getType() != EOSUserType.SYSTEM) {
 			throw new EOSForbiddenException("User not a system user");
 		}
-		// Setup session
-		SessionContext context = createSessionContext(uuid.toString(),
-				tenantId, user);
 
-		try {
-			session.setSessionId(uuid.toString()).setSession(context);
-			job.run();
-		} catch (Throwable e) {
-			throw new EOSException("Failed to execute task", e);
-		} finally {
-			// Restore session
-			session.setSessionId(currentSessionId).setSession(currentContext);
+		if (sessionTenantId == null) {
+			sessionTenantId = currentContext.getTenant().getId();
 		}
+
+		impersonates.push(currentContext);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Impersonating: " + user.toString() + " on tenant: "
+					+ sessionTenantId);
+		}
+
+		// Setup session with the same session ID
+		createSessionContext(currentSessionId, sessionTenantId, user);
 	}
-	
+
 	/**
-	 * @see com.eos.security.api.service.EOSSecurityService#checkPermissions(boolean, boolean, java.lang.String[])
+	 * @see com.eos.security.api.service.EOSSecurityService#deImpersonate()
 	 */
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public void deImpersonate() throws EOSInvalidStateException {
+
+		if (impersonates.isEmpty()) {
+			throw new EOSInvalidStateException(
+					"There is no impersonated sessions");
+		}
+
+		final EOSSession session = EOSSession.getContext();
+		final SessionContext oldContext = impersonates.poll();
+		final String currentSessionId = session.getSessionId();
+
+		if (log.isDebugEnabled()) {
+			log.debug("De-Impersonate - restoring old context: "
+					+ oldContext.toString());
+		}
+
+		// Restore session
+		createSessionContext(currentSessionId, oldContext.getTenant().getId(),
+				oldContext.getUser());
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSSecurityService#checkPermissions(java.lang.String[])
+	 */
+	@Override
+	public void checkPermissions(String... permissions)
+			throws EOSForbiddenException, EOSUnauthorizedException {
+		checkPermissions(true, true, permissions);
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSSecurityService#checkPermissions(boolean,
+	 *      boolean, java.lang.String[])
+	 */
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public void checkPermissions(boolean verifyLoggedUser,
 			boolean verifyHierarchical, String... permissions)
 			throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO Auto-generated method stub
-		
+
+		if (verifyLoggedUser) {
+			checkLogged();
+		}
+
+		List<String> perms = new ArrayList<>(permissions.length + 1);
+
+		if (verifyHierarchical) {
+			perms.add(EOSKnownPermissions.PERMISSION_ALL);
+		}
+
+		for (String permission : permissions) {
+			perms.add(permission);
+		}
+
+		Map<String, Boolean> hasPerms = svcPermission.hasPermissions(
+				SessionContextManager.getCurrentUserLogin(), perms);
+		for (Boolean hasPerm : hasPerms.values()) {
+			// Permission found, leave this method
+			if (hasPerm) {
+				return;
+			}
+		}
+
+		// Still in this method, no permissions found
+		throw new EOSForbiddenException("User is not allowed");
 	}
 
 }

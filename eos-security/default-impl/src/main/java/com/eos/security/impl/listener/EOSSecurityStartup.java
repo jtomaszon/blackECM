@@ -25,7 +25,8 @@ import com.eos.security.impl.model.EOSRoleUserEntity;
 import com.eos.security.impl.model.EOSTenantEntity;
 import com.eos.security.impl.model.EOSUserEntity;
 import com.eos.security.impl.model.EOSUserTenantEntity;
-import com.eos.security.impl.service.EOSSystemConstants;
+import com.eos.security.impl.service.internal.EOSKnownPermissions;
+import com.eos.security.impl.service.internal.EOSSystemConstants;
 
 /**
  * Startup service. Create application default tenant, user, role and
@@ -152,7 +153,7 @@ public class EOSSecurityStartup implements
 			// Create Admin permission
 			EOSPermissionEntity permissionAll = new EOSPermissionEntity()
 					.setRoleCode(role.getCode()).setPermission(
-							EOSSystemConstants.PERMISSION_ALL);
+							EOSKnownPermissions.PERMISSION_ALL);
 			permissionAll.setTenantId(EOSSystemConstants.ADMIN_TENANT);
 			permissionDAO.persist(permissionAll);
 		}

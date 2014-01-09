@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSUserDAO;
@@ -31,6 +34,7 @@ import com.eos.security.impl.dao.EOSUserTenantDataDAO;
 import com.eos.security.impl.model.EOSUserEntity;
 import com.eos.security.impl.model.EOSUserTenantDataEntity;
 import com.eos.security.impl.model.EOSUserTenantEntity;
+import com.eos.security.impl.service.internal.EOSKnownPermissions;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -48,6 +52,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	private EOSUserDAO userDAO;
 	private EOSUserTenantDAO userTenantDAO;
 	private EOSUserTenantDataDAO userTenantDataDAO;
+	private EOSSecurityService svcSecurity;
 
 	@Autowired
 	public void setUserDAO(EOSUserDAO userDAO) {
@@ -62,6 +67,11 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Autowired
 	public void setUserTenantDataDAO(EOSUserTenantDataDAO userTenantDataDAO) {
 		this.userTenantDataDAO = userTenantDataDAO;
+	}
+
+	@Autowired
+	public void setsecurityservice(EOSSecurityService svcSecurity) {
+		this.svcSecurity = svcSecurity;
 	}
 
 	/**
@@ -224,6 +234,43 @@ public class EOSUserServiceImpl implements EOSUserService {
 			EOSUnauthorizedException {
 		// TODO Auto-generated method stub
 
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSUserService#setUserPassword(java.lang.String,
+	 *      java.lang.String, java.lang.String)
+	 */
+	@Override
+	@Transactional
+	public void setUserPassword(String login, String oldPassword,
+			String newPassword) throws EOSForbiddenException,
+			EOSUnauthorizedException, EOSValidationException {
+		EOSUserEntity entity = userDAO.checkedFind(login);
+		String newDigested = DigestUtils.md5Hex(newPassword);
+
+		if (StringUtil.isEmpty(oldPassword)) {
+			svcSecurity.checkPermissions(true, true,
+					EOSKnownPermissions.PASSWORD_UPDATE);
+		} else {
+			// Verify credentials
+			svcSecurity.checkLogged();
+			if (!SessionContextManager.getCurrentUserLogin().equals(login)) {
+				throw new EOSForbiddenException(
+						"You cannot change the password for other users!");
+			}
+
+			// Verify password match
+			String oldDigested = DigestUtils.md5Hex(oldPassword);
+			log.info("Old Entity:" + entity.getPassword());
+			log.info("Old rec:" + oldDigested);
+			if (!oldDigested.equals(entity.getPassword())) {
+				// TODO set correct error code
+				throw new EOSValidationException("Password mismatch");
+			}
+		}
+
+		entity.setPassword(newDigested);
+		userDAO.merge(entity);
 	}
 
 	private EOSUser entityToVo(EOSUserTenantEntity entity) {

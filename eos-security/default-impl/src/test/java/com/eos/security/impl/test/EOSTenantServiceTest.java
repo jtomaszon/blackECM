@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,6 +25,7 @@ import com.eos.security.api.service.EOSTenantService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSTenant;
 import com.eos.security.api.vo.EOSUser;
+import com.eos.security.impl.test.util.EOSTestUtil;
 
 /**
  * @author santos.fabiano
@@ -33,6 +36,8 @@ import com.eos.security.api.vo.EOSUser;
 public class EOSTenantServiceTest {
 
 	@Autowired
+	private ApplicationContext context;
+	@Autowired
 	private EOSTenantService svcTenant;
 	@Autowired
 	private EOSUserService svcUser;
@@ -41,6 +46,11 @@ public class EOSTenantServiceTest {
 		return new EOSUser().setLogin("test.user").setFirstName("Test")
 				.setLastName("User").setPersonalMail("test@personal.com")
 				.setEmail(tenantMail).setState(EOSState.ACTIVE);
+	}
+
+	@Before
+	public void setUp() throws EOSException {
+		EOSTestUtil.setup(context);
 	}
 
 	// Tenant

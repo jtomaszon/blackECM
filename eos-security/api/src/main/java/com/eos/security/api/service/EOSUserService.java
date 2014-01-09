@@ -9,6 +9,7 @@ import java.util.Map;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSUser;
@@ -123,6 +124,26 @@ public interface EOSUserService {
 	 */
 	public void deleteUser(String login) throws EOSForbiddenException,
 			EOSUnauthorizedException;
+
+	/**
+	 * Updates a user password. The oldPassword parameter is required if the
+	 * logged user do not have permissions to updates user passwords.
+	 * 
+	 * @param login
+	 * @param oldPassword
+	 * @param newPassword
+	 * @throws EOSForbiddenException
+	 *             If is not the logged user changing his password and the
+	 *             logged user do not have permission to update user passwords.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can change passwords.
+	 * @throws EOSValidationException
+	 *             If the parameters oldPassword and newPassword doesn't match
+	 *             for logged users changing their passwords.
+	 */
+	public void setUserPassword(String login, String oldPassword,
+			String newPassword) throws EOSForbiddenException,
+			EOSUnauthorizedException, EOSValidationException;
 
 	// User Data
 

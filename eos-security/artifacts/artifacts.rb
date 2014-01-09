@@ -26,6 +26,9 @@ REST = ['javax.ws.rs:javax.ws.rs-api:jar:2.0', 'javax.servlet:javax.servlet-api:
 RESTEASY = transitive('org.jboss.resteasy:resteasy-servlet-initializer:jar:3.0.4.Final', 'org.jboss.resteasy:resteasy-jackson-provider:jar:3.0.4.Final')
 REST_IMPL = RESTEASY
 
+# Apache utils
+COMMONS_CODEC='commons-codec:commons-codec:jar:1.9'
+
 # Test dependencies
 TEST = ['org.springframework:spring-test:jar:3.2.4.RELEASE', 'org.hsqldb:hsqldb:jar:2.3.1']
 

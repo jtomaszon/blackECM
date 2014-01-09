@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.eos.security.impl.service;
+package com.eos.security.impl.service.internal;
 
 /**
  * System constants.
@@ -43,8 +43,4 @@ public interface EOSSystemConstants {
 	 * Administrative internal level.
 	 */
 	Integer INTERNAL_LEVEL = 1;
-	/**
-	 * Permission for access to do anything on anything.
-	 */
-	String PERMISSION_ALL = "EOS.Permission.ALL";
 }

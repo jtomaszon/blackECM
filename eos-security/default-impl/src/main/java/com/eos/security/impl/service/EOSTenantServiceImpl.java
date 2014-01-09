@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
-import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSInvalidStateException;
+import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSRuntimeException;
 import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
@@ -31,6 +33,7 @@ import com.eos.security.impl.dao.EOSTenantDAO;
 import com.eos.security.impl.dao.EOSTenantDataDAO;
 import com.eos.security.impl.model.EOSTenantDataEntity;
 import com.eos.security.impl.model.EOSTenantEntity;
+import com.eos.security.impl.service.internal.EOSSystemConstants;
 
 /**
  * @author santos.fabiano
@@ -66,7 +69,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	@Override
 	@Transactional
 	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data,
-			final EOSUser adminUser) throws EOSException {
+			final EOSUser adminUser) throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException {
 		EOSTenantEntity entity = new EOSTenantEntity();
 
 		entity.setName(tenant.getName());
@@ -82,19 +86,22 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 		tenantDAO.getEntityManager().flush();
 		tenant.setId(entity.getId());
 		// Create administrator user with new tenant
-		svcSecurity.runAs(EOSSystemConstants.LOGIN_SYSTEM_USER, entity.getId(),
-				new Runnable() {
-					@Override
-					public void run() {
-						try {
-							svcUser.createUser(adminUser, null);
-						} catch (EOSDuplicatedEntryException
-								| EOSForbiddenException
-								| EOSUnauthorizedException e) {
-							throw new RuntimeException(e);
-						}
-					}
-				});
+		try {
+			log.debug("Creating administrator for tenant " + tenant.getName());
+			svcSecurity.impersonate(EOSSystemConstants.LOGIN_SYSTEM_USER,
+					EOSSystemConstants.ADMIN_TENANT, entity.getId());
+			svcUser.createUser(adminUser, null);
+		} catch (EOSNotFoundException e) {
+			log.debug("User and/or tenant createds not found in user creation");
+			throw new EOSRuntimeException(
+					"User and/or tenant createds not found in user creation", e);
+		} finally {
+			try {
+				svcSecurity.deImpersonate();
+			} catch (EOSInvalidStateException e) {
+				throw new EOSRuntimeException("Failed to de-impersonate", e);
+			}
+		}
 
 		// TODO messaging and validations, security check
 		log.info("Tenant created: " + tenant.toString());

@@ -32,7 +32,7 @@ define 'eos-security' do
 
 	desc 'Security Default Implementation'
 	define 'default-impl' do
-		compile.with PERSISTENCE, SPRING, projects('api', 'common-jpa', 'common-util'), SLF4J
+		compile.with PERSISTENCE, SPRING, projects('api', 'common-jpa', 'common-util'), SLF4J, COMMONS_CODEC
 		test.with PERSISTENCE, transitive(SPRING), projects('api', 'common-util', 'common-jpa'), SLF4J, TEST, HIBERNATE, LOG4J
 		package :jar
 	end

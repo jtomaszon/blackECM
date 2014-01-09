@@ -3,7 +3,9 @@
  */
 package com.eos.security.api.service;
 
+import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSInvalidStateException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
@@ -82,20 +84,59 @@ public interface EOSSecurityService {
 	public boolean isLogged();
 
 	/**
-	 * Executes a job with the given user into the given tenant. Only system
-	 * users can execute jobs.
+	 * Verify if there is any logged user.
+	 * 
+	 * @throws EOSUnauthorizedException
+	 *             If no user is not logged.
+	 */
+	public void checkLogged() throws EOSUnauthorizedException;
+
+	/**
+	 * Impersonate the given user, so all subsequent calls use the given user as
+	 * the logged one. Only system users can be impersonated.
 	 * 
 	 * @param login
 	 *            Login of a system user.
-	 * @param tenantId
-	 *            Id of the tenant for the job.
-	 * @param job
-	 *            Task job.
-	 * @throws EOSException
+	 * @param userTenantId
+	 *            The tenant ID where to fin the given user.
+	 * @param sessionTenantId
+	 *            Id of the tenant to be set. Optional, if null no changes are
+	 *            performed for tenant.
 	 * @throws EOSForbiddenException
+	 *             If the user is not a {@link EOSUserType#SYSTEM}.
+	 * @throws EOSNotFoundException
+	 *             If the user with the given userTenantId parameter do not
+	 *             exists, or if the tenant with sessionTenantId parameter do
+	 *             not exists.
 	 */
-	public void runAs(String login, Long tenantId, Runnable job)
-			throws EOSForbiddenException, EOSException;
+	public void impersonate(String login, Long userTenantId,
+			Long sessionTenantId) throws EOSForbiddenException,
+			EOSNotFoundException;
+
+	/**
+	 * Restore an impersonated user, ends an impersonated session, setting back
+	 * user and tenant.
+	 * 
+	 * @throws EOSInvalidStateException
+	 *             If no impersonated session exists.
+	 */
+	public void deImpersonate() throws EOSInvalidStateException;
+
+	/**
+	 * Verify if the logged user has any the given permissions. Calling this
+	 * method is the same as checkPermissions(true, true, String...).
+	 * 
+	 * @see EOSSecurityService#checkPermissions(boolean, boolean, String...).
+	 * @param permissions
+	 *            List of permissions to be checked.
+	 * @throws EOSForbiddenException
+	 *             If the user do not have any of the given permissions or any
+	 *             of the hierarchical permissions.
+	 * @throws EOSUnauthorizedException
+	 *             If the user is not logged.
+	 */
+	public void checkPermissions(String... permissions)
+			throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * Performs the following validations:

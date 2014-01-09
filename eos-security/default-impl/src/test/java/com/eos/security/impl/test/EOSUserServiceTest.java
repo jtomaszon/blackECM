@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -21,6 +22,7 @@ import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSSecurityService;
@@ -40,6 +42,8 @@ import com.eos.security.impl.test.util.EOSTestUtil;
 public class EOSUserServiceTest {
 
 	@Autowired
+	private ApplicationContext context;
+	@Autowired
 	private EOSUserService svcUser;
 	@Autowired
 	private EOSSecurityService svcSecurity;
@@ -48,7 +52,7 @@ public class EOSUserServiceTest {
 
 	@Before
 	public void setUp() throws EOSException {
-		EOSTestUtil.setup(svcSecurity);
+		EOSTestUtil.setup(context);
 	}
 
 	@Test
@@ -134,6 +138,24 @@ public class EOSUserServiceTest {
 		EOSTestUtil.createUser("list-2", null, svcUser);
 		List<EOSUser> users = svcUser.listUsers(null, 5, 0);
 		Assert.assertTrue("List users size", users.size() >= 2);
+	}
+
+	@Test
+	public void testSetPassword() throws EOSException {
+		final EOSUser user = EOSTestUtil.createUser("setPassword", null,
+				svcUser);
+		final String password = "password";
+		svcUser.setUserPassword(user.getLogin(), null, password);
+
+		try {
+			EOSTestUtil.setup(context, user.getTenantId(), user);
+			svcUser.setUserPassword(user.getLogin(), password, "newPassword");
+			// Restore context.
+			EOSTestUtil.setup(context);
+		} catch (EOSForbiddenException | EOSUnauthorizedException
+				| EOSValidationException e) {
+			Assert.fail("Logged user change password failed: " + e.getMessage());
+		}
 	}
 
 	// User Data
