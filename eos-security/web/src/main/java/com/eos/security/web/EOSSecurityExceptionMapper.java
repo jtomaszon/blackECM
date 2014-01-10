@@ -18,7 +18,7 @@ import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSRuntimeException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
-import com.eos.security.web.dto.EOSExceptionData;
+import com.eos.security.web.util.WebUtils;
 
 /**
  * Mapper to handle exceptions.
@@ -69,20 +69,8 @@ public class EOSSecurityExceptionMapper implements ExceptionMapper<Throwable> {
 		}
 
 		builder.type(MediaType.APPLICATION_JSON).entity(
-				formatResponse(exception));
+				WebUtils.formatResponse(exception));
 		return builder.build();
-	}
-
-	/**
-	 * Extract errors from an exception.
-	 * 
-	 * @param exception
-	 *            Exception to extract errors.
-	 * @return Return exception data errors object.
-	 */
-	private static EOSExceptionData formatResponse(EOSException exception) {
-		return new EOSExceptionData(exception.getMessage(),
-				exception.getErrors());
 	}
 
 }

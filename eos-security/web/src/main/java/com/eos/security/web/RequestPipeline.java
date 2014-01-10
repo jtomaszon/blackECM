@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.util.StringUtil;
 import com.eos.security.api.service.EOSSecurityService;
 
 /**
@@ -31,6 +32,8 @@ public class RequestPipeline implements Filter {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(RequestPipeline.class);
+
+	public static final String SESSION_HEADER = "ppk";
 
 	@Autowired
 	private EOSSecurityService svcSecurity;
@@ -64,6 +67,7 @@ public class RequestPipeline implements Filter {
 				log.debug("Invalid session ID", e);
 				httpRes.setStatus(HttpServletResponse.SC_NOT_FOUND);
 				// TODO setup response entity
+				// httpRes.setContentType(MediaType.APPLICATION_JSON);
 				return;
 			}
 		}
@@ -74,11 +78,14 @@ public class RequestPipeline implements Filter {
 	private void setupContext(HttpServletRequest request,
 			HttpServletResponse response) throws EOSNotFoundException {
 		String sessionId = getSessionCookie(request);
-		svcSecurity.setupSession(sessionId);
+
+		if (!StringUtil.isEmpty(sessionId)) {
+			svcSecurity.setupSession(sessionId);
+		}
 	}
 
 	private String getSessionCookie(HttpServletRequest request) {
-		return null;
+		return request.getHeader(SESSION_HEADER);
 	}
 
 	/**

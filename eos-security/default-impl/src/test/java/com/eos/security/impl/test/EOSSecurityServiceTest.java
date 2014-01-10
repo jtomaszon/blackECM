@@ -59,7 +59,8 @@ public class EOSSecurityServiceTest {
 		svcSecurity.logout();
 		// Perform logout
 		Assert.assertFalse("LoginLogout: anonymouos", svcSecurity.isLogged());
-		svcSecurity.login(EOSSystemConstants.LOGIN_SUPER_ADMIN, "EOSpas$");
+		svcSecurity.login(EOSSystemConstants.LOGIN_SUPER_ADMIN, "EOSpas$",
+				false);
 		Assert.assertTrue("LoginLogout: admin", svcSecurity.isLogged());
 	}
 

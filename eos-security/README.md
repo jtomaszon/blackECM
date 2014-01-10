@@ -10,19 +10,17 @@ EOS-Security
   start with ??
 
 ** Sample of configuration file:
+  TODO
 
-
+** API Documentation
+All documentation can be found [here](http://docs.eossecurity.apiary.io/ "EOS Security API Documentation") 
 
 *** TODO
-  Use enunciate to generate documentation
   Cache required services
-  Implement PermissionService
-  Implement SecurityServices
-  Implement SessionServices
   Implement validation on all services
   Implement security on all services
   Use flyway to generate ddls and sqls
   Finish auto-start without any configuration needed (add derby or hsqldb)
   Try to replace all List to Set interfaces where it make sense
   Validate documentation VS Rests services
-
+  Resolve all TODO's

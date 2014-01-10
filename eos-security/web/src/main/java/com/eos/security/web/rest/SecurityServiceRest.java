@@ -8,20 +8,21 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.eos.common.EOSState;
+import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.util.StringUtil;
+import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.session.SessionContext;
-import com.eos.security.api.vo.EOSTenant;
-import com.eos.security.api.vo.EOSUser;
+import com.eos.security.web.RequestPipeline;
 import com.eos.security.web.dto.EOSCredentials;
-import com.eos.security.web.dto.EOSPermissionData;
 
 /**
  * @author santos.fabiano
@@ -34,60 +35,35 @@ public class SecurityServiceRest {
 	@Context
 	private HttpServletRequest request;
 
-	private EOSSecurityService svcSecurity;
+	private static EOSSecurityService svcSecurity;
 
-	private static final SessionContext context;
-
-	static {
-		EOSTenant tenant = new EOSTenant();
-		tenant.setId(1L);
-		tenant.setName("Mock Tenant");
-		tenant.setDescription("Mock Tenant");
-		tenant.setState(EOSState.ACTIVE);
-
-		EOSUser user = new EOSUser();
-		user.setLogin("mock_user");
-		user.setFirstName("First");
-		user.setLastName("Last");
-		user.setNickName("Nick");
-		user.setPersonalMail("personal@mail.com");
-		user.setEmail("mock@usermail.com");
-		user.setUrl("/security/user/mock_user");
-		user.setTenantId(1L);
-		user.setState(EOSState.ACTIVE);
-
-		context = new SessionContext(tenant, user);
+	@Autowired
+	private void setRoleService(EOSSecurityService eosSecurityService) {
+		svcSecurity = eosSecurityService;
 	}
 
 	@Path("/login")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void login(EOSCredentials credentials) {
-		// TODO
+	public void login(EOSCredentials credentials) throws EOSException {
+		String login = StringUtil.isEmpty(credentials.getLogin()) ? credentials
+				.getEmail() : credentials.getLogin();
+		if (StringUtil.isEmpty(credentials.getLogin()))
+			svcSecurity.login(login, credentials.getPassword(),
+					credentials.isKeepConnected());
 	}
 
 	@Path("/logout")
 	@PUT
-	public void logout() {
-		// TODO
+	public void logout() throws EOSUnauthorizedException {
+		svcSecurity.logout();
 	}
 
 	@Path("/context")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public SessionContext getSessionContext() {
-		// TODO
-		return context;
-	}
-
-	@Path("/{login}/permission")
-	@GET
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public EOSPermissionData hasPermission(@PathParam("login") String login,
-			String permission) {
-		// TODO
-		return new EOSPermissionData().setLogin(login)
-				.setHasPermission(Boolean.TRUE).setPermission(permission);
+	public SessionContext getSessionContext() throws EOSNotFoundException {
+		String sessionId = request.getHeader(RequestPipeline.SESSION_HEADER);
+		return svcSecurity.getSessionContext(sessionId);
 	}
 }

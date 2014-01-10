@@ -60,10 +60,13 @@ public interface EOSSecurityService {
 	 *            The user login.
 	 * @param password
 	 *            The user password.
+	 * @param keepConnected
+	 *            True if is desired a long live session.
 	 * @throws EOSException
 	 *             If user not found or invalid password.
 	 */
-	public void login(String login, String password) throws EOSException;
+	public void login(String login, String password, boolean keepConnected)
+			throws EOSException;
 
 	/**
 	 * Perform the user logout, also clean up the {@link SessionContext}.

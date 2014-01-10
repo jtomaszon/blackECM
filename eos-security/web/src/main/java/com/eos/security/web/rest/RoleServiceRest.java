@@ -3,7 +3,6 @@
  */
 package com.eos.security.web.rest;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSPermissionService;
 import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.vo.EOSGroup;
 import com.eos.security.api.vo.EOSRole;
@@ -41,6 +41,7 @@ import com.eos.security.api.vo.EOSUser;
 public class RoleServiceRest {
 
 	private static EOSRoleService svcRole;
+	private static EOSPermissionService svcPermission;
 
 	@Context
 	private HttpServletResponse response;
@@ -48,6 +49,11 @@ public class RoleServiceRest {
 	@Autowired
 	private void setRoleService(EOSRoleService eosRoleService) {
 		svcRole = eosRoleService;
+	}
+
+	@Autowired
+	private void setPermissionService(EOSPermissionService eosPermissionService) {
+		svcPermission = eosPermissionService;
 	}
 
 	@Path("")
@@ -167,23 +173,25 @@ public class RoleServiceRest {
 	public List<String> listPermissions(@PathParam("code") String code,
 			@QueryParam("limit") @DefaultValue("20") int limit,
 			@QueryParam("offset") @DefaultValue("0") int offset) {
-		// TODO
-		return Collections.emptyList();
+		return svcPermission.listRolePermissions(code, limit, offset);
 	}
 
 	@Path("{code}/permission")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addPermissions(@PathParam("code") String code) {
-		// TODO
+	public void addPermissions(@PathParam("code") String code,
+			List<String> permissions) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcPermission.addRolePermissions(code, permissions);
 	}
 
 	@Path("{code}/permission")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void removePermissions(@PathParam("code") String code,
-			List<String> permissions) {
-		// TODO
+			List<String> permissions) throws EOSForbiddenException,
+			EOSUnauthorizedException {
+		svcPermission.removeRolePermission(code, permissions);
 	}
 
 }

@@ -140,10 +140,11 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 
 	/**
 	 * @see com.eos.security.api.service.EOSSecurityService#login(java.lang.String,
-	 *      java.lang.String)
+	 *      java.lang.String, boolean)
 	 */
 	@Override
-	public void login(String login, String password) throws EOSException {
+	public void login(String login, String password, boolean keepConnected)
+			throws EOSException {
 		// Validation done by user service
 		final EOSUser user = svcUser.checkForLogin(login, password);
 		// Retrieve current session info
@@ -151,6 +152,7 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 		final Long tenantId = SessionContextManager.getCurrentTenantId();
 		// Create new one with logged and current session id
 		createSessionContext(sessionId, tenantId, user);
+		// TODO do something with keepConnected
 	}
 
 	/**

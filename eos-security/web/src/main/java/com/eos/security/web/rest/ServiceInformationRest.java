@@ -29,6 +29,7 @@ public class ServiceInformationRest {
 	@Path("/status")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ServiceStatus getServiceStatus() {
+		// TODO
 		return status;
 	}
 }
