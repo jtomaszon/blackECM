@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSInvalidStateException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSRuntimeException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSPermissionService;
@@ -71,7 +73,7 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	 */
 	@Override
 	public final SessionContext createSessionContext(String sessionId,
-			Long tenantId) throws EOSException {
+			Long tenantId) {
 		try {
 			return createSessionContext(sessionId, tenantId,
 					svcUser.findTenantUser(EOSSystemConstants.LOGIN_ANONYMOUS,
@@ -79,7 +81,7 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 		} catch (EOSNotFoundException e) {
 			// Should never happens
 			log.debug("Anonymous user not found");
-			throw e;
+			throw new EOSRuntimeException("Anonymouos user not found", e);
 		}
 	}
 
@@ -103,6 +105,7 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 		session.setSessionId(sessionId).setSession(context);
 		// Add to local session cache
 		SessionContextManager.setSession(sessionId, context);
+		// TODO use cache to store session
 		return session.getSession();
 	}
 
@@ -112,6 +115,7 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	@Override
 	public final SessionContext getSessionContext(String sessionId)
 			throws EOSNotFoundException {
+		// TODO use cache to store session
 		SessionContext session = SessionContextManager.getSession(sessionId);
 
 		// If session do not exist, create default session and return
@@ -140,8 +144,13 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	 */
 	@Override
 	public void login(String login, String password) throws EOSException {
-		// TODO Auto-generated method stub
-
+		// Validation done by user service
+		final EOSUser user = svcUser.checkForLogin(login, password);
+		// Retrieve current session info
+		final String sessionId = SessionContextManager.getCurrentSessionId();
+		final Long tenantId = SessionContextManager.getCurrentTenantId();
+		// Create new one with logged and current session id
+		createSessionContext(sessionId, tenantId, user);
 	}
 
 	/**
@@ -149,8 +158,12 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	 */
 	@Override
 	public void logout() throws EOSUnauthorizedException {
-		// TODO Auto-generated method stub
-
+		checkLogged();
+		// Retrieve current session info
+		final Long tenantId = SessionContextManager.getCurrentTenantId();
+		// Just create a new one with current tenant
+		createSessionContext(UUID.randomUUID().toString(), tenantId);
+		// TODO expires old session
 	}
 
 	/**
@@ -253,7 +266,6 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	public void checkPermissions(boolean verifyLoggedUser,
 			boolean verifyHierarchical, String... permissions)
 			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO Auto-generated method stub
 
 		if (verifyLoggedUser) {
 			checkLogged();

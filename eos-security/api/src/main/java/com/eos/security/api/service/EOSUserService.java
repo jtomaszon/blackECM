@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.eos.common.EOSState;
+import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
@@ -144,6 +146,23 @@ public interface EOSUserService {
 	public void setUserPassword(String login, String oldPassword,
 			String newPassword) throws EOSForbiddenException,
 			EOSUnauthorizedException, EOSValidationException;
+
+	/**
+	 * Verify if the given user can perform login. Validates if the user state
+	 * is {@link EOSState#ACTIVE} and his type is {@link EOSUserType#USER}, also
+	 * verify if the password informed is correct.
+	 * 
+	 * @param login
+	 *            The user login.
+	 * @param password
+	 *            The user password.
+	 * @return The user information, if its OK to perform login.
+	 * @throws EOSException
+	 *             If the user is not found, the password is not correct or the
+	 *             user do not have a valid state or type for login.
+	 */
+	public EOSUser checkForLogin(String login, String password)
+			throws EOSException;
 
 	// User Data
 

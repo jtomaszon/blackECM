@@ -142,9 +142,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void testSetPassword() throws EOSException {
-		final EOSUser user = EOSTestUtil.createUser("setPassword", null,
-				svcUser);
-		final String password = "password";
+		EOSUser user = EOSTestUtil.createUser("setPassword", null, svcUser);
+		String password = "password";
 		svcUser.setUserPassword(user.getLogin(), null, password);
 
 		try {
@@ -156,6 +155,15 @@ public class EOSUserServiceTest {
 				| EOSValidationException e) {
 			Assert.fail("Logged user change password failed: " + e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCheckForLogin() throws EOSException {
+		EOSUser user = EOSTestUtil.createUser("checkForLogin", null, svcUser);
+		String password = "password";
+		svcUser.setUserPassword(user.getLogin(), null, password);
+		EOSUser checked = svcUser.checkForLogin(user.getLogin(), password);
+		Assert.assertEquals("Checked user", checked.getLogin(), user.getLogin());
 	}
 
 	// User Data

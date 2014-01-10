@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSState;
+import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSValidationException;
 import com.eos.common.util.StringUtil;
@@ -249,8 +251,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 		String newDigested = DigestUtils.md5Hex(newPassword);
 
 		if (StringUtil.isEmpty(oldPassword)) {
-			svcSecurity.checkPermissions(true, true,
-					EOSKnownPermissions.PASSWORD_UPDATE);
+			svcSecurity.checkPermissions(EOSKnownPermissions.PASSWORD_UPDATE);
 		} else {
 			// Verify credentials
 			svcSecurity.checkLogged();
@@ -261,8 +262,6 @@ public class EOSUserServiceImpl implements EOSUserService {
 
 			// Verify password match
 			String oldDigested = DigestUtils.md5Hex(oldPassword);
-			log.info("Old Entity:" + entity.getPassword());
-			log.info("Old rec:" + oldDigested);
 			if (!oldDigested.equals(entity.getPassword())) {
 				// TODO set correct error code
 				throw new EOSValidationException("Password mismatch");
@@ -271,6 +270,30 @@ public class EOSUserServiceImpl implements EOSUserService {
 
 		entity.setPassword(newDigested);
 		userDAO.merge(entity);
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSUserService#checkForLogin(java.lang.String,
+	 *      java.lang.String)
+	 */
+	@Override
+	public EOSUser checkForLogin(String login, String password)
+			throws EOSException {
+		EOSUser user = findUser(login);
+
+		if (user.getState() != EOSState.ACTIVE
+				&& user.getType() != EOSUserType.USER) {
+			throw new EOSException("User not found or invalid");
+		}
+
+		EOSUserEntity entity = userDAO.find(login);
+		// Verify password match
+		String digested = DigestUtils.md5Hex(password);
+		if (!digested.equals(entity.getPassword())) {
+			throw new EOSException("User not found or invalid");
+		}
+
+		return user;
 	}
 
 	private EOSUser entityToVo(EOSUserTenantEntity entity) {

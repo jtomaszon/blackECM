@@ -27,11 +27,8 @@ public interface EOSSecurityService {
 	 * @param tenantId
 	 *            The tenant for this session.
 	 * @return Session context created.
-	 * @throws EOSException
-	 *             If any error happens.
 	 */
-	public SessionContext createSessionContext(String sessionId, Long tenantId)
-			throws EOSException;
+	public SessionContext createSessionContext(String sessionId, Long tenantId);
 
 	/**
 	 * Retrieve session context information based on session Id.

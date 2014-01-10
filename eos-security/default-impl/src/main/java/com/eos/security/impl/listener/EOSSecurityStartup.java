@@ -3,6 +3,7 @@
  */
 package com.eos.security.impl.listener;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class EOSSecurityStartup implements
 				EOSUserType.USER);
 		// Create Anonymous User
 		createUser(EOSSystemConstants.LOGIN_ANONYMOUS, "Anonymous",
-				EOSUserType.USER);
+				EOSUserType.SYSTEM);
 
 		// Super Administrator role
 		EOSRoleEntity adminRole = createAdminRole();
@@ -110,12 +111,18 @@ public class EOSSecurityStartup implements
 	private EOSUserTenantEntity createUser(String login, String name,
 			EOSUserType type) {
 		EOSUserEntity user = userDAO.checkedFind(login);
+		String password = null;
+
+		if (type == EOSUserType.USER) {
+			// For all default users, set default password.
+			password = DigestUtils.md5Hex("EOSpas$");
+		}
 
 		if (user == null) {
 			log.debug("Creating EOS default user " + login);
 			user = new EOSUserEntity().setFirstName("EOS").setLastName(name)
 					.setLogin(login).setEmail(login + "@eossecurity.com")
-					.setType(type);
+					.setType(type).setPassword(password);
 
 			userDAO.persist(user);
 		}
