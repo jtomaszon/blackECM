@@ -143,7 +143,7 @@ public class EOSSecurityStartup implements
 	}
 
 	private EOSRoleEntity createAdminRole() {
-		EOSRoleEntity role = roleDAO.findByCode(
+		EOSRoleEntity role = roleDAO.checkedFindByCode(
 				EOSSystemConstants.ROLE_SUPER_ADMIN,
 				EOSSystemConstants.ADMIN_TENANT);
 

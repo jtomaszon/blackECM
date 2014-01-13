@@ -7,6 +7,8 @@ import java.util.List;
 
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSGroup;
@@ -36,9 +38,13 @@ public interface EOSRoleService {
 	 *             If the creator do not have permission for role creation.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create roles.
+	 * @throws EOSValidationException
+	 *             If the role contains any invalid field. For group code only
+	 *             number, characters, dot and hyphen are allowed.
 	 */
 	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException;
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException;
 
 	/**
 	 * Updates the role info.
@@ -49,9 +55,14 @@ public interface EOSRoleService {
 	 *             If the creator do not have permission for role update.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can update roles.
+	 * @throws EOSNotFoundException
+	 *             If the role with the given code do not exists.
+	 * @throws EOSValidationException
+	 *             If the role contains any invalid field.
 	 */
 	public void updateRole(EOSRole role) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSNotFoundException,
+			EOSValidationException;
 
 	/**
 	 * Delete the given role and all its relations (Users, Groups, Permissions).
@@ -75,8 +86,11 @@ public interface EOSRoleService {
 	 * @throws EOSForbiddenException
 	 *             For {@link EOSLevel#INTERNAL} special permissions are
 	 *             required.
+	 * @throws EOSNotFoundException
+	 *             If the role with the given code do not exists.
 	 */
-	public EOSRole findRole(String code) throws EOSForbiddenException;
+	public EOSRole findRole(String code) throws EOSForbiddenException,
+			EOSNotFoundException;
 
 	/**
 	 * Find roles by their code.

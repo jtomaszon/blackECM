@@ -36,7 +36,7 @@ public interface EOSGroupService {
 	 *             If the creator do not have permission for group creation.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create groups.
-	 * @throws EOSUnauthorizedException
+	 * @throws EOSValidationException
 	 *             If the group contains any invalid field.
 	 */
 	public EOSGroup createGroup(EOSGroup group)

@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -29,6 +31,7 @@ import com.eos.security.impl.dao.EOSRoleUserDAO;
 import com.eos.security.impl.model.EOSRoleEntity;
 import com.eos.security.impl.model.EOSRoleGroupEntity;
 import com.eos.security.impl.model.EOSRoleUserEntity;
+import com.eos.security.impl.service.internal.EOSValidator;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -80,8 +83,10 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	@Override
 	@Transactional
 	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
-		// TODO security, validation and messaging
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
+		// TODO security and messaging
+		EOSValidator.validateRole(role);
 		EOSRoleEntity entity = new EOSRoleEntity().setCode(role.getCode())
 				.setDescription(role.getDescription())
 				.setLevel(role.getLevel());
@@ -96,8 +101,10 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	@Override
 	@Transactional
 	public void updateRole(EOSRole role) throws EOSForbiddenException,
-			EOSUnauthorizedException {
-		// TODO security, validation and messaging
+			EOSUnauthorizedException, EOSNotFoundException,
+			EOSValidationException {
+		// TODO security and messaging
+		EOSValidator.validateRole(role);
 		EOSRoleEntity entity = roleDAO.findByCode(role.getCode(),
 				SessionContextManager.getCurrentTenantId());
 		entity.setDescription(role.getDescription()).setLevel(role.getLevel());
@@ -125,7 +132,8 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public EOSRole findRole(String code) throws EOSForbiddenException {
+	public EOSRole findRole(String code) throws EOSForbiddenException,
+			EOSNotFoundException {
 		// TODO security, validation
 		return entityToVO(roleDAO.findByCode(code,
 				SessionContextManager.getCurrentTenantId()));

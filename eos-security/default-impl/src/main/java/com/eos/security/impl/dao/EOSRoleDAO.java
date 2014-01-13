@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.commons.jpa.AbstractDAO;
 import com.eos.security.impl.model.EOSRoleEntity;
 
@@ -41,7 +42,7 @@ public class EOSRoleDAO extends AbstractDAO<EOSRoleEntity> {
 		return em;
 	}
 
-	public EOSRoleEntity findByCode(String code, Long tenantId) {
+	public EOSRoleEntity checkedFindByCode(String code, Long tenantId) {
 		try {
 			return em
 					.createNamedQuery(EOSRoleEntity.QUERY_FIND,
@@ -51,6 +52,20 @@ public class EOSRoleDAO extends AbstractDAO<EOSRoleEntity> {
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
+		}
+	}
+
+	public EOSRoleEntity findByCode(String code, Long tenantId)
+			throws EOSNotFoundException {
+		try {
+			return em
+					.createNamedQuery(EOSRoleEntity.QUERY_FIND,
+							EOSRoleEntity.class)
+					.setParameter(EOSRoleEntity.PARAM_CODE, code)
+					.setParameter(EOSRoleEntity.PARAM_TENANT, tenantId)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			throw new EOSNotFoundException("No role found with code " + code);
 		}
 	}
 

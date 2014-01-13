@@ -45,9 +45,10 @@ public final class EOSValidator {
 
 	public static void validateUser(EOSUser user) throws EOSValidationException {
 		EOSErrorFactory factory = new EOSErrorFactory();
-
-		factory.addError(ValidationUtils.requiredLogin("user login",
-				user.getLogin()));
+		;
+		factory.addError(ValidationUtils.validatePathString("user login",
+				user.getLogin(), EntityFieldSizes.MINIMUM,
+				EntityFieldSizes.DATA_TINY, true));
 		factory.addError(ValidationUtils.validateEmail("personal email",
 				user.getPersonalMail(), true));
 		factory.addError(ValidationUtils.validateString("user first name",
@@ -68,9 +69,9 @@ public final class EOSValidator {
 	public static void validateRole(EOSRole role) throws EOSValidationException {
 		EOSErrorFactory factory = new EOSErrorFactory();
 
-		factory.addError(ValidationUtils.validateString("role code",
-				role.getCode(), true, EntityFieldSizes.MINIMUM,
-				EntityFieldSizes.DATA_TINY));
+		factory.addError(ValidationUtils.validatePathString("role code",
+				role.getCode(), EntityFieldSizes.MINIMUM,
+				EntityFieldSizes.DATA_TINY, true));
 		factory.addError(ValidationUtils.maxLength("role description",
 				role.getDescription(), EntityFieldSizes.DATA_STANDART));
 		factory.addError(ValidationUtils.requiredNotNull("role level",
@@ -97,8 +98,9 @@ public final class EOSValidator {
 		EOSErrorFactory factory = new EOSErrorFactory();
 
 		for (String permission : permissions) {
-			factory.addError(ValidationUtils.validatePermission(
-					"role permission", permission));
+			factory.addError(ValidationUtils.validatePathString(
+					"role permission", permission, EntityFieldSizes.MINIMUM,
+					EntityFieldSizes.DATA_TINY, true));
 		}
 
 		checkErrors(factory);

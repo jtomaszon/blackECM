@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
@@ -60,8 +61,9 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testCreateFindRole() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
-		EOSRole role = new EOSRole().setCode("createRole_code")
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException, EOSNotFoundException {
+		EOSRole role = new EOSRole().setCode("createRole-code")
 				.setDescription("Create Description")
 				.setLevel(EOSLevel.MAXIMUM.getLevel());
 
@@ -72,7 +74,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testFindMultiple() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role1 = EOSTestUtil.createRole("mfindRole1", svcRole);
 		EOSRole role2 = EOSTestUtil.createRole("mfindRole2", svcRole);
 		List<String> codes = Arrays.asList(role1.getCode(), role2.getCode());
@@ -86,7 +89,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testUpdateRole() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException, EOSNotFoundException {
 		EOSRole role = EOSTestUtil.createRole("updateRole", svcRole);
 		role.setDescription("Description updated");
 
@@ -100,18 +104,25 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testDeleteRole() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("deleteRole", svcRole);
 		svcRole.deleteRole(role.getCode());
-		EOSRole deleted = svcRole.findRole(role.getCode());
-		Assert.assertNull("Delete Role", deleted);
+		;
+		try {
+			EOSRole deleted = svcRole.findRole(role.getCode());
+			Assert.assertNull("Delete Role", deleted);
+		} catch (EOSNotFoundException e) {
+			// exception expected
+		}
 	}
 
 	// Role User
 
 	@Test
 	public void testAddListUserRoles() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role1 = EOSTestUtil.createRole("addUserRoles1", svcRole);
 		EOSRole role2 = EOSTestUtil.createRole("addUserRoles2", svcRole);
 		EOSUser user = EOSTestUtil.createUser("addUserRoles", null, svcUser);
@@ -128,7 +139,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testRemoveUserRoles() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role1 = EOSTestUtil.createRole("delUserRoles1", svcRole);
 		EOSRole role2 = EOSTestUtil.createRole("delUserRoles2", svcRole);
 		EOSRole role3 = EOSTestUtil.createRole("delUserRoles3", svcRole);
@@ -150,7 +162,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testAddListRoleUsers() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("addListRoleUsers", svcRole);
 		EOSUser user1 = EOSTestUtil.createUser("addListRoleUsers1", null,
 				svcUser);
@@ -168,7 +181,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testRemoveRoleUsers() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("delListRoleUsers", svcRole);
 		EOSUser user1 = EOSTestUtil.createUser("delListRoleUsers1", null,
 				svcUser);

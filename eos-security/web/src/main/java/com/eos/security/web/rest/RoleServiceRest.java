@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
@@ -62,7 +63,8 @@ public class RoleServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		response.setStatus(Response.Status.CREATED.getStatusCode());
 		return svcRole.createRole(role);
 	}
@@ -71,7 +73,8 @@ public class RoleServiceRest {
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateRole(@PathParam("code") String code, EOSRole role)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException, EOSValidationException {
 		svcRole.updateRole(role);
 	}
 
@@ -87,7 +90,7 @@ public class RoleServiceRest {
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	public EOSRole findRole(@PathParam("code") String code)
-			throws EOSForbiddenException {
+			throws EOSForbiddenException, EOSNotFoundException {
 		return svcRole.findRole(code);
 	}
 

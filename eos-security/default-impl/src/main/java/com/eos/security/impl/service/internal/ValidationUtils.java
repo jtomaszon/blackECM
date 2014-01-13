@@ -126,35 +126,19 @@ public final class ValidationUtils {
 
 	private static final Pattern PATH_PATTERN = Pattern
 			.compile("[a-zA-Z0-9]+[a-zA-Z0-9.-]+");
-	private static final String LOGIN_ERROR = "Invalid characters";
+	private static final String PATH_ERROR = "Invalid characters";
 
-	public static EOSError requiredLogin(String fieldName, String login) {
-		EOSError error = validateString(fieldName, login, true, 1,
-				EntityFieldSizes.DATA_TINY);
-
-		if (error != null)
-			return error;
-
-		if (!PATH_PATTERN.matcher(login).matches()) {
-			String message = getMessage(fieldName, LOGIN_ERROR, login);
-			error = new EOSError(EOSErrorCodes.INVALID_LOGIN, message);
-		}
-
-		return error;
-	}
-
-	public static EOSError validatePermission(String fieldName,
-			String permission) {
-		EOSError error = validateString(fieldName, permission, true,
-				EntityFieldSizes.MINIMUM, EntityFieldSizes.DATA_TINY);
+	public static EOSError validatePathString(String fieldName, String value,
+			int min, int max, boolean required) {
+		EOSError error = validateString(fieldName, value, required, min, max);
 
 		if (error != null) {
 			return error;
 		}
 
-		if (!PATH_PATTERN.matcher(permission).matches()) {
-			String message = getMessage(fieldName, LOGIN_ERROR, permission);
-			error = new EOSError(EOSErrorCodes.INVALID_LOGIN, message);
+		if (!PATH_PATTERN.matcher(value).matches()) {
+			String message = getMessage(fieldName, PATH_ERROR, value);
+			error = new EOSError(EOSErrorCodes.INVALID_CHARS, message);
 		}
 
 		return error;

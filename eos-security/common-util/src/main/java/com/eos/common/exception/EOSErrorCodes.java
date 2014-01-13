@@ -14,6 +14,7 @@ public interface EOSErrorCodes {
 	Integer REQUIRED = 1;
 	Integer MAX_SIZE = 2;
 	Integer MIN_SIZE = 3;
+	Integer INVALID_CHARS = 4;
 
 	Integer INVALID_LOGIN = 11;
 	Integer INVALID_EMAIL = 12;

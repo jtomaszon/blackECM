@@ -111,8 +111,8 @@ public class EOSTestUtil {
 
 	public static EOSRole createRole(String identifier, EOSRoleService svcRole)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
-		EOSRole role = new EOSRole().setCode(identifier + "_code")
+			EOSUnauthorizedException, EOSValidationException {
+		EOSRole role = new EOSRole().setCode(identifier + "-code")
 				.setDescription(identifier + " Description")
 				.setLevel(EOSLevel.MAXIMUM.getLevel());
 		return svcRole.createRole(role);
