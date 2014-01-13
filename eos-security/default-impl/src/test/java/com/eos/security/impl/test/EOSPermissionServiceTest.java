@@ -60,7 +60,8 @@ public class EOSPermissionServiceTest {
 
 	@Test
 	public void testAddListPermissions() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("addListPermissions", svcRole);
 		List<String> permissions = Arrays.asList("addListPermissions1",
 				"addListPermissions2");
@@ -76,7 +77,8 @@ public class EOSPermissionServiceTest {
 
 	@Test
 	public void testRemovePermissions() throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSDuplicatedEntryException {
+			EOSUnauthorizedException, EOSDuplicatedEntryException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("removePermissions", svcRole);
 		List<String> permissions = Arrays.asList("removePermissions1",
 				"removePermissions2", "removePermissions3");
@@ -95,7 +97,8 @@ public class EOSPermissionServiceTest {
 
 	@Test
 	public void testHasRolePermission() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSUser user = EOSTestUtil.createUser("hasRolePermission", null,
 				svcUser);
 		EOSRole role = EOSTestUtil.createRole("hasRolePermission", svcRole);

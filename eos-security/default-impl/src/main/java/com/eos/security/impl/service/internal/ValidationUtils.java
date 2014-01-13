@@ -99,7 +99,8 @@ public final class ValidationUtils {
 			.compile("[a-zA-Z0-9]+[.[a-zA-Z0-9_-]+]*@[a-zA-Z0-9]+[.[a-zA-Z0-9_-]+]+");
 	private static final String EMAIL_ERR = "EMAIL Address";
 
-	public static EOSError validateEmail(String fieldName, String email, boolean required) {
+	public static EOSError validateEmail(String fieldName, String email,
+			boolean required) {
 		EOSError error = validateString(fieldName, email, required,
 				EntityFieldSizes.EMAIL_MIN_SIZE, EntityFieldSizes.DATA_LARGE);
 
@@ -123,7 +124,7 @@ public final class ValidationUtils {
 		return error;
 	}
 
-	private static final Pattern LOGIN_PATTERN = Pattern
+	private static final Pattern PATH_PATTERN = Pattern
 			.compile("[a-zA-Z0-9]+[a-zA-Z0-9.-]+");
 	private static final String LOGIN_ERROR = "Invalid characters";
 
@@ -134,8 +135,25 @@ public final class ValidationUtils {
 		if (error != null)
 			return error;
 
-		if (!LOGIN_PATTERN.matcher(login).matches()) {
+		if (!PATH_PATTERN.matcher(login).matches()) {
 			String message = getMessage(fieldName, LOGIN_ERROR, login);
+			error = new EOSError(EOSErrorCodes.INVALID_LOGIN, message);
+		}
+
+		return error;
+	}
+
+	public static EOSError validatePermission(String fieldName,
+			String permission) {
+		EOSError error = validateString(fieldName, permission, true,
+				EntityFieldSizes.MINIMUM, EntityFieldSizes.DATA_TINY);
+
+		if (error != null) {
+			return error;
+		}
+
+		if (!PATH_PATTERN.matcher(permission).matches()) {
+			String message = getMessage(fieldName, LOGIN_ERROR, permission);
 			error = new EOSError(EOSErrorCodes.INVALID_LOGIN, message);
 		}
 

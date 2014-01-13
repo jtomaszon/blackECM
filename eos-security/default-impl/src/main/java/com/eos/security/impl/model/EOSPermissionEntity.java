@@ -45,7 +45,7 @@ public class EOSPermissionEntity extends AbstractTenantEntity {
 	@Column(name = "rolecode", nullable = false, updatable = false)
 	private String roleCode;
 
-	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_SMALL)
+	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_TINY)
 	@Column(name = "permission", nullable = false, updatable = false)
 	private String permission;
 

@@ -6,6 +6,7 @@ package com.eos.security.api.service;
 import java.util.List;
 import java.util.Map;
 
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 
@@ -32,9 +33,13 @@ public interface EOSPermissionService {
 	 *             If the creator do not have permission for role manipulation.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
+	 * @throws EOSValidationException
+	 *             If the permission is invalid. Only number, characters, dot
+	 *             and hyphen are allowed.
 	 */
 	public void addRolePermissions(String code, List<String> permissions)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException;
 
 	/**
 	 * Remove permissions from a role.

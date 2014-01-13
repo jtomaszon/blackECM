@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSPermissionService;
@@ -181,7 +182,7 @@ public class RoleServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void addPermissions(@PathParam("code") String code,
 			List<String> permissions) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException {
 		svcPermission.addRolePermissions(code, permissions);
 	}
 

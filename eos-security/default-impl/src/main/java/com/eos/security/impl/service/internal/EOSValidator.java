@@ -3,6 +3,8 @@
  */
 package com.eos.security.impl.service.internal;
 
+import java.util.List;
+
 import com.eos.common.exception.EOSValidationException;
 import com.eos.commons.jpa.EntityFieldSizes;
 import com.eos.security.api.vo.EOSGroup;
@@ -86,6 +88,18 @@ public final class EOSValidator {
 				EntityFieldSizes.DATA_SMALL));
 		factory.addError(ValidationUtils.maxLength("tenant description",
 				tenant.getDescription(), EntityFieldSizes.DATA_LARGE));
+
+		checkErrors(factory);
+	}
+
+	public static void validatePermissions(List<String> permissions)
+			throws EOSValidationException {
+		EOSErrorFactory factory = new EOSErrorFactory();
+
+		for (String permission : permissions) {
+			factory.addError(ValidationUtils.validatePermission(
+					"role permission", permission));
+		}
 
 		checkErrors(factory);
 	}
