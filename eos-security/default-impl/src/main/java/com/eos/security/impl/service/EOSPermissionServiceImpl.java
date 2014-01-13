@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -25,6 +26,7 @@ import com.eos.security.impl.dao.EOSPermissionDAO;
 import com.eos.security.impl.dao.EOSRoleGroupDAO;
 import com.eos.security.impl.model.EOSPermissionEntity;
 import com.eos.security.impl.model.EOSRoleGroupEntity;
+import com.eos.security.impl.service.internal.EOSValidator;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -71,8 +73,10 @@ public class EOSPermissionServiceImpl implements EOSPermissionService {
 	@Override
 	@Transactional
 	public void addRolePermissions(String code, List<String> permissions)
-			throws EOSForbiddenException, EOSUnauthorizedException {
-		// TODO validation, security, cache and messaging
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
+		// TODO security, cache and messaging
+		EOSValidator.validatePermissions(permissions);
 		for (String permission : permissions) {
 			createRolePermission(code, permission);
 		}
