@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -26,6 +27,7 @@ import com.eos.security.impl.dao.EOSGroupDAO;
 import com.eos.security.impl.dao.EOSGroupUserDAO;
 import com.eos.security.impl.model.EOSGroupEntity;
 import com.eos.security.impl.model.EOSGroupUserEntity;
+import com.eos.security.impl.service.internal.EOSValidator;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -66,8 +68,9 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	@Transactional
 	public EOSGroup createGroup(EOSGroup group)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
-		// TODO Security, validations and messaging
+			EOSUnauthorizedException, EOSValidationException {
+		// TODO Security, and messaging
+		EOSValidator.validateGroup(group);
 		EOSGroupEntity entity = new EOSGroupEntity();
 		entity.setName(group.getName()).setDescription(group.getDescription())
 				.setLevel(group.getLevel());
@@ -116,8 +119,10 @@ public class EOSGroupServiceImpl implements EOSGroupService {
 	@Override
 	@Transactional
 	public void updateGroup(EOSGroup group) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException {
-		// TODO Security, validations and messaging
+			EOSUnauthorizedException, EOSNotFoundException,
+			EOSValidationException {
+		// TODO Security and messaging
+		EOSValidator.validateGroup(group);
 		EOSGroupEntity entity = groupDAO.find(group.getId(),
 				SessionContextManager.getCurrentTenantId());
 		entity.setName(group.getName()).setDescription(group.getDescription())

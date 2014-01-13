@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -193,7 +194,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testAddListRoleGroups() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("addListRoleGroups", svcRole);
 		EOSGroup group1 = EOSTestUtil.createGroup("addListRoleGroups1",
 				svcGroup);
@@ -211,7 +213,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testRemoveRoleGroups() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role = EOSTestUtil.createRole("removeRoleGroups", svcRole);
 		EOSGroup group1 = EOSTestUtil
 				.createGroup("removeRoleGroups1", svcGroup);
@@ -236,7 +239,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testAddListGroupRoles() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role1 = EOSTestUtil.createRole("addListGroupRoles1", svcRole);
 		EOSRole role2 = EOSTestUtil.createRole("addListGroupRoles2", svcRole);
 		EOSGroup group = EOSTestUtil.createGroup("addListGroupRoles", svcGroup);
@@ -252,7 +256,8 @@ public class EOSRoleServiceTest {
 
 	@Test
 	public void testRemoveGroupRoles() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSRole role1 = EOSTestUtil.createRole("removeGroupRoles1", svcRole);
 		EOSRole role2 = EOSTestUtil.createRole("removeGroupRoles2", svcRole);
 		EOSRole role3 = EOSTestUtil.createRole("removeGroupRoles3", svcRole);

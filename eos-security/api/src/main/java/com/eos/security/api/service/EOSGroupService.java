@@ -8,6 +8,7 @@ import java.util.List;
 import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSGroup;
@@ -35,10 +36,12 @@ public interface EOSGroupService {
 	 *             If the creator do not have permission for group creation.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create groups.
+	 * @throws EOSUnauthorizedException
+	 *             If the group contains any invalid field.
 	 */
 	public EOSGroup createGroup(EOSGroup group)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSValidationException;
 
 	/**
 	 * Find a group.
@@ -81,9 +84,12 @@ public interface EOSGroupService {
 	 * @throws EOSNotFoundException
 	 *             If a group is not found with the given ID in the current
 	 *             tenant.
+	 * @throws EOSUnauthorizedException
+	 *             If the group contains any invalid field.
 	 */
 	public void updateGroup(EOSGroup group) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException;
+			EOSUnauthorizedException, EOSNotFoundException,
+			EOSValidationException;
 
 	/**
 	 * Deletes a group. All group user relation and role group relations are

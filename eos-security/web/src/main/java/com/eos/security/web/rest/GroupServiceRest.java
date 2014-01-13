@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -66,7 +67,7 @@ public class GroupServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateGroup(@PathParam("groupId") Long groupId, EOSGroup group)
 			throws EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		group.setId(groupId);
 		svcGroup.updateGroup(group);
 	}
@@ -114,7 +115,7 @@ public class GroupServiceRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public EOSGroup createGroup(EOSGroup group)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException {
 		group = svcGroup.createGroup(group);
 		response.setStatus(Response.Status.CREATED.getStatusCode());
 		return group;

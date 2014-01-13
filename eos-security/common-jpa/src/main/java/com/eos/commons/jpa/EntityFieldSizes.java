@@ -44,4 +44,7 @@ public interface EntityFieldSizes {
 	String MAXIMUM_LIMIT_STR = String.valueOf(MAXIMUM_LIMIT);
 	// Constant indicating when the limit must not be configured.
 	int UNLIMITED = -2;
+	
+	int EMAIL_MIN_SIZE = 5;
+	int PASSWORD_MIN_SIZE = 6;
 }

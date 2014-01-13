@@ -12,6 +12,7 @@ import com.eos.common.EOSLevel;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -99,7 +100,8 @@ public class EOSTestUtil {
 
 	public static EOSGroup createGroup(String identifier,
 			EOSGroupService svcGroup) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSGroup group = new EOSGroup().setName("Test " + identifier)
 				.setDescription("Test description " + identifier)
 				.setLevel(EOSLevel.PUBLIC.getLevel());

@@ -20,6 +20,7 @@ import com.eos.common.EOSLevel;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -55,7 +56,8 @@ public class EOSGroupServiceTest {
 
 	@Test
 	public void testCreateGroup() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSGroup group = new EOSGroup().setName("Test Create")
 				.setDescription("Create description")
 				.setLevel(EOSLevel.PUBLIC.getLevel());
@@ -67,7 +69,7 @@ public class EOSGroupServiceTest {
 	@Test
 	public void testFindGroup() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		EOSGroup group = EOSTestUtil.createGroup("Find", svcGroup);
 		EOSGroup find = svcGroup.findGroup(group.getId());
 		Assert.assertEquals("Find Group", group.getId(), find.getId());
@@ -75,7 +77,8 @@ public class EOSGroupServiceTest {
 
 	@Test
 	public void testFindMultiple() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSGroup group1 = EOSTestUtil.createGroup("Find Multiple 1", svcGroup);
 		EOSGroup group2 = EOSTestUtil.createGroup("Find Multiple 2", svcGroup);
 		List<Long> ids = new ArrayList<>(2);
@@ -91,7 +94,8 @@ public class EOSGroupServiceTest {
 
 	@Test
 	public void testListGroups() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSTestUtil.createGroup("List 1", svcGroup);
 		EOSTestUtil.createGroup("List 2", svcGroup);
 		List<EOSGroup> groups = svcGroup.listGroups(null, null, 50, 0);
@@ -101,7 +105,7 @@ public class EOSGroupServiceTest {
 	@Test
 	public void testDeleteGroup() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		EOSGroup group = EOSTestUtil.createGroup("Delete", svcGroup);
 		svcGroup.deleteGroup(group.getId());
 		EOSGroup deleted = null;
@@ -122,10 +126,12 @@ public class EOSGroupServiceTest {
 	 * @throws EOSDuplicatedEntryException
 	 * @throws EOSForbiddenException
 	 * @throws EOSUnauthorizedException
+	 * @throws EOSValidationException
 	 */
 	@Test
 	public void testAddFindUsersGroup() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSGroup group = EOSTestUtil.createGroup("Add Users", svcGroup);
 		EOSUser user1 = EOSTestUtil.createUser("groupaddUsers1", null, svcUser);
 		EOSUser user2 = EOSTestUtil.createUser("groupaddUsers2", null, svcUser);
@@ -149,10 +155,12 @@ public class EOSGroupServiceTest {
 	 * @throws EOSDuplicatedEntryException
 	 * @throws EOSForbiddenException
 	 * @throws EOSUnauthorizedException
+	 * @throws EOSValidationException
 	 */
 	@Test
 	public void testAddFindGroupsUser() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSUser user = EOSTestUtil.createUser("addgroupsUser", null, svcUser);
 		EOSGroup group1 = EOSTestUtil.createGroup("Add Find Groups User 1",
 				svcGroup);
@@ -177,10 +185,12 @@ public class EOSGroupServiceTest {
 	 * @throws EOSDuplicatedEntryException
 	 * @throws EOSForbiddenException
 	 * @throws EOSUnauthorizedException
+	 * @throws EOSValidationException
 	 */
 	@Test
 	public void testRemoveUsersFromGroup() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSGroup group = EOSTestUtil.createGroup("Remove Users", svcGroup);
 		EOSUser user1 = EOSTestUtil.createUser("groupremoveUsers1", null,
 				svcUser);
@@ -211,10 +221,12 @@ public class EOSGroupServiceTest {
 	 * @throws EOSDuplicatedEntryException
 	 * @throws EOSForbiddenException
 	 * @throws EOSUnauthorizedException
+	 * @throws EOSValidationException
 	 */
 	@Test
 	public void testRemoveUserFromGroups() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSUser user = EOSTestUtil
 				.createUser("removegroupsUser", null, svcUser);
 		EOSGroup group1 = EOSTestUtil.createGroup("Remove Groups User 1",

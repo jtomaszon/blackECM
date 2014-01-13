@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -111,7 +112,7 @@ public class EOSPermissionServiceTest {
 	@Test
 	public void testHasGroupRolePermission()
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException {
 		EOSUser user = EOSTestUtil.createUser("hasGroupRolePermission", null,
 				svcUser);
 		EOSRole role = EOSTestUtil
