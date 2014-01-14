@@ -73,18 +73,18 @@ public class EOSSecurityStartup implements
 	private void createTenant() {
 		// Default tenant
 		EOSTenantEntity tenant = tenantDAO
-				.find(EOSSystemConstants.ADMIN_TENANT);
-
-		if (tenant == null) {
-			log.debug("Creating EOS default tenant");
-			// Use merge to force id on entity
-			tenant = new EOSTenantEntity()
-					.setId(EOSSystemConstants.ADMIN_TENANT)
-					.setName("EOS Tenant")
-					.setDescription("Administration tenant")
-					.setState(EOSState.ACTIVE);
-			tenantDAO.merge(tenant);
+				.checkedFind(EOSSystemConstants.ADMIN_TENANT);
+		// Found, then return
+		if (tenant != null) {
+			return;
 		}
+
+		log.debug("Creating EOS default tenant");
+		tenant = new EOSTenantEntity().setId(EOSSystemConstants.ADMIN_TENANT)
+				.setName("EOS Tenant").setDescription("Administration tenant")
+				.setState(EOSState.ACTIVE);
+		// Use merge to force id on entity
+		tenantDAO.merge(tenant);
 	}
 
 	private void createUsers() {

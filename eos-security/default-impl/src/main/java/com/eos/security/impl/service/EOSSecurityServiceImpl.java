@@ -95,9 +95,12 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 	 * @param user
 	 *            The user to be used with the session.
 	 * @return The session context created.
+	 * @throws EOSNotFoundException
+	 *             If not tenant found with the given ID.
 	 */
 	private final SessionContext createSessionContext(final String sessionId,
-			final Long tenantId, final EOSUser user) {
+			final Long tenantId, final EOSUser user)
+			throws EOSNotFoundException {
 		final SessionContext context = new SessionContext(
 				svcTenant.findTenant(tenantId), user);
 		final EOSSession session = EOSSession.getContext();
@@ -246,8 +249,13 @@ public class EOSSecurityServiceImpl implements EOSSecurityService {
 		}
 
 		// Restore session
-		createSessionContext(currentSessionId, oldContext.getTenant().getId(),
-				oldContext.getUser());
+		try {
+			createSessionContext(currentSessionId, oldContext.getTenant()
+					.getId(), oldContext.getUser());
+		} catch (EOSNotFoundException e) {
+			// Should never happens
+			throw new EOSRuntimeException("Tenant not found", e);
+		}
 	}
 
 	/**

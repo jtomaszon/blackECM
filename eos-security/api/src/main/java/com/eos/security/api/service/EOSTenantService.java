@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.vo.EOSTenant;
@@ -37,18 +39,23 @@ public interface EOSTenantService {
 	 *             Usually only a super user can create a tenant.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other tenant.
+	 * @throws EOSValidationException
+	 *             If tenant contains invalid fields.
 	 */
 	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data,
 			EOSUser adminUser) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException;
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException;
 
 	/**
 	 * Finds a tenant by its id.
 	 * 
 	 * @param tenantId
 	 * @return the tenant.
+	 * @throws EOSValidationException
+	 *             If no tenant exists with the given tenant ID.
 	 */
-	public EOSTenant findTenant(Long tenantId);
+	public EOSTenant findTenant(Long tenantId) throws EOSNotFoundException;
 
 	/**
 	 * Find all tenants that match the given id list.
@@ -84,9 +91,14 @@ public interface EOSTenantService {
 	 *             If the creator do not have permission for tenant update.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can update other tenant.
+	 * @throws EOSValidationException
+	 *             If tenant contains invalid fields.
+	 * @throws EOSValidationException
+	 *             If no tenant exists with the given tenant ID.
 	 */
 	public void updateTenant(EOSTenant tenant) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSValidationException,
+			EOSNotFoundException;
 
 	/**
 	 * Change a tenant state.
@@ -99,9 +111,12 @@ public interface EOSTenantService {
 	 *             If the creator do not have permission for tenant update.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can update other tenant.
+	 * @throws EOSValidationException
+	 *             If no tenant exists with the given tenant ID.
 	 */
 	public void updateTenantState(Long tenantId, EOSState state)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException;
 
 	/**
 	 * Purge (physical delete) the tenant and all related data.

@@ -21,6 +21,7 @@ import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSInvalidStateException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSRuntimeException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
@@ -34,6 +35,7 @@ import com.eos.security.impl.dao.EOSTenantDataDAO;
 import com.eos.security.impl.model.EOSTenantDataEntity;
 import com.eos.security.impl.model.EOSTenantEntity;
 import com.eos.security.impl.service.internal.EOSSystemConstants;
+import com.eos.security.impl.service.internal.EOSValidator;
 
 /**
  * @author santos.fabiano
@@ -70,7 +72,9 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	@Transactional
 	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data,
 			final EOSUser adminUser) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
+		EOSValidator.validateTenant(tenant);
 		EOSTenantEntity entity = new EOSTenantEntity();
 
 		entity.setName(tenant.getName());
@@ -103,7 +107,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 			}
 		}
 
-		// TODO messaging and validations, security check
+		// TODO messaging and security check
 		log.info("Tenant created: " + tenant.toString());
 		return tenant;
 	}
@@ -113,7 +117,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public EOSTenant findTenant(Long tenantId) {
+	public EOSTenant findTenant(Long tenantId) throws EOSNotFoundException {
 		// TODO cache
 		return entityToVO(tenantDAO.find(tenantId));
 	}
@@ -160,7 +164,9 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	@Override
 	@Transactional
 	public void updateTenant(EOSTenant tenant) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException,
+			EOSNotFoundException {
+		EOSValidator.validateTenant(tenant);
 		// DO a find, then update, so hibernate listeners are fired.
 		EOSTenantEntity entity = tenantDAO.find(tenant.getId());
 
@@ -168,7 +174,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 		entity.setDescription(tenant.getDescription());
 		tenantDAO.merge(entity);
 		log.debug("Tenant updated: " + tenant.toString());
-		// TODO messaging and validations, security check
+		// TODO messaging and security check
 	}
 
 	/**
@@ -178,7 +184,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	@Override
 	@Transactional
 	public void updateTenantState(Long tenantId, EOSState state)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		// DO a find, then update, so hibernate listeners are fired.
 		EOSTenantEntity entity = tenantDAO.find(tenantId);
 

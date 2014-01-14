@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSTenantService;
@@ -95,7 +96,8 @@ public class TenantServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateTenant(@PathParam("tenant") Long tenantId,
 			EOSTenant tenant) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException,
+			EOSNotFoundException {
 		tenant.setId(tenantId);
 		svcTenant.updateTenant(tenant);
 	}
@@ -104,7 +106,8 @@ public class TenantServiceRest {
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void deleteTenant(@PathParam("tenant") Long tenantId)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+			throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		svcTenant.updateTenantState(tenantId, EOSState.REMOVED);
 	}
 

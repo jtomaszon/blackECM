@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 
+import com.eos.common.exception.EOSNotFoundException;
+
 /**
  * @author santos.fabiano
  * 
@@ -30,11 +32,22 @@ public abstract class AbstractDAO<T> {
 	 * @param id
 	 *            the entity id (PK)
 	 * @return entity
-	 * @throws PersistenceException
+	 * @throws EOSNotFoundException
 	 *             If not found.
 	 */
-	public T find(Object id) throws PersistenceException {
-		return getEntityManager().find(entityClazz, id);
+	public T find(Object id) throws EOSNotFoundException {
+		T entity = null;
+		try {
+			entity = getEntityManager().find(entityClazz, id);
+		} catch (PersistenceException e) {
+			throw new EOSNotFoundException("No entity found with id: " + id);
+		}
+		// Still null, not found
+		if (entity == null) {
+			throw new EOSNotFoundException("No entity found with id: " + id);
+		}
+
+		return entity;
 	}
 
 	/**
@@ -48,7 +61,7 @@ public abstract class AbstractDAO<T> {
 	public T checkedFind(Object id) {
 		try {
 			return find(id);
-		} catch (PersistenceException e) {
+		} catch (EOSNotFoundException e) {
 			return null;
 		}
 	}
