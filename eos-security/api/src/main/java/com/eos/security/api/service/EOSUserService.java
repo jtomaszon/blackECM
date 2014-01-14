@@ -109,9 +109,9 @@ public interface EOSUserService {
 	 * @throws EOSForbiddenException
 	 *             If the creator do not have permission for user update.
 	 * @throws EOSUnauthorizedException
-	 *             Only authenticated users can create other users.
+	 *             Only authenticated users can update other users.
 	 * @throws EOSNotFoundException
-	 *             If not entity is found in the current tenant with the given
+	 *             If no entity is found in the current tenant with the given
 	 *             login.
 	 * @throws EOSValidationException
 	 *             If the user contains invalid fields.
@@ -157,9 +157,15 @@ public interface EOSUserService {
 	 * Verify if the given user can perform login. Validates if the user state
 	 * is {@link EOSState#ACTIVE} and his type is {@link EOSUserType#USER}, also
 	 * verify if the password informed is correct.
+	 * <p>
+	 * First try to find the user by login, if not found, try to find by any of
+	 * his e-mails.
+	 * </p>
 	 * 
 	 * @param login
 	 *            The user login.
+	 * @param email
+	 *            The user personal or tenant e-mail.
 	 * @param password
 	 *            The user password.
 	 * @return The user information, if its OK to perform login.
@@ -167,7 +173,7 @@ public interface EOSUserService {
 	 *             If the user is not found, the password is not correct or the
 	 *             user do not have a valid state or type for login.
 	 */
-	public EOSUser checkForLogin(String login, String password)
+	public EOSUser checkForLogin(String login, String email, String password)
 			throws EOSException;
 
 	// User Data

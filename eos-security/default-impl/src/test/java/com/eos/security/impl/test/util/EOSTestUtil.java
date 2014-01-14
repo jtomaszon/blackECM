@@ -45,6 +45,15 @@ public class EOSTestUtil {
 	 *             If any problem occurs.
 	 */
 	public static void setup(ApplicationContext appContext) throws EOSException {
+		// Already setup, return
+		if (SessionContextManager.getCurrentTenantId() != null
+				&& SessionContextManager.getCurrentTenantId() == EOSSystemConstants.ADMIN_TENANT
+				&& SessionContextManager.getCurrentUserLogin() != null
+				&& EOSSystemConstants.LOGIN_SUPER_ADMIN
+						.equals(SessionContextManager.getCurrentUserLogin())) {
+			return;
+		}
+
 		final EOSUserService svcUser = appContext.getBean(EOSUserService.class);
 		EOSUser user = svcUser.findTenantUser(
 				EOSSystemConstants.LOGIN_SUPER_ADMIN,

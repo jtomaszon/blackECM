@@ -32,6 +32,8 @@ import com.eos.commons.jpa.EntityFieldSizes;
 				+ "WHERE t.login = :login AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_FIND_MULTIPLE, query = "SELECT t FROM EOSUserTenant t "
 				+ "WHERE t.login IN (:login) AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSUserTenantEntity.QUERY_FIND_BY_EMAIL, query = "SELECT t FROM EOSUserTenant t "
+				+ "WHERE t.tenantMail = :email AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_LIST, query = "SELECT t FROM EOSUserTenant t "
 				+ "WHERE t.state IN (:state) AND t.tenantId = :tenantId") })
 public class EOSUserTenantEntity extends AbstractTenantEntity {
@@ -40,10 +42,12 @@ public class EOSUserTenantEntity extends AbstractTenantEntity {
 
 	public static final String QUERY_FIND = "EOSUserTenant.FindByLogin";
 	public static final String QUERY_FIND_MULTIPLE = "EOSUserTenant.FindUsersByLogin";
+	public static final String QUERY_FIND_BY_EMAIL = "EOSUserTenant.FindByEMail";
 	public static final String QUERY_LIST = "EOSUserTenant.ListAll";
 
 	public static final String PARAM_LOGIN = "login";
 	public static final String PARAM_STATE = "state";
+	public static final String PARAM_EMAIL = "email";
 
 	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_TINY)
 	@Column(name = "login", nullable = false, updatable = false)

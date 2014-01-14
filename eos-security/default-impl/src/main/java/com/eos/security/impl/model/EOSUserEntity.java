@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
@@ -23,9 +25,17 @@ import com.eos.commons.jpa.EntityFieldSizes;
  */
 @Entity(name = "EOSUser")
 @Table(name = "tbuser")
+@NamedQueries({ @NamedQuery(name = EOSUserEntity.QUERY_FIND_BY_EMAIL, query = "SELECT t FROM EOSUser t "
+		+ "WHERE t.email = :email")
+
+})
 public class EOSUserEntity extends AbstractEntity {
 
 	private static final long serialVersionUID = -7976368002799372189L;
+
+	public static final String QUERY_FIND_BY_EMAIL = "EOSUser.FindByEMail";
+
+	public static final String PARAM_EMAIL = "email";
 
 	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_TINY)
 	@Id

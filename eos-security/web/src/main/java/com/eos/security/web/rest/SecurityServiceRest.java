@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
-import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.session.SessionContext;
@@ -46,11 +45,8 @@ public class SecurityServiceRest {
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void login(EOSCredentials credentials) throws EOSException {
-		String login = StringUtil.isEmpty(credentials.getLogin()) ? credentials
-				.getEmail() : credentials.getLogin();
-		if (StringUtil.isEmpty(credentials.getLogin()))
-			svcSecurity.login(login, credentials.getPassword(),
-					credentials.isKeepConnected());
+		svcSecurity.login(credentials.getLogin(), credentials.getEmail(),
+				credentials.getPassword(), credentials.isKeepConnected());
 	}
 
 	@Path("/logout")

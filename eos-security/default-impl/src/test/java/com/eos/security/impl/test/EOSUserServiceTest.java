@@ -165,7 +165,8 @@ public class EOSUserServiceTest {
 		EOSUser user = EOSTestUtil.createUser("checkForLogin", null, svcUser);
 		String password = "password";
 		svcUser.setUserPassword(user.getLogin(), null, password);
-		EOSUser checked = svcUser.checkForLogin(user.getLogin(), password);
+		EOSUser checked = svcUser
+				.checkForLogin(user.getLogin(), null, password);
 		Assert.assertEquals("Checked user", checked.getLogin(), user.getLogin());
 	}
 

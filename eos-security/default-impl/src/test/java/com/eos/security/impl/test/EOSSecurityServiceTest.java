@@ -18,6 +18,7 @@ import com.eos.common.exception.EOSException;
 import com.eos.security.api.service.EOSPermissionService;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
+import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.service.internal.EOSSystemConstants;
 import com.eos.security.impl.session.SessionContextManager;
 import com.eos.security.impl.test.util.EOSTestUtil;
@@ -59,9 +60,37 @@ public class EOSSecurityServiceTest {
 		svcSecurity.logout();
 		// Perform logout
 		Assert.assertFalse("LoginLogout: anonymouos", svcSecurity.isLogged());
-		svcSecurity.login(EOSSystemConstants.LOGIN_SUPER_ADMIN, "EOSpas$",
-				false);
+		svcSecurity.login(EOSSystemConstants.LOGIN_SUPER_ADMIN, null,
+				"EOSpas$", false);
 		Assert.assertTrue("LoginLogout: admin", svcSecurity.isLogged());
+	}
+
+	@Test
+	public void testLoginByPersonalEmail() throws EOSException {
+		EOSUser user = EOSTestUtil.createUser("emailPersonalLogin", null,
+				svcUser);
+		String password = "EMail-Login$1";
+		svcUser.setUserPassword(user.getLogin(), null, password);
+		// Setup puts SYS Administrator as logged user
+		svcSecurity.logout();
+		// Perform logout
+		Assert.assertFalse("LoginPersonal: anonymouos", svcSecurity.isLogged());
+		svcSecurity.login(null, user.getPersonalMail(), password, false);
+		Assert.assertTrue("LoginPersonal: user logged", svcSecurity.isLogged());
+	}
+
+	@Test
+	public void testLoginByTenantEmail() throws EOSException {
+		EOSUser user = EOSTestUtil
+				.createUser("emailTenantLogin", null, svcUser);
+		String password = "EMail-Login$2";
+		svcUser.setUserPassword(user.getLogin(), null, password);
+		// Setup puts SYS Administrator as logged user
+		svcSecurity.logout();
+		// Perform logout
+		Assert.assertFalse("LoginTenant: anonymouos", svcSecurity.isLogged());
+		svcSecurity.login(null, user.getEmail(), password, false);
+		Assert.assertTrue("LoginTenant: user logged", svcSecurity.isLogged());
 	}
 
 	@Test
@@ -75,9 +104,6 @@ public class EOSSecurityServiceTest {
 		Assert.assertEquals("IsLoggded anonymous",
 				EOSSystemConstants.LOGIN_ANONYMOUS,
 				SessionContextManager.getCurrentUserLogin());
-		// Restore session, only runs setup
-		EOSTestUtil.setup(context);
-		Assert.assertTrue("IsLogged: admin", svcSecurity.isLogged());
 	}
 
 	@Test

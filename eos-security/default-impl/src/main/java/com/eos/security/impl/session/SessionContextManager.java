@@ -34,10 +34,22 @@ public class SessionContextManager {
 	}
 
 	public static Long getCurrentTenantId() {
-		return EOSSession.getContext().getSession().getTenant().getId();
+		SessionContext context = EOSSession.getContext().getSession();
+
+		if (context != null && context.getTenant() != null) {
+			return context.getTenant().getId();
+		} else {
+			return null;
+		}
 	}
 
 	public static String getCurrentUserLogin() {
-		return EOSSession.getContext().getSession().getUser().getLogin();
+		SessionContext context = EOSSession.getContext().getSession();
+
+		if (context != null && context.getUser() != null) {
+			return context.getUser().getLogin();
+		} else {
+			return null;
+		}
 	}
 }

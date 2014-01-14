@@ -282,22 +282,64 @@ public class EOSUserServiceImpl implements EOSUserService {
 
 	/**
 	 * @see com.eos.security.api.service.EOSUserService#checkForLogin(java.lang.String,
-	 *      java.lang.String)
+	 *      java.lang.String, java.lang.String)
 	 */
 	@Override
-	public EOSUser checkForLogin(String login, String password)
+	public EOSUser checkForLogin(String login, String email, String password)
 			throws EOSException {
-		EOSUser user = findUser(login);
+		EOSUserEntity entity = null;
+		EOSUser user = findUser(login, email, entity);
 
 		if (user.getState() != EOSState.ACTIVE
 				&& user.getType() != EOSUserType.USER) {
 			throw new EOSException("User not found or invalid");
 		}
 
-		EOSUserEntity entity = userDAO.find(login);
+		if (entity == null) {
+			entity = userDAO.find(user.getLogin());
+		}
 		// Verify password match
 		String digested = DigestUtils.md5Hex(password);
 		if (!digested.equals(entity.getPassword())) {
+			throw new EOSException("User not found or invalid");
+		}
+
+		return user;
+	}
+
+	private EOSUser findUser(String login, String email, EOSUserEntity entity)
+			throws EOSException {
+		EOSUser user = null;
+
+		if (!StringUtil.isEmpty(login)) {
+			try {
+				user = findUser(login);
+			} catch (EOSNotFoundException e) {
+				log.debug("Check for login: not found by login");
+			}
+
+			if (user != null) {
+				return user;
+			}
+		}
+
+		if (!StringUtil.isEmpty(email)) {
+			// Not found, try by tenant e-mail
+			user = entityToVo(userTenantDAO.findByEMail(email,
+					SessionContextManager.getCurrentTenantId()));
+			if (user != null) {
+				return user;
+			}
+
+			// Still not found, try by personal e-mail
+			entity = userDAO.findByEMail(email);
+			if (entity != null) {
+				user = findUser(entity.getLogin());
+			}
+		}
+
+		// not found or not found in the current tenant
+		if (user == null) {
 			throw new EOSException("User not found or invalid");
 		}
 

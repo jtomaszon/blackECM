@@ -74,4 +74,18 @@ public class EOSUserTenantDAO extends AbstractDAO<EOSUserTenantEntity> {
 				.setParameter(EOSUserTenantEntity.PARAM_STATE, states)
 				.setFirstResult(offset).setMaxResults(limit).getResultList();
 	}
+
+	public EOSUserTenantEntity findByEMail(String email, Long tenantId) {
+
+		try {
+			return em
+					.createNamedQuery(EOSUserTenantEntity.QUERY_FIND_BY_EMAIL,
+							EOSUserTenantEntity.class)
+					.setParameter(EOSUserTenantEntity.PARAM_EMAIL, email)
+					.setParameter(EOSUserTenantEntity.PARAM_TENANT, tenantId)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
 }

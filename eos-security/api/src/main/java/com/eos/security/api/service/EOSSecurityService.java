@@ -55,9 +55,15 @@ public interface EOSSecurityService {
 	/**
 	 * Perform the user login. This service also loads the
 	 * {@link SessionContext}.
+	 * <p>
+	 * First try to find the user by login, if not found, try to find by any of
+	 * his e-mails.
+	 * </p>
 	 * 
 	 * @param login
 	 *            The user login.
+	 * @param email
+	 *            The user personal or tenant e-mail.
 	 * @param password
 	 *            The user password.
 	 * @param keepConnected
@@ -65,8 +71,8 @@ public interface EOSSecurityService {
 	 * @throws EOSException
 	 *             If user not found or invalid password.
 	 */
-	public void login(String login, String password, boolean keepConnected)
-			throws EOSException;
+	public void login(String login, String email, String password,
+			boolean keepConnected) throws EOSException;
 
 	/**
 	 * Perform the user logout, also clean up the {@link SessionContext}.
