@@ -57,9 +57,10 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void testCreateUser() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSUser user = new EOSUser();
-		user.setLogin("user_create").setEmail("user@create.com")
+		user.setLogin("user-create").setEmail("user@create.com")
 				.setFirstName("Create F").setLastName("Create L")
 				.setNickName("Create N").setPersonalMail("create@personal.com");
 
@@ -71,7 +72,7 @@ public class EOSUserServiceTest {
 	@Test
 	public void testFindUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		EOSUser user = EOSTestUtil.createUser("find", null, svcUser);
 		EOSUser find = svcUser.findUser(user.getLogin());
 		Assert.assertNotNull("Find User", find);
@@ -81,7 +82,7 @@ public class EOSUserServiceTest {
 	@Test
 	public void testFindTenantUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		EOSUser user = EOSTestUtil.createUser("findtenant", null, svcUser);
 		EOSUser find = svcUser.findTenantUser(user.getLogin(), 99L);
 		Assert.assertNull("Find Tenant User other tenant", find);
@@ -94,7 +95,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void testFindUsers() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSUser user1 = EOSTestUtil.createUser("finds1", null, svcUser);
 		EOSUser user2 = EOSTestUtil.createUser("finds2", null, svcUser);
 
@@ -110,7 +112,7 @@ public class EOSUserServiceTest {
 	@Test
 	public void testUpdateUser() throws EOSDuplicatedEntryException,
 			EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		EOSUser user = EOSTestUtil.createUser("update", null, svcUser);
 		// Change names and emails
 		user.setFirstName("Updated F. Name").setLastName("Update L. Name")
@@ -133,7 +135,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void testListUser() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		EOSTestUtil.createUser("list-1", null, svcUser);
 		EOSTestUtil.createUser("list-2", null, svcUser);
 		List<EOSUser> users = svcUser.listUsers(null, 5, 0);
@@ -170,7 +173,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void createUserData() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		Map<String, String> userData = new HashMap<>(1);
 		userData.put("key", "value");
 
@@ -182,7 +186,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void updateUserData() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		Map<String, String> userData = new HashMap<>(2);
 		userData.put("key1", "value1");
 		userData.put("key2", "value2");
@@ -212,7 +217,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void listUserData() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		Map<String, String> userData = new HashMap<>(2);
 		userData.put("key1", "value1");
 		userData.put("key2", "value2");
@@ -226,7 +232,8 @@ public class EOSUserServiceTest {
 
 	@Test
 	public void listUserDataByKey() throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException {
+			EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException {
 		Map<String, String> userData = new HashMap<>(3);
 		userData.put("key1", "value1");
 		userData.put("key2", "value2");

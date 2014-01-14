@@ -115,15 +115,6 @@ public final class ValidationUtils {
 		return null;
 	}
 
-	public static EOSError validatePassword(String fieldName, String password,
-			boolean required) {
-		EOSError error = validateString(fieldName, password, required,
-				EntityFieldSizes.PASSWORD_MIN_SIZE, EntityFieldSizes.DATA_TINY);
-		// TODO validate password strength
-
-		return error;
-	}
-
 	private static final Pattern PATH_PATTERN = Pattern
 			.compile("[a-zA-Z0-9]+[a-zA-Z0-9.-]+");
 	private static final String PATH_ERROR = "Invalid characters";

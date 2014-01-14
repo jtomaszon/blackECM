@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import com.eos.common.EOSState;
 import com.eos.common.exception.EOSDuplicatedEntryException;
 import com.eos.common.exception.EOSNotFoundException;
+import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
 import com.eos.security.api.service.EOSGroupService;
@@ -82,7 +83,7 @@ public class UserServiceRest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateUser(@PathParam("login") String login, EOSUser user)
 			throws EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+			EOSNotFoundException, EOSValidationException {
 		svcUser.updateUser(user);
 	}
 
@@ -99,7 +100,7 @@ public class UserServiceRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public EOSUser createUser(EOSUserCreateData user)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException {
 		EOSUser ret = svcUser.createUser(user.getUser(), user.getUserData());
 		response.setStatus(Response.Status.CREATED.getStatusCode());
 		return ret;

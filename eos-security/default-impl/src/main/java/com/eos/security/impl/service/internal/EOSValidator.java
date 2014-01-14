@@ -105,4 +105,17 @@ public final class EOSValidator {
 
 		checkErrors(factory);
 	}
+
+	public static void validatePassword(String password)
+			throws EOSValidationException {
+		EOSErrorFactory factory = new EOSErrorFactory();
+
+		factory.addError(ValidationUtils.validateString("user password",
+				password, true, EntityFieldSizes.PASSWORD_MIN_SIZE,
+				EntityFieldSizes.DATA_TINY));
+		// TODO validate password strength, see:
+		// https://code.google.com/p/vt-middleware/wiki/vtpassword
+
+		checkErrors(factory);
+	}
 }

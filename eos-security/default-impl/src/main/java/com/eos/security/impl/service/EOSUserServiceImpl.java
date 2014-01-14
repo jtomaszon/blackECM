@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eos.common.EOSState;
 import com.eos.common.EOSUserType;
 import com.eos.common.exception.EOSDuplicatedEntryException;
+import com.eos.common.exception.EOSError;
+import com.eos.common.exception.EOSErrorCodes;
 import com.eos.common.exception.EOSException;
 import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSValidationException;
@@ -37,6 +39,7 @@ import com.eos.security.impl.model.EOSUserEntity;
 import com.eos.security.impl.model.EOSUserTenantDataEntity;
 import com.eos.security.impl.model.EOSUserTenantEntity;
 import com.eos.security.impl.service.internal.EOSKnownPermissions;
+import com.eos.security.impl.service.internal.EOSValidator;
 import com.eos.security.impl.session.SessionContextManager;
 
 /**
@@ -84,11 +87,12 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Transactional
 	public EOSUser createUser(EOSUser user, Map<String, String> userData)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
-		// TODO Validations and security
+			EOSUnauthorizedException, EOSValidationException {
+		// TODO security
 		EOSUserEntity entity = userDAO.checkedFind(user.getLogin());
 
 		if (entity == null) {
+			EOSValidator.validateUser(user);
 			log.debug("User entity not found, creating it");
 			entity = new EOSUserEntity();
 			entity.setLogin(user.getLogin()).setEmail(user.getPersonalMail())
@@ -204,8 +208,10 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Override
 	@Transactional
 	public void updateUser(EOSUser user) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException {
-		// TODO Validations and security
+			EOSUnauthorizedException, EOSNotFoundException,
+			EOSValidationException {
+		// TODO security
+		EOSValidator.validateUser(user);
 		EOSUserTenantEntity entity = userTenantDAO.findByLogin(user.getLogin(),
 				SessionContextManager.getCurrentTenantId());
 		// Find UserEntity, because the attached one in UserTenant isn't managed
@@ -263,11 +269,13 @@ public class EOSUserServiceImpl implements EOSUserService {
 			// Verify password match
 			String oldDigested = DigestUtils.md5Hex(oldPassword);
 			if (!oldDigested.equals(entity.getPassword())) {
-				// TODO set correct error code
-				throw new EOSValidationException("Password mismatch");
+				List<EOSError> errors = Arrays.asList(new EOSError(
+						EOSErrorCodes.INVALID_PASSWORD, "Invalid password"));
+				throw new EOSValidationException("Password mismatch", errors);
 			}
 		}
 
+		EOSValidator.validatePassword(newPassword);
 		entity.setPassword(newDigested);
 		userDAO.merge(entity);
 	}

@@ -86,7 +86,7 @@ public class EOSTestUtil {
 	public static EOSUser createUser(String prefix,
 			Map<String, String> userData, EOSUserService svcUser)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException {
+			EOSUnauthorizedException, EOSValidationException {
 		EOSUser user = new EOSUser();
 		user.setLogin(prefix + "-create").setEmail(prefix + "@create.com")
 				.setFirstName(prefix + " First").setLastName(prefix + " Last")

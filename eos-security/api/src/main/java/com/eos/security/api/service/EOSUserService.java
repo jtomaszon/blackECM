@@ -42,10 +42,13 @@ public interface EOSUserService {
 	 *             If the creator do not have permission for user creation.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can create other users.
+	 * @throws EOSValidationException
+	 *             If the user contains invalid fields. For login on number,
+	 *             characters, dot and hyphen are allowed.
 	 */
 	public EOSUser createUser(EOSUser user, Map<String, String> userData)
 			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException;
+			EOSUnauthorizedException, EOSValidationException;
 
 	/**
 	 * Finds the user with the given login.
@@ -110,9 +113,12 @@ public interface EOSUserService {
 	 * @throws EOSNotFoundException
 	 *             If not entity is found in the current tenant with the given
 	 *             login.
+	 * @throws EOSValidationException
+	 *             If the user contains invalid fields.
 	 */
 	public void updateUser(EOSUser user) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException;
+			EOSUnauthorizedException, EOSNotFoundException,
+			EOSValidationException;
 
 	/**
 	 * Delete a user, the user is marked as deleted.
