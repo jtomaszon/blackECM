@@ -11,7 +11,8 @@ package com.eos.common;
  */
 public enum EOSState {
 	/**
-	 * Entity not verified.
+	 * Entity not verified. Its is considered disabled, is active but is not
+	 * accessible or cannot perform any action.
 	 */
 	INACTIVE,
 	/**
@@ -19,12 +20,8 @@ public enum EOSState {
 	 */
 	ACTIVE,
 	/**
-	 * Entity removed, logical deletion
-	 */
-	REMOVED,
-	/**
-	 * Entity disabled, is active but is not accessible or cannot perform any
-	 * action.
+	 * Entity disabled, also known as logical deletion. Its is considered
+	 * disabled, is active but is not accessible or cannot perform any action.
 	 */
 	DISABLED;
 }

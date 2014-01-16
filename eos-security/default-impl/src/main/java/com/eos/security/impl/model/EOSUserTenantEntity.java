@@ -25,8 +25,7 @@ import com.eos.commons.jpa.EntityFieldSizes;
  * 
  */
 @Entity(name = "EOSUserTenant")
-@Table(name = "tbusertenant", uniqueConstraints = { @UniqueConstraint(columnNames = {
-		"login", "tenantid" }) })
+@Table(name = "tbusertenant", uniqueConstraints = { @UniqueConstraint(columnNames = { "login", "tenantid" }) })
 @NamedQueries({
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_FIND, query = "SELECT t FROM EOSUserTenant t "
 				+ "WHERE t.login = :login AND t.tenantId = :tenantId"),
@@ -35,7 +34,11 @@ import com.eos.commons.jpa.EntityFieldSizes;
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_FIND_BY_EMAIL, query = "SELECT t FROM EOSUserTenant t "
 				+ "WHERE t.tenantMail = :email AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_LIST, query = "SELECT t FROM EOSUserTenant t "
-				+ "WHERE t.state IN (:state) AND t.tenantId = :tenantId") })
+				+ "WHERE t.state IN (:state) AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSUserTenantEntity.QUERY_UPDATE_STATE, query = "UPDATE EOSUserTenant t "
+				+ "SET t.state = :state WHERE t.login = :login AND t.tenantId = :tenantId")
+
+})
 public class EOSUserTenantEntity extends AbstractTenantEntity {
 
 	private static final long serialVersionUID = 3877045991804448137L;
@@ -44,6 +47,7 @@ public class EOSUserTenantEntity extends AbstractTenantEntity {
 	public static final String QUERY_FIND_MULTIPLE = "EOSUserTenant.FindUsersByLogin";
 	public static final String QUERY_FIND_BY_EMAIL = "EOSUserTenant.FindByEMail";
 	public static final String QUERY_LIST = "EOSUserTenant.ListAll";
+	public static final String QUERY_UPDATE_STATE = "EOSUserTenant.UpdateState";
 
 	public static final String PARAM_LOGIN = "login";
 	public static final String PARAM_STATE = "state";
@@ -217,9 +221,8 @@ public class EOSUserTenantEntity extends AbstractTenantEntity {
 	 */
 	@Override
 	public String toString() {
-		return "EOSUserTenantEntity [login=" + login + ", user=" + user
-				+ ", nickName=" + nickName + ", tenantMail=" + tenantMail
-				+ ", getId()=" + getId() + ", state=" + state + "]";
+		return "EOSUserTenantEntity [login=" + login + ", user=" + user + ", nickName=" + nickName + ", tenantMail="
+				+ tenantMail + ", getId()=" + getId() + ", state=" + state + "]";
 	}
 
 }

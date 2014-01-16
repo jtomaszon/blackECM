@@ -73,33 +73,43 @@ public class UserServiceRest {
 	@Path("/{login}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSUser findUser(@PathParam("login") String login)
-			throws EOSNotFoundException {
+	public EOSUser findUser(@PathParam("login") String login) throws EOSNotFoundException {
 		return svcUser.findUser(login);
 	}
 
 	@Path("/{login}")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateUser(@PathParam("login") String login, EOSUser user)
-			throws EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException, EOSValidationException {
+	public void updateUser(@PathParam("login") String login, EOSUser user) throws EOSForbiddenException,
+			EOSUnauthorizedException, EOSNotFoundException, EOSValidationException {
 		svcUser.updateUser(user);
 	}
 
 	@Path("/{login}")
 	@DELETE
-	public void deleteUser(@PathParam("login") String login)
-			throws EOSForbiddenException, EOSUnauthorizedException {
-		svcUser.deleteUser(login);
+	public void disableUser(@PathParam("login") String login) throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
+		svcUser.updateUserState(login, EOSState.DISABLED);
+	}
+
+	@Path("/{login}/active")
+	@PUT
+	public void activeUser(@PathParam("login") String login) throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
+		svcUser.updateUserState(login, EOSState.ACTIVE);
+	}
+
+	@Path("/{login}/purge")
+	@DELETE
+	public void purgeUser(@PathParam("login") String login) throws EOSForbiddenException, EOSUnauthorizedException {
+		svcUser.purgeUser(login);
 	}
 
 	@Path("")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public EOSUser createUser(EOSUserCreateData user)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
+	public EOSUser createUser(EOSUserCreateData user) throws EOSDuplicatedEntryException, EOSForbiddenException,
 			EOSUnauthorizedException, EOSValidationException {
 		EOSUser ret = svcUser.createUser(user.getUser(), user.getUserData());
 		response.setStatus(Response.Status.CREATED.getStatusCode());
@@ -117,8 +127,7 @@ public class UserServiceRest {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EOSUser> listUsers(@QueryParam("state") List<EOSState> states,
-			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset) {
+			@QueryParam("limit") @DefaultValue("20") int limit, @QueryParam("offset") @DefaultValue("0") int offset) {
 		return svcUser.listUsers(states, limit, offset);
 	}
 
@@ -127,8 +136,7 @@ public class UserServiceRest {
 	@Path("/{login}/permission")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Map<String, Boolean> hasPermissions(
-			@PathParam("login") String login,
+	public Map<String, Boolean> hasPermissions(@PathParam("login") String login,
 			@QueryParam("permission") List<String> permissions) {
 		return svcUser.hasPermission(login, permissions);
 	}
@@ -139,8 +147,7 @@ public class UserServiceRest {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EOSGroup> listUserGroups(@PathParam("login") String login,
-			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset)
+			@QueryParam("limit") @DefaultValue("20") int limit, @QueryParam("offset") @DefaultValue("0") int offset)
 			throws EOSForbiddenException {
 		return svcGroup.listUserGroups(login, limit, offset);
 	}
@@ -148,8 +155,7 @@ public class UserServiceRest {
 	@Path("/{login}/groups")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addUserToGroups(@PathParam("login") String login,
-			List<Long> groups) throws EOSForbiddenException,
+	public void addUserToGroups(@PathParam("login") String login, List<Long> groups) throws EOSForbiddenException,
 			EOSUnauthorizedException {
 		svcGroup.addUsersInGroup(groups, login);
 	}
@@ -157,8 +163,7 @@ public class UserServiceRest {
 	@Path("/{login}/groups")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeUserFromGroups(@PathParam("login") String login,
-			List<Long> groups) throws EOSForbiddenException,
+	public void removeUserFromGroups(@PathParam("login") String login, List<Long> groups) throws EOSForbiddenException,
 			EOSUnauthorizedException {
 		svcGroup.removeUserFromGroups(groups, login);
 	}
@@ -169,8 +174,7 @@ public class UserServiceRest {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EOSRole> listUserRoles(@PathParam("login") String login,
-			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset)
+			@QueryParam("limit") @DefaultValue("20") int limit, @QueryParam("offset") @DefaultValue("0") int offset)
 			throws EOSForbiddenException {
 		return svcRole.listUserRoles(login, limit, offset);
 	}
@@ -178,8 +182,7 @@ public class UserServiceRest {
 	@Path("/{login}/roles")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addUserToRoles(@PathParam("login") String login,
-			List<String> roles) throws EOSForbiddenException,
+	public void addUserToRoles(@PathParam("login") String login, List<String> roles) throws EOSForbiddenException,
 			EOSUnauthorizedException {
 		svcRole.addRolesToUser(login, roles);
 	}
@@ -187,8 +190,7 @@ public class UserServiceRest {
 	@Path("/{login}/roles")
 	@DELETE
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeUserFromRoles(@PathParam("login") String login,
-			List<String> roles) throws EOSForbiddenException,
+	public void removeUserFromRoles(@PathParam("login") String login, List<String> roles) throws EOSForbiddenException,
 			EOSUnauthorizedException {
 		svcRole.removeRolesFromUser(login, roles);
 	}
@@ -198,27 +200,23 @@ public class UserServiceRest {
 	@Path("/{login}/data")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateUserData(@PathParam("login") String login,
-			Map<String, String> userData) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+	public void updateUserData(@PathParam("login") String login, Map<String, String> userData)
+			throws EOSForbiddenException, EOSUnauthorizedException {
 		svcUser.updateUserData(login, userData);
 	}
 
 	@Path("/{login}/data")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Map<String, String> listUserData(@PathParam("login") String login,
-			List<String> keys) {
+	public Map<String, String> listUserData(@PathParam("login") String login, List<String> keys) {
 		return svcUser.listUserData(login, keys);
 	}
 
 	@Path("/{login}/data")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Map<String, String> listAllUserData(
-			@PathParam("login") String login,
-			@QueryParam("limit") @DefaultValue("20") int limit,
-			@QueryParam("offset") @DefaultValue("0") int offset) {
+	public Map<String, String> listAllUserData(@PathParam("login") String login,
+			@QueryParam("limit") @DefaultValue("20") int limit, @QueryParam("offset") @DefaultValue("0") int offset) {
 		return svcUser.listUserData(login, limit, offset);
 	}
 

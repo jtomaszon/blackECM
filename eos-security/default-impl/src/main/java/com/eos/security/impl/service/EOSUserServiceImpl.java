@@ -51,8 +51,7 @@ import com.eos.security.impl.session.SessionContextManager;
 @Service
 public class EOSUserServiceImpl implements EOSUserService {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(EOSUserServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(EOSUserServiceImpl.class);
 
 	private EOSUserDAO userDAO;
 	private EOSUserTenantDAO userTenantDAO;
@@ -85,9 +84,8 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	@Override
 	@Transactional
-	public EOSUser createUser(EOSUser user, Map<String, String> userData)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException, EOSValidationException {
+	public EOSUser createUser(EOSUser user, Map<String, String> userData) throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException, EOSValidationException {
 		// TODO security
 		EOSUserEntity entity = userDAO.checkedFind(user.getLogin());
 
@@ -95,19 +93,17 @@ public class EOSUserServiceImpl implements EOSUserService {
 			EOSValidator.validateUser(user);
 			log.debug("User entity not found, creating it");
 			entity = new EOSUserEntity();
-			entity.setLogin(user.getLogin()).setEmail(user.getPersonalMail())
-					.setFirstName(user.getFirstName())
+			entity.setLogin(user.getLogin()).setEmail(user.getPersonalMail()).setFirstName(user.getFirstName())
 					.setLastName(user.getLastName());
 			// Create user
 			userDAO.persist(entity);
 		}
 
-		EOSUserTenantEntity userTenant = addUserToTenant(user.getLogin(),
-				user.getNickName(), user.getEmail(), user.getState());
+		EOSUserTenantEntity userTenant = addUserToTenant(user.getLogin(), user.getNickName(), user.getEmail(),
+				user.getState());
 
 		// Override state and tenant
-		user.setState(userTenant.getState()).setTenantId(
-				userTenant.getTenantId());
+		user.setState(userTenant.getState()).setTenantId(userTenant.getTenantId());
 
 		// User data
 		if (userData != null && !userData.isEmpty()) {
@@ -126,8 +122,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 * @param state
 	 * @return The user tenant created.
 	 */
-	private EOSUserTenantEntity addUserToTenant(String login, String nickName,
-			String email, EOSState state) {
+	private EOSUserTenantEntity addUserToTenant(String login, String nickName, String email, EOSState state) {
 		log.debug("Adding user " + login + " to current tenant");
 		EOSUserTenantEntity entity = new EOSUserTenantEntity();
 		entity.setLogin(login).setNickName(nickName).setTenantMail(email);
@@ -155,8 +150,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public EOSUser findTenantUser(String login, Long tenantId)
-			throws EOSNotFoundException {
+	public EOSUser findTenantUser(String login, Long tenantId) throws EOSNotFoundException {
 		// TODO Validations, cache and security
 		return entityToVo(userTenantDAO.findByLogin(login, tenantId));
 	}
@@ -191,8 +185,8 @@ public class EOSUserServiceImpl implements EOSUserService {
 			states = Arrays.asList(EOSState.values());
 		}
 
-		List<EOSUserTenantEntity> entities = userTenantDAO.list(states,
-				SessionContextManager.getCurrentTenantId(), limit, offset);
+		List<EOSUserTenantEntity> entities = userTenantDAO.list(states, SessionContextManager.getCurrentTenantId(),
+				limit, offset);
 		List<EOSUser> users = new ArrayList<>(entities.size());
 
 		for (EOSUserTenantEntity entity : entities) {
@@ -207,8 +201,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	@Override
 	@Transactional
-	public void updateUser(EOSUser user) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException,
+	public void updateUser(EOSUser user) throws EOSForbiddenException, EOSUnauthorizedException, EOSNotFoundException,
 			EOSValidationException {
 		// TODO security
 		EOSValidator.validateUser(user);
@@ -218,29 +211,41 @@ public class EOSUserServiceImpl implements EOSUserService {
 		EOSUserEntity userEntity = userDAO.checkedFind(user.getLogin());
 
 		if (entity == null || userEntity == null) {
-			throw new EOSNotFoundException("User not found with login: "
-					+ user.getLogin());
+			throw new EOSNotFoundException("User not found with login: " + user.getLogin());
 		}
 
 		// UserTenantEntity
 		entity.setNickName(user.getNickName()).setTenantMail(user.getEmail());
 		// UserEntity
-		userEntity.setEmail(user.getPersonalMail())
-				.setFirstName(user.getFirstName())
-				.setLastName(user.getLastName());
+		userEntity.setEmail(user.getPersonalMail()).setFirstName(user.getFirstName()).setLastName(user.getLastName());
 
 		userDAO.merge(userEntity);
 		userTenantDAO.merge(entity);
 	}
 
 	/**
-	 * @see com.eos.security.api.service.EOSUserService#deleteUser(java.lang.String)
+	 * @see com.eos.security.api.service.EOSUserService#updateUserState(java.lang.String,
+	 *      com.eos.common.EOSState)
 	 */
 	@Override
 	@Transactional
-	public void deleteUser(String login) throws EOSForbiddenException,
-			EOSUnauthorizedException {
-		// TODO Auto-generated method stub
+	public void updateUserState(String login, EOSState state) throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
+		// TODO security and messaging
+		EOSUser user = findUser(login);
+
+		if (user.getState() != state) {
+			userTenantDAO.updateState(login, SessionContextManager.getCurrentTenantId(), state);
+		}
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSUserService#purgeUser(java.lang.String)
+	 */
+	@Override
+	@Transactional
+	public void purgeUser(String login) throws EOSForbiddenException, EOSUnauthorizedException {
+		// TODO security and messaging
 
 	}
 
@@ -250,8 +255,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	@Override
 	@Transactional
-	public void setUserPassword(String login, String oldPassword,
-			String newPassword) throws EOSForbiddenException,
+	public void setUserPassword(String login, String oldPassword, String newPassword) throws EOSForbiddenException,
 			EOSUnauthorizedException, EOSValidationException {
 		EOSUserEntity entity = userDAO.checkedFind(login);
 		String newDigested = DigestUtils.md5Hex(newPassword);
@@ -262,15 +266,13 @@ public class EOSUserServiceImpl implements EOSUserService {
 			// Verify credentials
 			svcSecurity.checkLogged();
 			if (!SessionContextManager.getCurrentUserLogin().equals(login)) {
-				throw new EOSForbiddenException(
-						"You cannot change the password for other users!");
+				throw new EOSForbiddenException("You cannot change the password for other users!");
 			}
 
 			// Verify password match
 			String oldDigested = DigestUtils.md5Hex(oldPassword);
 			if (!oldDigested.equals(entity.getPassword())) {
-				List<EOSError> errors = Arrays.asList(new EOSError(
-						EOSErrorCodes.INVALID_PASSWORD, "Invalid password"));
+				List<EOSError> errors = Arrays.asList(new EOSError(EOSErrorCodes.INVALID_PASSWORD, "Invalid password"));
 				throw new EOSValidationException("Password mismatch", errors);
 			}
 		}
@@ -285,13 +287,11 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.lang.String, java.lang.String)
 	 */
 	@Override
-	public EOSUser checkForLogin(String login, String email, String password)
-			throws EOSException {
+	public EOSUser checkForLogin(String login, String email, String password) throws EOSException {
 		EOSUserEntity entity = null;
 		EOSUser user = findUser(login, email, entity);
 
-		if (user.getState() != EOSState.ACTIVE
-				&& user.getType() != EOSUserType.USER) {
+		if (user.getState() != EOSState.ACTIVE && user.getType() != EOSUserType.USER) {
 			throw new EOSException("User not found or invalid");
 		}
 
@@ -307,8 +307,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 		return user;
 	}
 
-	private EOSUser findUser(String login, String email, EOSUserEntity entity)
-			throws EOSException {
+	private EOSUser findUser(String login, String email, EOSUserEntity entity) throws EOSException {
 		EOSUser user = null;
 
 		if (!StringUtil.isEmpty(login)) {
@@ -324,9 +323,9 @@ public class EOSUserServiceImpl implements EOSUserService {
 		}
 
 		if (!StringUtil.isEmpty(email)) {
+			log.warn("Finding user by tenant e-mail: " + email);
 			// Not found, try by tenant e-mail
-			user = entityToVo(userTenantDAO.findByEMail(email,
-					SessionContextManager.getCurrentTenantId()));
+			user = entityToVo(userTenantDAO.findByEMail(email, SessionContextManager.getCurrentTenantId()));
 			if (user != null) {
 				return user;
 			}
@@ -334,6 +333,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 			// Still not found, try by personal e-mail
 			entity = userDAO.findByEMail(email);
 			if (entity != null) {
+				log.warn("Finding user by personal e-mail: " + email);
 				user = findUser(entity.getLogin());
 			}
 		}
@@ -351,14 +351,10 @@ public class EOSUserServiceImpl implements EOSUserService {
 			return null;
 		}
 
-		return new EOSUser().setLogin(entity.getLogin())
-				.setFirstName(entity.getUser().getFirstName())
-				.setLastName(entity.getUser().getLastName())
-				.setPersonalMail(entity.getUser().getEmail())
-				.setNickName(entity.getNickName())
-				.setEmail(entity.getTenantMail()).setState(entity.getState())
-				.setType(entity.getUser().getType())
-				.setTenantId(entity.getTenantId());
+		return new EOSUser().setLogin(entity.getLogin()).setFirstName(entity.getUser().getFirstName())
+				.setLastName(entity.getUser().getLastName()).setPersonalMail(entity.getUser().getEmail())
+				.setNickName(entity.getNickName()).setEmail(entity.getTenantMail()).setState(entity.getState())
+				.setType(entity.getUser().getType()).setTenantId(entity.getTenantId());
 
 	}
 
@@ -370,8 +366,8 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	@Override
 	@Transactional
-	public void updateUserData(String login, Map<String, String> userData)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void updateUserData(String login, Map<String, String> userData) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security check
 		final Long tenantId = SessionContextManager.getCurrentTenantId();
 		List<String> keys = new ArrayList<>(userData.size());
@@ -389,8 +385,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 				log.debug("User Tenant data set for removal: " + entry.getKey());
 			} else {
 				// Update
-				userTenantDataDAO.updateUserData(login, entry.getKey(),
-						entry.getValue(), tenantId);
+				userTenantDataDAO.updateUserData(login, entry.getKey(), entry.getValue(), tenantId);
 				log.debug("User Tenant data [" + entry.getKey() + "] updated");
 			}
 			// Remove key pair value from tenantData map
@@ -412,8 +407,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 		log.debug("Adding user data to user " + login);
 
 		for (Entry<String, String> entry : userData.entrySet()) {
-			EOSUserTenantDataEntity entity = new EOSUserTenantDataEntity()
-					.setLogin(login).setKey(entry.getKey())
+			EOSUserTenantDataEntity entity = new EOSUserTenantDataEntity().setLogin(login).setKey(entry.getKey())
 					.setValue(entry.getValue());
 			userTenantDataDAO.persist(entity);
 		}
@@ -427,8 +421,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public String findUserData(String login, String key) {
 		// TODO security check
-		return userTenantDataDAO.findUserData(login, key,
-				SessionContextManager.getCurrentTenantId());
+		return userTenantDataDAO.findUserData(login, key, SessionContextManager.getCurrentTenantId());
 	}
 
 	/**
@@ -439,8 +432,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public Map<String, String> listUserData(String login, List<String> keys) {
 		// TODO security check
-		return entitiesToMap(userTenantDataDAO.listUserData(login, keys,
-				SessionContextManager.getCurrentTenantId()));
+		return entitiesToMap(userTenantDataDAO.listUserData(login, keys, SessionContextManager.getCurrentTenantId()));
 	}
 
 	/**
@@ -451,12 +443,11 @@ public class EOSUserServiceImpl implements EOSUserService {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public Map<String, String> listUserData(String login, int limit, int offset) {
 		// TODO security check
-		return entitiesToMap(userTenantDataDAO.listUserData(login, limit,
-				offset, SessionContextManager.getCurrentTenantId()));
+		return entitiesToMap(userTenantDataDAO.listUserData(login, limit, offset,
+				SessionContextManager.getCurrentTenantId()));
 	}
 
-	private Map<String, String> entitiesToMap(
-			List<EOSUserTenantDataEntity> entities) {
+	private Map<String, String> entitiesToMap(List<EOSUserTenantDataEntity> entities) {
 		Map<String, String> userData = new HashMap<>(entities.size());
 
 		for (EOSUserTenantDataEntity entity : entities) {
@@ -473,8 +464,7 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 *      java.util.List)
 	 */
 	@Override
-	public Map<String, Boolean> hasPermission(String login,
-			List<String> permissions) {
+	public Map<String, Boolean> hasPermission(String login, List<String> permissions) {
 		// TODO Auto-generated method stub
 		return null;
 	}

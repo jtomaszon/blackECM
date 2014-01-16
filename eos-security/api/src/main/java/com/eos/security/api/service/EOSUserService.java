@@ -46,9 +46,8 @@ public interface EOSUserService {
 	 *             If the user contains invalid fields. For login on number,
 	 *             characters, dot and hyphen are allowed.
 	 */
-	public EOSUser createUser(EOSUser user, Map<String, String> userData)
-			throws EOSDuplicatedEntryException, EOSForbiddenException,
-			EOSUnauthorizedException, EOSValidationException;
+	public EOSUser createUser(EOSUser user, Map<String, String> userData) throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException, EOSValidationException;
 
 	/**
 	 * Finds the user with the given login.
@@ -75,8 +74,7 @@ public interface EOSUserService {
 	 *             If not entity is found in the given tenant with the given
 	 *             login.
 	 */
-	public EOSUser findTenantUser(String login, Long tenantId)
-			throws EOSNotFoundException;
+	public EOSUser findTenantUser(String login, Long tenantId) throws EOSNotFoundException;
 
 	/**
 	 * Find users by their login.
@@ -102,7 +100,7 @@ public interface EOSUserService {
 	public List<EOSUser> listUsers(List<EOSState> states, int limit, int offset);
 
 	/**
-	 * Update user info.
+	 * Update user info. User state is not update through this method.
 	 * 
 	 * @param user
 	 *            User info.
@@ -116,22 +114,40 @@ public interface EOSUserService {
 	 * @throws EOSValidationException
 	 *             If the user contains invalid fields.
 	 */
-	public void updateUser(EOSUser user) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException,
+	public void updateUser(EOSUser user) throws EOSForbiddenException, EOSUnauthorizedException, EOSNotFoundException,
 			EOSValidationException;
 
 	/**
-	 * Delete a user, the user is marked as deleted.
+	 * Change the user state.
+	 * 
+	 * @param login
+	 *            User login.
+	 * @param state
+	 *            The new user state.
+	 * @throws EOSForbiddenException
+	 *             If the logged user do not have permission for user state
+	 *             update.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can update user states.
+	 * @throws EOSNotFoundException
+	 *             If no entity is found in the current tenant with the given
+	 *             login.
+	 */
+	public void updateUserState(String login, EOSState state) throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException;
+
+	/**
+	 * Delete a user, the user is physically deleted, no restore actions is
+	 * possible.
 	 * 
 	 * @param login
 	 *            User login.
 	 * @throws EOSForbiddenException
 	 *             If the creator do not have permission for user removal.
 	 * @throws EOSUnauthorizedException
-	 *             Only authenticated users can create other users.
+	 *             Only authenticated users can purge other users.
 	 */
-	public void deleteUser(String login) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+	public void purgeUser(String login) throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * Updates a user password. The oldPassword parameter is required if the
@@ -149,8 +165,7 @@ public interface EOSUserService {
 	 *             If the parameters oldPassword and newPassword doesn't match
 	 *             for logged users changing their passwords.
 	 */
-	public void setUserPassword(String login, String oldPassword,
-			String newPassword) throws EOSForbiddenException,
+	public void setUserPassword(String login, String oldPassword, String newPassword) throws EOSForbiddenException,
 			EOSUnauthorizedException, EOSValidationException;
 
 	/**
@@ -173,8 +188,7 @@ public interface EOSUserService {
 	 *             If the user is not found, the password is not correct or the
 	 *             user do not have a valid state or type for login.
 	 */
-	public EOSUser checkForLogin(String login, String email, String password)
-			throws EOSException;
+	public EOSUser checkForLogin(String login, String email, String password) throws EOSException;
 
 	// User Data
 
@@ -192,8 +206,8 @@ public interface EOSUserService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can update user data.
 	 */
-	public void updateUserData(String login, Map<String, String> userData)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void updateUserData(String login, Map<String, String> userData) throws EOSForbiddenException,
+			EOSUnauthorizedException;
 
 	/**
 	 * Find a user data that has the given key.
@@ -241,6 +255,5 @@ public interface EOSUserService {
 	 *            Permissions list to be verified.
 	 * @return Map indicating which permissions the user has.
 	 */
-	public Map<String, Boolean> hasPermission(String login,
-			List<String> permissions);
+	public Map<String, Boolean> hasPermission(String login, List<String> permissions);
 }
