@@ -29,6 +29,8 @@ import com.eos.common.exception.EOSValidationException;
 import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSGroupService;
+import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
 import com.eos.security.api.vo.EOSUser;
@@ -38,6 +40,7 @@ import com.eos.security.impl.dao.EOSUserTenantDataDAO;
 import com.eos.security.impl.model.EOSUserEntity;
 import com.eos.security.impl.model.EOSUserTenantDataEntity;
 import com.eos.security.impl.model.EOSUserTenantEntity;
+import com.eos.security.impl.service.internal.EOSErrorFactory;
 import com.eos.security.impl.service.internal.EOSKnownPermissions;
 import com.eos.security.impl.service.internal.EOSValidator;
 import com.eos.security.impl.session.SessionContextManager;
@@ -53,30 +56,18 @@ public class EOSUserServiceImpl implements EOSUserService {
 
 	private static final Logger log = LoggerFactory.getLogger(EOSUserServiceImpl.class);
 
+	@Autowired
 	private EOSUserDAO userDAO;
+	@Autowired
 	private EOSUserTenantDAO userTenantDAO;
+	@Autowired
 	private EOSUserTenantDataDAO userTenantDataDAO;
+	@Autowired
 	private EOSSecurityService svcSecurity;
-
 	@Autowired
-	public void setUserDAO(EOSUserDAO userDAO) {
-		this.userDAO = userDAO;
-	}
-
+	private EOSGroupService svcGroup;
 	@Autowired
-	public void setUserTenantDAO(EOSUserTenantDAO userTenantDAO) {
-		this.userTenantDAO = userTenantDAO;
-	}
-
-	@Autowired
-	public void setUserTenantDataDAO(EOSUserTenantDataDAO userTenantDataDAO) {
-		this.userTenantDataDAO = userTenantDataDAO;
-	}
-
-	@Autowired
-	public void setsecurityservice(EOSSecurityService svcSecurity) {
-		this.svcSecurity = svcSecurity;
-	}
+	private EOSRoleService svcRole;
 
 	/**
 	 * @see com.eos.security.api.service.EOSUserService#createUser(com.eos.security.api.vo.EOSUser,
@@ -244,9 +235,26 @@ public class EOSUserServiceImpl implements EOSUserService {
 	 */
 	@Override
 	@Transactional
-	public void purgeUser(String login) throws EOSForbiddenException, EOSUnauthorizedException {
+	public void purgeUser(String login) throws EOSForbiddenException, EOSUnauthorizedException, EOSNotFoundException {
 		// TODO security and messaging
+		// Only disabled users can be deleted
+		if (findUser(login).getState() != EOSState.DISABLED) {
+			throw new EOSForbiddenException("Invalid state for removal", EOSErrorFactory.build()
+					.addError(EOSErrorCodes.INVALID_STATE, "Only users with DISABLED state can be purged").getErrors());
+		}
 
+		final Long tenantId = SessionContextManager.getCurrentTenantId();
+		// First remove user from all groups and roles
+		svcGroup.removeGroupsByUser(login);
+		svcRole.removeRolesByUser(login);
+		// Remove all user data
+		userTenantDataDAO.clearUserData(login, tenantId);
+		// Remove user from current tenant
+		userTenantDAO.deleteUser(login, tenantId);
+		// If the user do exists on other tenants, delete global reference
+		if (userTenantDAO.countUsers(login) == 0) {
+			userDAO.deleteUser(login);
+		}
 	}
 
 	/**

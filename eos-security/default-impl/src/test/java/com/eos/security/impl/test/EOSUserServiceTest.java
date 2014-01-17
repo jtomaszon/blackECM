@@ -25,8 +25,12 @@ import com.eos.common.exception.EOSNotFoundException;
 import com.eos.common.exception.EOSValidationException;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSGroupService;
+import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSUserService;
+import com.eos.security.api.vo.EOSGroup;
+import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSUserTenantDAO;
 import com.eos.security.impl.test.util.EOSTestUtil;
@@ -49,6 +53,10 @@ public class EOSUserServiceTest {
 	private EOSSecurityService svcSecurity;
 	@Autowired
 	private EOSUserTenantDAO userTenantDAO;
+	@Autowired
+	private EOSGroupService svcGroup;
+	@Autowired
+	private EOSRoleService svcRole;
 
 	@Before
 	public void setUp() throws EOSException {
@@ -128,8 +136,28 @@ public class EOSUserServiceTest {
 	}
 
 	@Test
-	public void testPurgeUser() {
-		// TODO
+	public void testPurgeUser() throws EOSDuplicatedEntryException, EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException, EOSNotFoundException {
+		Map<String, String> userData = new HashMap<>(2);
+		userData.put("key1", "value1");
+		userData.put("key2", "value2");
+		EOSUser user = EOSTestUtil.createUser("purgeUser", userData, svcUser);
+		List<String> logins = Arrays.asList(user.getLogin());
+		// Create user relations
+		EOSGroup group = EOSTestUtil.createGroup("purgeUser", svcGroup);
+		EOSRole role = EOSTestUtil.createRole("purgeUser", svcRole);
+		svcGroup.addUsersToGroup(group.getId(), logins);
+		svcRole.addUsersToRole(role.getCode(), logins);
+		// disable user
+		svcUser.updateUserState(user.getLogin(), EOSState.DISABLED);
+		// Purge it and validate
+		svcUser.purgeUser(user.getLogin());
+		try {
+			user = svcUser.findUser(user.getLogin());
+			Assert.assertNull("Purge User: find purged", user);
+		} catch (EOSNotFoundException e) {
+			// exception expected :)
+		}
 	}
 
 	@Test

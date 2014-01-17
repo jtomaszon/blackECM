@@ -17,21 +17,20 @@ import javax.persistence.UniqueConstraint;
  * 
  */
 @Entity(name = "EOSRoleUser")
-@Table(name = "tbroleuser", uniqueConstraints = { @UniqueConstraint(columnNames = {
-		"rolecode", "userlogin", "tenantid" }) })
+@Table(name = "tbroleuser", uniqueConstraints = { @UniqueConstraint(columnNames = { "rolecode", "userlogin", "tenantid" }) })
 @NamedQueries({
 		@NamedQuery(name = EOSRoleUserEntity.QUERY_FIND, query = "SELECT t FROM EOSRoleUser t "
 				+ "WHERE t.userLogin = :login AND t.roleCode = :code AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSRoleUserEntity.QUERY_LIST_USERS, query = "SELECT t.userLogin FROM EOSRoleUser t "
-				+ "WHERE t.roleCode = :code AND t.tenantId = :tenantId "
-				+ "ORDER BY t.userLogin ASC"),
+				+ "WHERE t.roleCode = :code AND t.tenantId = :tenantId " + "ORDER BY t.userLogin ASC"),
 		@NamedQuery(name = EOSRoleUserEntity.QUERY_LIST_ROLES, query = "SELECT t.roleCode FROM EOSRoleUser t "
-				+ "WHERE t.userLogin = :login AND t.tenantId = :tenantId "
-				+ "ORDER BY t,roleCode ASC"),
+				+ "WHERE t.userLogin = :login AND t.tenantId = :tenantId " + "ORDER BY t,roleCode ASC"),
 		@NamedQuery(name = EOSRoleUserEntity.QUERY_DELETE_USERS, query = "DELETE FROM EOSRoleUser t "
 				+ "WHERE t.roleCode = :code AND t.userLogin IN (:login) AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSRoleUserEntity.QUERY_DELETE_ROLES, query = "DELETE FROM EOSRoleUser t "
-				+ "WHERE t.roleCode IN (:code) AND t.userLogin = :login AND t.tenantId = :tenantId")
+				+ "WHERE t.roleCode IN (:code) AND t.userLogin = :login AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSRoleUserEntity.QUERY_DELETE_BY_USER, query = "DELETE FROM EOSRoleUser t "
+				+ "WHERE t.userLogin = :login AND t.tenantId = :tenantId")
 
 })
 public class EOSRoleUserEntity extends AbstractTenantEntity {
@@ -43,6 +42,7 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 	public static final String QUERY_LIST_ROLES = "EOSRoleUser.ListRolesByUUser";
 	public static final String QUERY_DELETE_USERS = "EOSRoleUser.RemoveUsersFromRole";
 	public static final String QUERY_DELETE_ROLES = "EOSRoleUser.RemoveRolesFromUser";
+	public static final String QUERY_DELETE_BY_USER = "EOSRoleUser.DeleteByUser";
 
 	public static final String PARAM_USER = "login";
 	public static final String PARAM_ROLE = "code";
@@ -99,10 +99,8 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result
-				+ ((roleCode == null) ? 0 : roleCode.hashCode());
-		result = prime * result
-				+ ((userLogin == null) ? 0 : userLogin.hashCode());
+		result = prime * result + ((roleCode == null) ? 0 : roleCode.hashCode());
+		result = prime * result + ((userLogin == null) ? 0 : userLogin.hashCode());
 		return result;
 	}
 
@@ -136,8 +134,8 @@ public class EOSRoleUserEntity extends AbstractTenantEntity {
 	 */
 	@Override
 	public String toString() {
-		return "EOSRoleUserEntity [userLogin=" + userLogin + ", roleCode="
-				+ roleCode + ", getTenantId()=" + getTenantId() + "]";
+		return "EOSRoleUserEntity [userLogin=" + userLogin + ", roleCode=" + roleCode + ", getTenantId()="
+				+ getTenantId() + "]";
 	}
 
 }

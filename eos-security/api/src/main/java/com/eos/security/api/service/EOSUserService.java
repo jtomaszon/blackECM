@@ -137,17 +137,27 @@ public interface EOSUserService {
 			EOSNotFoundException;
 
 	/**
+	 * <p>
 	 * Delete a user, the user is physically deleted, no restore actions is
 	 * possible.
+	 * </p>
+	 * <p>
+	 * If true and the user DO NOT exists on other tenant, the global user data
+	 * will be also purged.
+	 * </p>
 	 * 
 	 * @param login
 	 *            User login.
 	 * @throws EOSForbiddenException
-	 *             If the creator do not have permission for user removal.
+	 *             If the logged user do not have permission for user removal or
+	 *             user current state isn't {@link EOSState#DISABLED}.
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can purge other users.
+	 * @throws EOSNotFoundException
+	 *             If no entity is found in the current tenant with the given
+	 *             login.
 	 */
-	public void purgeUser(String login) throws EOSForbiddenException, EOSUnauthorizedException;
+	public void purgeUser(String login) throws EOSForbiddenException, EOSUnauthorizedException, EOSNotFoundException;
 
 	/**
 	 * Updates a user password. The oldPassword parameter is required if the

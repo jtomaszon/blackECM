@@ -36,7 +36,11 @@ import com.eos.commons.jpa.EntityFieldSizes;
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_LIST, query = "SELECT t FROM EOSUserTenant t "
 				+ "WHERE t.state IN (:state) AND t.tenantId = :tenantId"),
 		@NamedQuery(name = EOSUserTenantEntity.QUERY_UPDATE_STATE, query = "UPDATE EOSUserTenant t "
-				+ "SET t.state = :state WHERE t.login = :login AND t.tenantId = :tenantId")
+				+ "SET t.state = :state WHERE t.login = :login AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSUserTenantEntity.QUERY_DELETE_USER, query = "DELETE FROM EOSUserTenant t "
+				+ "WHERE t.login = :login AND t.tenantId = :tenantId"),
+		@NamedQuery(name = EOSUserTenantEntity.QUERY_COUNT_BY_LOGIN, query = "SELECT count(login) FROM EOSUserTenant t "
+				+ "WHERE t.login = :login")
 
 })
 public class EOSUserTenantEntity extends AbstractTenantEntity {
@@ -48,6 +52,8 @@ public class EOSUserTenantEntity extends AbstractTenantEntity {
 	public static final String QUERY_FIND_BY_EMAIL = "EOSUserTenant.FindByEMail";
 	public static final String QUERY_LIST = "EOSUserTenant.ListAll";
 	public static final String QUERY_UPDATE_STATE = "EOSUserTenant.UpdateState";
+	public static final String QUERY_DELETE_USER = "EOSUserTenant.DeleteUser";
+	public static final String QUERY_COUNT_BY_LOGIN = "EOSUserTenant.CountByLogin";
 
 	public static final String PARAM_LOGIN = "login";
 	public static final String PARAM_STATE = "state";

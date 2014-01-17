@@ -4,6 +4,7 @@
 package com.eos.security.impl.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -43,8 +44,7 @@ import com.eos.security.impl.session.SessionContextManager;
 @Service
 public class EOSRoleServiceImpl implements EOSRoleService {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(EOSRoleServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(EOSRoleServiceImpl.class);
 
 	private EOSRoleDAO roleDAO;
 	private EOSRoleUserDAO roleUserDAO;
@@ -82,13 +82,11 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException,
-			EOSValidationException {
+	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException, EOSValidationException {
 		// TODO security and messaging
 		EOSValidator.validateRole(role);
-		EOSRoleEntity entity = new EOSRoleEntity().setCode(role.getCode())
-				.setDescription(role.getDescription())
+		EOSRoleEntity entity = new EOSRoleEntity().setCode(role.getCode()).setDescription(role.getDescription())
 				.setLevel(role.getLevel());
 
 		roleDAO.persist(entity);
@@ -100,13 +98,11 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void updateRole(EOSRole role) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException,
+	public void updateRole(EOSRole role) throws EOSForbiddenException, EOSUnauthorizedException, EOSNotFoundException,
 			EOSValidationException {
 		// TODO security and messaging
 		EOSValidator.validateRole(role);
-		EOSRoleEntity entity = roleDAO.findByCode(role.getCode(),
-				SessionContextManager.getCurrentTenantId());
+		EOSRoleEntity entity = roleDAO.findByCode(role.getCode(), SessionContextManager.getCurrentTenantId());
 		entity.setDescription(role.getDescription()).setLevel(role.getLevel());
 		roleDAO.merge(entity);
 
@@ -120,8 +116,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void deleteRole(String code) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+	public void deleteRole(String code) throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO security, validation and messaging
 		roleDAO.deleteByCode(code, SessionContextManager.getCurrentTenantId());
 		log.debug("Deleted role: " + code);
@@ -132,11 +127,9 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public EOSRole findRole(String code) throws EOSForbiddenException,
-			EOSNotFoundException {
+	public EOSRole findRole(String code) throws EOSForbiddenException, EOSNotFoundException {
 		// TODO security, validation
-		return entityToVO(roleDAO.findByCode(code,
-				SessionContextManager.getCurrentTenantId()));
+		return entityToVO(roleDAO.findByCode(code, SessionContextManager.getCurrentTenantId()));
 	}
 
 	/**
@@ -144,11 +137,13 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSRole> findRoles(List<String> codes)
-			throws EOSForbiddenException {
+	public List<EOSRole> findRoles(List<String> codes) throws EOSForbiddenException {
 		// TODO security, validation
-		List<EOSRoleEntity> entities = roleDAO.findByCodes(codes,
-				SessionContextManager.getCurrentTenantId());
+		if (codes == null || codes.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<EOSRoleEntity> entities = roleDAO.findByCodes(codes, SessionContextManager.getCurrentTenantId());
 		List<EOSRole> roles = new ArrayList<>(entities.size());
 
 		for (EOSRoleEntity entity : entities) {
@@ -164,8 +159,8 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSRole> listRoles(Integer minimumLevel, Integer maximumLevel,
-			int limit, int offset) throws EOSUnauthorizedException {
+	public List<EOSRole> listRoles(Integer minimumLevel, Integer maximumLevel, int limit, int offset)
+			throws EOSUnauthorizedException {
 		// TODO security, validation
 		if (minimumLevel == null) {
 			minimumLevel = EOSLevel.PUBLIC.getLevel();
@@ -175,8 +170,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 			maximumLevel = EOSLevel.MAXIMUM.getLevel();
 		}
 
-		List<EOSRoleEntity> entities = roleDAO.listRoles(
-				SessionContextManager.getCurrentTenantId(), minimumLevel,
+		List<EOSRoleEntity> entities = roleDAO.listRoles(SessionContextManager.getCurrentTenantId(), minimumLevel,
 				maximumLevel, limit, offset);
 		List<EOSRole> roles = new ArrayList<>(entities.size());
 
@@ -195,8 +189,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void addUsersToRole(String code, List<String> users)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void addUsersToRole(String code, List<String> users) throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO security, validation and messaging, user has role
 
 		for (String login : users) {
@@ -210,8 +203,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void addRolesToUser(String login, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void addRolesToUser(String login, List<String> roles) throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO security, validation and messaging, user has role
 
 		for (String code : roles) {
@@ -232,11 +224,10 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void removeUsersFromRole(String code, List<String> users)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void removeUsersFromRole(String code, List<String> users) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security, validation and messaging
-		roleUserDAO.removeUsersFromRole(code, users,
-				SessionContextManager.getCurrentTenantId());
+		roleUserDAO.removeUsersFromRole(code, users, SessionContextManager.getCurrentTenantId());
 	}
 
 	/**
@@ -245,11 +236,20 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void removeRolesFromUser(String login, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void removeRolesFromUser(String login, List<String> roles) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security, validation and messaging
-		roleUserDAO.removeRolesFromUser(roles, login,
-				SessionContextManager.getCurrentTenantId());
+		roleUserDAO.removeRolesFromUser(roles, login, SessionContextManager.getCurrentTenantId());
+	}
+
+	/**
+	 * @see com.eos.security.api.service.EOSRoleService#removeRolesByUser(java.lang.String)
+	 */
+	@Override
+	@Transactional
+	public void removeRolesByUser(String login) throws EOSForbiddenException, EOSUnauthorizedException {
+		// TODO security, validation
+		roleUserDAO.deleteByUser(login, SessionContextManager.getCurrentTenantId());
 	}
 
 	/**
@@ -260,8 +260,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public List<EOSUser> listRoleUsers(String code, int limit, int offset) {
 		// TODO security, validation
-		List<String> logins = roleUserDAO.listUsersByRole(code,
-				SessionContextManager.getCurrentTenantId());
+		List<String> logins = roleUserDAO.listUsersByRole(code, SessionContextManager.getCurrentTenantId());
 		// TODO List of groups as sub lists using limit and offset
 		return svcUser.findUsers(logins);
 	}
@@ -272,11 +271,9 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSRole> listUserRoles(String login, int limit, int offset)
-			throws EOSForbiddenException {
+	public List<EOSRole> listUserRoles(String login, int limit, int offset) throws EOSForbiddenException {
 		// TODO security, validation, cache user roles
-		List<String> roles = roleUserDAO.listRolesByUser(login,
-				SessionContextManager.getCurrentTenantId());
+		List<String> roles = roleUserDAO.listRolesByUser(login, SessionContextManager.getCurrentTenantId());
 		// TODO limit and offset applied on cached user roles
 		return findRoles(roles);
 	}
@@ -287,8 +284,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	@Override
 	public List<String> listUserRoleCodes(String login) {
 		// TODO security, validation, cache user roles
-		return roleUserDAO.listRolesByUser(login,
-				SessionContextManager.getCurrentTenantId());
+		return roleUserDAO.listRolesByUser(login, SessionContextManager.getCurrentTenantId());
 	}
 
 	// Role Group
@@ -299,8 +295,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void addGroupsToRole(String code, List<Long> groups)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void addGroupsToRole(String code, List<Long> groups) throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO security, validation and messaging
 		for (Long groupId : groups) {
 			createRoleGroup(code, groupId);
@@ -313,8 +308,8 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void addRolesToGroup(Long groupId, List<String> codes)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void addRolesToGroup(Long groupId, List<String> codes) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security, validation and messaging
 		for (String code : codes) {
 			createRoleGroup(code, groupId);
@@ -322,8 +317,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	}
 
 	private void createRoleGroup(String code, Long groupId) {
-		EOSRoleGroupEntity entity = new EOSRoleGroupEntity()
-				.setGroupId(groupId).setRoleCode(code);
+		EOSRoleGroupEntity entity = new EOSRoleGroupEntity().setGroupId(groupId).setRoleCode(code);
 		roleGroupDAO.persist(entity);
 	}
 
@@ -333,11 +327,10 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void removeGroupsFromRole(String code, List<Long> groups)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void removeGroupsFromRole(String code, List<Long> groups) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security, validation and messaging
-		roleGroupDAO.removeRoleFromGroups(
-				SessionContextManager.getCurrentTenantId(), code, groups);
+		roleGroupDAO.removeRoleFromGroups(SessionContextManager.getCurrentTenantId(), code, groups);
 	}
 
 	/**
@@ -346,11 +339,10 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional
-	public void removeRolesFromGroup(Long groupId, List<String> codes)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void removeRolesFromGroup(Long groupId, List<String> codes) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security, validation and messaging
-		roleGroupDAO.removeGroupFromRoles(
-				SessionContextManager.getCurrentTenantId(), groupId, codes);
+		roleGroupDAO.removeGroupFromRoles(SessionContextManager.getCurrentTenantId(), groupId, codes);
 	}
 
 	/**
@@ -359,11 +351,9 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSGroup> listRoleGroups(String code, int limit, int offset)
-			throws EOSForbiddenException {
+	public List<EOSGroup> listRoleGroups(String code, int limit, int offset) throws EOSForbiddenException {
 		// TODO security, validation
-		List<Long> groups = roleGroupDAO.listRoleGroups(
-				SessionContextManager.getCurrentTenantId(), code);
+		List<Long> groups = roleGroupDAO.listRoleGroups(SessionContextManager.getCurrentTenantId(), code);
 		// TODO List of groups as sub lists using limit and offset
 		return svcGroup.findGroups(groups);
 	}
@@ -374,11 +364,9 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset)
-			throws EOSForbiddenException {
+	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset) throws EOSForbiddenException {
 		// TODO security, validation, cache
-		List<String> codes = roleGroupDAO.listGroupRoles(
-				SessionContextManager.getCurrentTenantId(), groupId);
+		List<String> codes = roleGroupDAO.listGroupRoles(SessionContextManager.getCurrentTenantId(), groupId);
 		// TODO List of codes as sub lists using limit and offset
 		return findRoles(codes);
 	}
@@ -390,8 +378,7 @@ public class EOSRoleServiceImpl implements EOSRoleService {
 			return null;
 		}
 
-		EOSRole role = new EOSRole().setCode(entity.getCode())
-				.setDescription(entity.getDescription())
+		EOSRole role = new EOSRole().setCode(entity.getCode()).setDescription(entity.getDescription())
 				.setLevel(entity.getLevel()).setTenantId(entity.getTenantId());
 
 		return role;

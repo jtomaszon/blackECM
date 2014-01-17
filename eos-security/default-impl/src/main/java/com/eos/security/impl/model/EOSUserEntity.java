@@ -25,8 +25,10 @@ import com.eos.commons.jpa.EntityFieldSizes;
  */
 @Entity(name = "EOSUser")
 @Table(name = "tbuser")
-@NamedQueries({ @NamedQuery(name = EOSUserEntity.QUERY_FIND_BY_EMAIL, query = "SELECT t FROM EOSUser t "
-		+ "WHERE t.email = :email")
+@NamedQueries({
+		@NamedQuery(name = EOSUserEntity.QUERY_FIND_BY_EMAIL, query = "SELECT t FROM EOSUser t "
+				+ "WHERE t.email = :email"),
+		@NamedQuery(name = EOSUserEntity.QUERY_DELETE, query = "DELETE FROM EOSUser t " + "WHERE t.login = :login")
 
 })
 public class EOSUserEntity extends AbstractEntity {
@@ -34,7 +36,9 @@ public class EOSUserEntity extends AbstractEntity {
 	private static final long serialVersionUID = -7976368002799372189L;
 
 	public static final String QUERY_FIND_BY_EMAIL = "EOSUser.FindByEMail";
+	public static final String QUERY_DELETE = "EOSUser.DeleteByLogin";
 
+	public static final String PARAM_LOGIN = "login";
 	public static final String PARAM_EMAIL = "email";
 
 	@Size(min = EntityFieldSizes.MINIMUM, max = EntityFieldSizes.DATA_TINY)
@@ -218,9 +222,8 @@ public class EOSUserEntity extends AbstractEntity {
 	 */
 	@Override
 	public String toString() {
-		return "EOSUserEntity [login=" + login + ", email=" + email
-				+ ", firstName=" + firstName + ", lastName=" + lastName
-				+ ", type=" + type + "]";
+		return "EOSUserEntity [login=" + login + ", email=" + email + ", firstName=" + firstName + ", lastName="
+				+ lastName + ", type=" + type + "]";
 	}
 
 }

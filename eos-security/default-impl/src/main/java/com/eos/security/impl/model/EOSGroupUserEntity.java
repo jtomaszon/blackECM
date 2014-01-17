@@ -27,7 +27,9 @@ import javax.persistence.Table;
 		@NamedQuery(name = EOSGroupUserEntity.QUERY_REMOVE_USERS, query = "DELETE FROM EOSGroupUser t "
 				+ "WHERE t.tenantId = :tenantId AND t.groupId = :groupId AND t.userLogin IN (:login) "),
 		@NamedQuery(name = EOSGroupUserEntity.QUERY_REMOVE_GROUPS, query = "DELETE FROM EOSGroupUser t "
-				+ "WHERE t.tenantId = :tenantId AND t.groupId IN (:groupId) AND t.userLogin = :login ")
+				+ "WHERE t.tenantId = :tenantId AND t.groupId IN (:groupId) AND t.userLogin = :login "),
+		@NamedQuery(name = EOSGroupUserEntity.QUERY_DELETE_BY_USER, query = "DELETE FROM EOSGroupUser t "
+				+ "WHERE t.tenantId = :tenantId AND t.userLogin = :login ")
 
 })
 public class EOSGroupUserEntity extends AbstractTenantEntity {
@@ -38,6 +40,7 @@ public class EOSGroupUserEntity extends AbstractTenantEntity {
 	public static final String QUERY_USER_GROUPS = "EOSGroupUser.ListGroupsByUser";
 	public static final String QUERY_REMOVE_USERS = "EOSGroupUser.ReomveUsersFromGroup";
 	public static final String QUERY_REMOVE_GROUPS = "EOSGroupUser.ReomveUserFromGroups";
+	public static final String QUERY_DELETE_BY_USER = "EOSGroupUser.DeleteByUser";
 
 	public static final String PARAM_USER = "login";
 	public static final String PARAM_GROUP = "groupId";
@@ -128,8 +131,7 @@ public class EOSGroupUserEntity extends AbstractTenantEntity {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		result = prime * result
-				+ ((userLogin == null) ? 0 : userLogin.hashCode());
+		result = prime * result + ((userLogin == null) ? 0 : userLogin.hashCode());
 		return result;
 	}
 
@@ -163,8 +165,7 @@ public class EOSGroupUserEntity extends AbstractTenantEntity {
 	 */
 	@Override
 	public String toString() {
-		return "EOSGroupUserEntity [groupId=" + groupId + ", userLogin="
-				+ userLogin + "]";
+		return "EOSGroupUserEntity [groupId=" + groupId + ", userLogin=" + userLogin + "]";
 	}
 
 }

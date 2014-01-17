@@ -101,7 +101,8 @@ public class UserServiceRest {
 
 	@Path("/{login}/purge")
 	@DELETE
-	public void purgeUser(@PathParam("login") String login) throws EOSForbiddenException, EOSUnauthorizedException {
+	public void purgeUser(@PathParam("login") String login) throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSNotFoundException {
 		svcUser.purgeUser(login);
 	}
 

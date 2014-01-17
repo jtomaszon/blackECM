@@ -82,4 +82,15 @@ public class EOSUserTenantDAO extends AbstractDAO<EOSUserTenantEntity> {
 				.setParameter(EOSUserTenantEntity.PARAM_TENANT, tenantId)
 				.setParameter(EOSUserTenantEntity.PARAM_STATE, state).executeUpdate();
 	}
+
+	public void deleteUser(String login, Long tenantId) {
+		em.createNamedQuery(EOSUserTenantEntity.QUERY_DELETE_USER)
+				.setParameter(EOSUserTenantEntity.PARAM_TENANT, tenantId)
+				.setParameter(EOSUserTenantEntity.PARAM_LOGIN, login).executeUpdate();
+	}
+
+	public Long countUsers(String login) {
+		return em.createNamedQuery(EOSUserTenantEntity.QUERY_COUNT_BY_LOGIN, Long.class)
+				.setParameter(EOSUserTenantEntity.PARAM_LOGIN, login).getSingleResult();
+	}
 }

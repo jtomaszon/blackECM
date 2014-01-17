@@ -41,13 +41,14 @@ public class EOSUserDAO extends AbstractDAO<EOSUserEntity> {
 
 	public EOSUserEntity findByEMail(String email) {
 		try {
-			return em
-					.createNamedQuery(EOSUserEntity.QUERY_FIND_BY_EMAIL,
-							EOSUserEntity.class)
-					.setParameter(EOSUserEntity.PARAM_EMAIL, email)
-					.getSingleResult();
+			return em.createNamedQuery(EOSUserEntity.QUERY_FIND_BY_EMAIL, EOSUserEntity.class)
+					.setParameter(EOSUserEntity.PARAM_EMAIL, email).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
+	}
+
+	public void deleteUser(String login) {
+		em.createNamedQuery(EOSUserEntity.QUERY_DELETE).setParameter(EOSUserEntity.PARAM_LOGIN, login).executeUpdate();
 	}
 }

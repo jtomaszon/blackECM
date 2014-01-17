@@ -70,4 +70,13 @@ public class EOSErrorFactory {
 	public final List<EOSError> getErrors() {
 		return errors;
 	}
+
+	/**
+	 * Build an error factory.
+	 * 
+	 * @return An error factory instance.
+	 */
+	public static EOSErrorFactory build() {
+		return new EOSErrorFactory();
+	}
 }

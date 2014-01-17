@@ -42,9 +42,8 @@ public interface EOSRoleService {
 	 *             If the role contains any invalid field. For group code only
 	 *             number, characters, dot and hyphen are allowed.
 	 */
-	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException,
-			EOSValidationException;
+	public EOSRole createRole(EOSRole role) throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException, EOSValidationException;
 
 	/**
 	 * Updates the role info.
@@ -60,8 +59,7 @@ public interface EOSRoleService {
 	 * @throws EOSValidationException
 	 *             If the role contains any invalid field.
 	 */
-	public void updateRole(EOSRole role) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSNotFoundException,
+	public void updateRole(EOSRole role) throws EOSForbiddenException, EOSUnauthorizedException, EOSNotFoundException,
 			EOSValidationException;
 
 	/**
@@ -74,8 +72,7 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can delete roles.
 	 */
-	public void deleteRole(String code) throws EOSForbiddenException,
-			EOSUnauthorizedException;
+	public void deleteRole(String code) throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * Find a role by its code.
@@ -89,8 +86,7 @@ public interface EOSRoleService {
 	 * @throws EOSNotFoundException
 	 *             If the role with the given code do not exists.
 	 */
-	public EOSRole findRole(String code) throws EOSForbiddenException,
-			EOSNotFoundException;
+	public EOSRole findRole(String code) throws EOSForbiddenException, EOSNotFoundException;
 
 	/**
 	 * Find roles by their code.
@@ -102,8 +98,7 @@ public interface EOSRoleService {
 	 *             For {@link EOSLevel#INTERNAL} special permissions are
 	 *             required.
 	 */
-	public List<EOSRole> findRoles(List<String> codes)
-			throws EOSForbiddenException;
+	public List<EOSRole> findRoles(List<String> codes) throws EOSForbiddenException;
 
 	/**
 	 * List roles filtered by level.
@@ -123,8 +118,8 @@ public interface EOSRoleService {
 	 *             For {@link EOSLevel#INTERNAL} is required special
 	 *             permissions.
 	 */
-	public List<EOSRole> listRoles(Integer minimumLevel, Integer maximumLevel,
-			int limit, int offset) throws EOSUnauthorizedException;
+	public List<EOSRole> listRoles(Integer minimumLevel, Integer maximumLevel, int limit, int offset)
+			throws EOSUnauthorizedException;
 
 	// Role User
 
@@ -140,8 +135,7 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
 	 */
-	public void addUsersToRole(String code, List<String> users)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void addUsersToRole(String code, List<String> users) throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * Add the roles to a user.
@@ -155,8 +149,7 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
 	 */
-	public void addRolesToUser(String login, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void addRolesToUser(String login, List<String> roles) throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * Remove users from a role.
@@ -171,8 +164,8 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
 	 */
-	public void removeUsersFromRole(String code, List<String> users)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void removeUsersFromRole(String code, List<String> users) throws EOSForbiddenException,
+			EOSUnauthorizedException;
 
 	/**
 	 * Remove roles from a user.
@@ -187,8 +180,21 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
 	 */
-	public void removeRolesFromUser(String login, List<String> roles)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void removeRolesFromUser(String login, List<String> roles) throws EOSForbiddenException,
+			EOSUnauthorizedException;
+
+	/**
+	 * Remove the user from all roles that he/she belongs.
+	 * 
+	 * @param login
+	 *            User who will have roles removed.
+	 * @throws EOSForbiddenException
+	 *             If the logged user do not have permission to remove roles
+	 *             from a user.
+	 * @throws EOSUnauthorizedException
+	 *             Only authenticated users can manipulate roles.
+	 */
+	public void removeRolesByUser(String login) throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * List users from a role.
@@ -217,8 +223,7 @@ public interface EOSRoleService {
 	 *             For {@link EOSLevel#INTERNAL} special permissions are
 	 *             required.
 	 */
-	public List<EOSRole> listUserRoles(String login, int limit, int offset)
-			throws EOSForbiddenException;
+	public List<EOSRole> listUserRoles(String login, int limit, int offset) throws EOSForbiddenException;
 
 	/**
 	 * Retrieve all codes from all roles that a user has.
@@ -244,8 +249,7 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
 	 */
-	public void addGroupsToRole(String code, List<Long> groups)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void addGroupsToRole(String code, List<Long> groups) throws EOSForbiddenException, EOSUnauthorizedException;
 
 	/**
 	 * Add roles to a group.
@@ -260,8 +264,8 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles and groups.
 	 */
-	public void addRolesToGroup(Long groupId, List<String> codes)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void addRolesToGroup(Long groupId, List<String> codes) throws EOSForbiddenException,
+			EOSUnauthorizedException;
 
 	/**
 	 * Remove groups from a role.
@@ -276,8 +280,8 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles.
 	 */
-	public void removeGroupsFromRole(String code, List<Long> groups)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void removeGroupsFromRole(String code, List<Long> groups) throws EOSForbiddenException,
+			EOSUnauthorizedException;
 
 	/**
 	 * Remove roles from a group.
@@ -292,8 +296,8 @@ public interface EOSRoleService {
 	 * @throws EOSUnauthorizedException
 	 *             Only authenticated users can manipulate roles / groups.
 	 */
-	public void removeRolesFromGroup(Long groupId, List<String> codes)
-			throws EOSForbiddenException, EOSUnauthorizedException;
+	public void removeRolesFromGroup(Long groupId, List<String> codes) throws EOSForbiddenException,
+			EOSUnauthorizedException;
 
 	/**
 	 * List groups of a role.
@@ -309,8 +313,7 @@ public interface EOSRoleService {
 	 *             For {@link EOSLevel#INTERNAL} special permissions are
 	 *             required.
 	 */
-	public List<EOSGroup> listRoleGroups(String code, int limit, int offset)
-			throws EOSForbiddenException;
+	public List<EOSGroup> listRoleGroups(String code, int limit, int offset) throws EOSForbiddenException;
 
 	/**
 	 * List all roles from a group.
@@ -326,6 +329,5 @@ public interface EOSRoleService {
 	 *             For {@link EOSLevel#INTERNAL} special permissions are
 	 *             required.
 	 */
-	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset)
-			throws EOSForbiddenException;
+	public List<EOSRole> listGroupRoles(Long groupId, int limit, int offset) throws EOSForbiddenException;
 }

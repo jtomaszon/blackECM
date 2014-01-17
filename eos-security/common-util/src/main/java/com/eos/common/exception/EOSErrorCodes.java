@@ -19,6 +19,7 @@ public interface EOSErrorCodes {
 	Integer INVALID_LOGIN = 11;
 	Integer INVALID_EMAIL = 12;
 	Integer INVALID_PASSWORD = 13;
+	Integer INVALID_STATE = 14;
 
 	Integer GENERIC = 500;
 }
