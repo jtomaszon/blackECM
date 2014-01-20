@@ -4,6 +4,7 @@
 package com.eos.security.impl.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +26,19 @@ import com.eos.common.exception.EOSValidationException;
 import com.eos.common.util.StringUtil;
 import com.eos.security.api.exception.EOSForbiddenException;
 import com.eos.security.api.exception.EOSUnauthorizedException;
+import com.eos.security.api.service.EOSPermissionService;
+import com.eos.security.api.service.EOSRoleService;
 import com.eos.security.api.service.EOSSecurityService;
 import com.eos.security.api.service.EOSTenantService;
 import com.eos.security.api.service.EOSUserService;
+import com.eos.security.api.vo.EOSRole;
 import com.eos.security.api.vo.EOSTenant;
 import com.eos.security.api.vo.EOSUser;
 import com.eos.security.impl.dao.EOSTenantDAO;
 import com.eos.security.impl.dao.EOSTenantDataDAO;
 import com.eos.security.impl.model.EOSTenantDataEntity;
 import com.eos.security.impl.model.EOSTenantEntity;
+import com.eos.security.impl.service.internal.EOSKnownPermissions;
 import com.eos.security.impl.service.internal.EOSSystemConstants;
 import com.eos.security.impl.service.internal.EOSValidator;
 
@@ -48,21 +53,16 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	private EOSTenantDAO tenantDAO;
 	@Autowired
 	private EOSTenantDataDAO tenantDataDAO;
+	@Autowired
 	private EOSUserService svcUser;
+	@Autowired
 	private EOSSecurityService svcSecurity;
-
-	private static final Logger log = LoggerFactory
-			.getLogger(EOSTenantServiceImpl.class);
-
 	@Autowired
-	public void setUserService(EOSUserService svcUser) {
-		this.svcUser = svcUser;
-	}
-
+	private EOSRoleService svcRole;
 	@Autowired
-	public void setSecurityService(EOSSecurityService svcSecurity) {
-		this.svcSecurity = svcSecurity;
-	}
+	private EOSPermissionService svcPermission;
+
+	private static final Logger log = LoggerFactory.getLogger(EOSTenantServiceImpl.class);
 
 	/**
 	 * @see com.eos.security.api.service.EOSTenantService#createTenant(EOSTenant,
@@ -70,10 +70,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional
-	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data,
-			final EOSUser adminUser) throws EOSDuplicatedEntryException,
-			EOSForbiddenException, EOSUnauthorizedException,
-			EOSValidationException {
+	public EOSTenant createTenant(EOSTenant tenant, Map<String, String> data, final EOSUser adminUser)
+			throws EOSDuplicatedEntryException, EOSForbiddenException, EOSUnauthorizedException, EOSValidationException {
 		EOSValidator.validateTenant(tenant);
 		EOSTenantEntity entity = new EOSTenantEntity();
 
@@ -92,13 +90,16 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 		// Create administrator user with new tenant
 		try {
 			log.debug("Creating administrator for tenant " + tenant.getName());
-			svcSecurity.impersonate(EOSSystemConstants.LOGIN_SYSTEM_USER,
-					EOSSystemConstants.ADMIN_TENANT, entity.getId());
-			svcUser.createUser(adminUser, null);
+			svcSecurity.impersonate(EOSSystemConstants.LOGIN_SYSTEM_USER, EOSSystemConstants.ADMIN_TENANT,
+					entity.getId());
+			createTenantAdminRole(tenant.getName());
+			createTenantAdminUser(adminUser, entity.getId());
+		} catch (EOSDuplicatedEntryException | EOSForbiddenException | EOSUnauthorizedException
+				| EOSValidationException e) {
+			log.debug("User and/or tenant create failed");
+			throw e;
 		} catch (EOSNotFoundException e) {
-			log.debug("User and/or tenant createds not found in user creation");
-			throw new EOSRuntimeException(
-					"User and/or tenant createds not found in user creation", e);
+			throw new EOSRuntimeException("Tenant create: Impersonate user and/or tenant not found", e);
 		} finally {
 			try {
 				svcSecurity.deImpersonate();
@@ -110,6 +111,25 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 		// TODO messaging and security check
 		log.info("Tenant created: " + tenant.toString());
 		return tenant;
+	}
+
+	private void createTenantAdminUser(EOSUser admin, Long tenantId) throws EOSDuplicatedEntryException,
+			EOSForbiddenException, EOSUnauthorizedException, EOSValidationException {
+		// Create user
+		svcUser.createUser(admin, null);
+		svcPermission.addRolePermissions(EOSSystemConstants.ROLE_TENANT_ADMIN,
+				Arrays.asList(EOSKnownPermissions.PERMISSION_TENAT_ALL + tenantId));
+		// Grant administrator role to him
+		svcRole.addRolesToUser(admin.getLogin(), Arrays.asList(EOSSystemConstants.ROLE_TENANT_ADMIN));
+
+	}
+
+	private void createTenantAdminRole(String tenantName) throws EOSDuplicatedEntryException, EOSForbiddenException,
+			EOSUnauthorizedException, EOSValidationException {
+		EOSRole admin = new EOSRole().setCode(EOSSystemConstants.ROLE_TENANT_ADMIN)
+				.setDescription("Administrator role for " + tenantName).setLevel(EOSSystemConstants.INTERNAL_LEVEL);
+
+		svcRole.createRole(admin);
 	}
 
 	/**
@@ -145,10 +165,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public List<EOSTenant> listTenants(List<EOSState> states, int limit,
-			int offset) {
-		List<EOSTenantEntity> entities = tenantDAO.listTenants(states, limit,
-				offset);
+	public List<EOSTenant> listTenants(List<EOSState> states, int limit, int offset) {
+		List<EOSTenantEntity> entities = tenantDAO.listTenants(states, limit, offset);
 		List<EOSTenant> tenants = new ArrayList<>(entities.size());
 
 		for (EOSTenantEntity entity : entities) {
@@ -163,9 +181,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional
-	public void updateTenant(EOSTenant tenant) throws EOSForbiddenException,
-			EOSUnauthorizedException, EOSValidationException,
-			EOSNotFoundException {
+	public void updateTenant(EOSTenant tenant) throws EOSForbiddenException, EOSUnauthorizedException,
+			EOSValidationException, EOSNotFoundException {
 		EOSValidator.validateTenant(tenant);
 		// DO a find, then update, so hibernate listeners are fired.
 		EOSTenantEntity entity = tenantDAO.find(tenant.getId());
@@ -183,9 +200,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional
-	public void updateTenantState(Long tenantId, EOSState state)
-			throws EOSForbiddenException, EOSUnauthorizedException,
-			EOSNotFoundException {
+	public void updateTenantState(Long tenantId, EOSState state) throws EOSForbiddenException,
+			EOSUnauthorizedException, EOSNotFoundException {
 		// DO a find, then update, so hibernate listeners are fired.
 		EOSTenantEntity entity = tenantDAO.find(tenantId);
 
@@ -200,8 +216,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional
-	public void purgeTenant(Long tenantId) throws EOSForbiddenException,
-			EOSUnauthorizedException {
+	public void purgeTenant(Long tenantId) throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO Auto-generated method stub
 
 	}
@@ -228,8 +243,8 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional
-	public void updateTenantData(Long tenantId, Map<String, String> tenantData)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public void updateTenantData(Long tenantId, Map<String, String> tenantData) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security check
 		List<String> keys = new ArrayList<>(tenantData.size());
 		keys.addAll(tenantData.keySet());
@@ -246,8 +261,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 				log.debug("Tenant data set for removal: " + entry.getKey());
 			} else {
 				// Update
-				tenantDataDAO.updateTenantData(tenantId, entry.getKey(),
-						entry.getValue());
+				tenantDataDAO.updateTenantData(tenantId, entry.getKey(), entry.getValue());
 				log.debug("Tenant data [" + entry.getKey() + "] updated");
 			}
 			// Remove key pair value from tenantData map
@@ -281,8 +295,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 
 		for (Entry<String, String> data : tenantData.entrySet()) {
 			// Skip empty keys or values
-			if (StringUtil.isEmpty(data.getKey())
-					|| StringUtil.isEmpty(data.getValue())) {
+			if (StringUtil.isEmpty(data.getKey()) || StringUtil.isEmpty(data.getValue())) {
 				continue;
 			}
 			EOSTenantDataEntity entity = new EOSTenantDataEntity();
@@ -299,8 +312,7 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public String findTenantData(Long tenantId, String key)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public String findTenantData(Long tenantId, String key) throws EOSForbiddenException, EOSUnauthorizedException {
 		// TODO security check
 		return tenantDataDAO.findTenantDataValue(tenantId, key);
 	}
@@ -311,11 +323,10 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public Map<String, String> listTenantData(Long tenantId, List<String> keys)
-			throws EOSForbiddenException, EOSUnauthorizedException {
+	public Map<String, String> listTenantData(Long tenantId, List<String> keys) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security check
-		List<EOSTenantDataEntity> datas = tenantDataDAO.findTenantDataValues(
-				tenantId, keys);
+		List<EOSTenantDataEntity> datas = tenantDataDAO.findTenantDataValues(tenantId, keys);
 		return dataEntityToMap(datas);
 	}
 
@@ -325,11 +336,10 @@ public class EOSTenantServiceImpl implements EOSTenantService {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public Map<String, String> listTenantData(Long tenantId, int limit,
-			int offset) throws EOSForbiddenException, EOSUnauthorizedException {
+	public Map<String, String> listTenantData(Long tenantId, int limit, int offset) throws EOSForbiddenException,
+			EOSUnauthorizedException {
 		// TODO security check
-		List<EOSTenantDataEntity> datas = tenantDataDAO.listTenantData(
-				tenantId, limit, offset);
+		List<EOSTenantDataEntity> datas = tenantDataDAO.listTenantData(tenantId, limit, offset);
 		return dataEntityToMap(datas);
 	}
 
